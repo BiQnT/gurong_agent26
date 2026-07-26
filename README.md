@@ -27,9 +27,10 @@
 ideas/         아이디어 하나 = 폴더 하나 = 브랜치 하나 (ideas/README.md 참고)
   _template/   복사해서 쓰는 템플릿
 docs/
+  decisions/   결정 기록 (ADR). 한 결정 = 한 파일, 고치지 않고 쌓는다
+  design/      파이프라인·아키텍처. 아이디어 확정 후 채운다
   api-catalog/ E-UM Open API 전체 카탈로그 (40개, 요청·응답 필드 포함)
   대회자료/    주최 측 제공 원본 (안내 PDF, 신청서 양식 hwp/docx)
-  회의록/      회의록 마크다운 (노션과 이중화가 싫으면 노션만 써도 됨)
 data/
   eum-api-catalog.json   위 카탈로그의 기계 판독용 원본
 research/
@@ -49,6 +50,16 @@ scripts/new-idea.sh breakwater-guard "방파제 보행자 위험 경보 에이�
 
 `main`에서 `idea/NNN-<slug>` 브랜치를 파고 `ideas/NNN-<slug>/`에 템플릿을 복사한다.
 자세한 규칙은 [ideas/README.md](ideas/README.md).
+
+## 문서를 어디에 쓰나
+
+**"이걸 PR에서 리뷰받아야 하나?"** 예면 레포, 아니면 노션.
+
+- **노션** — 진행 상황 트래커, 회의록, 제출 서류 체크리스트, 팀원 정보
+- **레포** — 결정([ADR](docs/decisions/)), 설계, API 스펙, 아이디어, 코드
+
+한 사실은 한 곳에만 둔다. 두 번째 위치에는 링크만.
+전체 규칙은 [0001 ADR](docs/decisions/0001-context-management.md).
 
 ## 데이터 소스
 
