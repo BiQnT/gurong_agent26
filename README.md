@@ -25,17 +25,26 @@
 
 ```
 docs/
+  api-catalog/ E-UM Open API 전체 카탈로그 (40개, 요청·응답 필드 포함)
   대회자료/    주최 측 제공 원본 (안내 PDF, 신청서 양식 hwp/docx)
   회의록/      회의록 마크다운 (노션과 이중화가 싫으면 노션만 써도 됨)
+data/
+  eum-api-catalog.json   위 카탈로그의 기계 판독용 원본
 research/
-  api-tests/   E-UM / 공공데이터 API 호출 테스트 스크립트와 응답 샘플
+  api-tests/   API 호출 테스트 기록 + 카탈로그 수집 스크립트
 prototype/     AI Agent 프로토타입 코드
 ```
 
 ## 데이터 소스
 
-- E-UM 디지털트윈 포항: https://pohang-eum.kr/
+- **E-UM Open API — [카탈로그 문서](docs/api-catalog/README.md) (40개 API / 7개 서비스)**
+- E-UM 디지털트윈 포항: https://pohang-eum.kr/data
 - 공공데이터포털: https://www.data.go.kr/
+
+전 API에 `serviceKey`(개인 발급 인증키)가 필수다. `.env.example`을 복사해 `.env`를 만들고
+E-UM 로그인 후 API 자료실에서 신청해 받은 키를 넣는다.
+
+카탈로그 갱신: `python3 research/api-tests/fetch_eum_catalog.py`
 
 ## 개발 규칙
 

@@ -1,0 +1,5357 @@
+{
+ "2": {
+  "typeId": 2,
+  "serviceTitle": "구룡포읍 해양환경",
+  "serviceName": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+  "description": "해양환경 상태를 실시간 모니터링하고, 유해물질 해양 유입 시 확산 과정 예측",
+  "apis": [
+   {
+    "apiId": "INT_S02_001",
+    "serviceType": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+    "serviceName": "해양환경 측정 장비 기본 정보 목록_전체",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/marine/devices",
+    "description": "구룡포항 바다에 설치된 해양환경 측정 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:22",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "100",
+      "sampleData": "스마트 부표 A-1",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "10",
+      "sampleData": "35.978844",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "10",
+      "sampleData": "129.56334",
+      "itemDescription": "장비위치(경도)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S02_002",
+    "serviceType": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+    "serviceName": "해양환경 측정 장비 기본 정보 목록_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/marine/device",
+    "description": "구룡포항 바다에 설치된 해양환경 측정 장비 중 사용자가 지정한 장비의 정보를 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:21",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "5",
+      "sampleData": "스마트 부표 A-1",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "10",
+      "sampleData": "35.978844",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "11",
+      "sampleData": "129.56334",
+      "itemDescription": "장비위치(경도)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S02_003",
+    "serviceType": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+    "serviceName": "해양환경 측정 장비 실시간 수집 정보_전체",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/marine/devices/realtime",
+    "description": "구룡포항 바다에 설치된 해양환경 측정 장비에서 가장 최근에 수집된 데이터를 조회할 수 있습니다.</br>수온, 용존산소, 전기전도도, 염분, TDS, 산성도, ORP, 배터리 전압, 부표 유속, 부표 수심, 부표의 현재 위치(위·경도) 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:21",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "데이터 수집 시각",
+      "itemNameEn": "logDateTime",
+      "itemSize": "20",
+      "sampleData": "2025-03-26 18:05:18",
+      "itemDescription": "데이터 수집 시각"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "온도",
+      "itemNameEn": "temper",
+      "itemSize": "",
+      "sampleData": "10.7824",
+      "itemDescription": "온도(단위 : ℃)"
+     },
+     {
+      "itemNameKo": "용존산소",
+      "itemNameEn": "doxygen",
+      "itemSize": "",
+      "sampleData": "7.74117",
+      "itemDescription": "용존산소(단위 : mg/L)"
+     },
+     {
+      "itemNameKo": "전기전도도",
+      "itemNameEn": "ec",
+      "itemSize": "",
+      "sampleData": "32040.9",
+      "itemDescription": "전기전도도(단위 : ㎲/㎝)"
+     },
+     {
+      "itemNameKo": "염분 농도",
+      "itemNameEn": "salinity",
+      "itemSize": "",
+      "sampleData": "38.6141",
+      "itemDescription": "염분 농도(단위 : %)"
+     },
+     {
+      "itemNameKo": "총용존고형물",
+      "itemNameEn": "tds",
+      "itemSize": "",
+      "sampleData": "8357.1",
+      "itemDescription": "총용존고형물(단위 : mg/L)"
+     },
+     {
+      "itemNameKo": "수소 이온 지수",
+      "itemNameEn": "ph",
+      "itemSize": "",
+      "sampleData": "7.97395",
+      "itemDescription": "수소 이온 지수(산도)(단위 : pH)"
+     },
+     {
+      "itemNameKo": "산소 감소 전위",
+      "itemNameEn": "orp",
+      "itemSize": "",
+      "sampleData": "227.406",
+      "itemDescription": "산소 감소 전위(단위 : mV)"
+     },
+     {
+      "itemNameKo": "배터리 잔량",
+      "itemNameEn": "batt",
+      "itemSize": "",
+      "sampleData": "79.632",
+      "itemDescription": "배터리 잔량(단위 : %)"
+     },
+     {
+      "itemNameKo": "부표의 유속",
+      "itemNameEn": "flowVelocity",
+      "itemSize": "",
+      "sampleData": "38.9503",
+      "itemDescription": "부표의 유속"
+     },
+     {
+      "itemNameKo": "부표의 수심",
+      "itemNameEn": "waterDepth",
+      "itemSize": "",
+      "sampleData": "17.6059",
+      "itemDescription": "부표의 수심"
+     },
+     {
+      "itemNameKo": "GPS 위도",
+      "itemNameEn": "gpsLati",
+      "itemSize": "",
+      "sampleData": "35.9805",
+      "itemDescription": "부표의 현재 GPS 위도"
+     },
+     {
+      "itemNameKo": "GPS 경도",
+      "itemNameEn": "gpsLongi",
+      "itemSize": "",
+      "sampleData": "129.557",
+      "itemDescription": "부표의 현재 GPS 경도"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S02_004",
+    "serviceType": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+    "serviceName": "해양환경 측정 장비 실시간 수집 정보_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/marine/device/realtime",
+    "description": "구룡포항 바다에 설치된 해양환경 측정 장비 중 사용자가 지정한 장비에서 가장 최근에 수집된 데이터를 조회할 수 있습니다.</br>수온, 용존산소, 전기전도도, 염분, TDS, 산성도, ORP, 배터리 전압, 부표 유속, 부표 수심, 부표의 현재 위치(위·경도) 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:20",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "데이터 수집 시각",
+      "itemNameEn": "logDateTime",
+      "itemSize": "20",
+      "sampleData": "2025-03-26 18:05:18",
+      "itemDescription": "데이터 수집 시각"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "온도",
+      "itemNameEn": "temper",
+      "itemSize": "",
+      "sampleData": "10.7824",
+      "itemDescription": "온도(단위 : ℃)"
+     },
+     {
+      "itemNameKo": "용존산소",
+      "itemNameEn": "doxygen",
+      "itemSize": "",
+      "sampleData": "7.74117",
+      "itemDescription": "용존산소(단위 : mg/L)"
+     },
+     {
+      "itemNameKo": "전기전도도",
+      "itemNameEn": "ec",
+      "itemSize": "",
+      "sampleData": "32040.9",
+      "itemDescription": "전기전도도(단위 : ㎲/㎝)"
+     },
+     {
+      "itemNameKo": "염분 농도",
+      "itemNameEn": "salinity",
+      "itemSize": "",
+      "sampleData": "38.6141",
+      "itemDescription": "염분 농도(단위 : %)"
+     },
+     {
+      "itemNameKo": "총용존고형물",
+      "itemNameEn": "tds",
+      "itemSize": "",
+      "sampleData": "8357.1",
+      "itemDescription": "총용존고형물(단위 : mg/L)"
+     },
+     {
+      "itemNameKo": "수소 이온 지수",
+      "itemNameEn": "ph",
+      "itemSize": "",
+      "sampleData": "7.97395",
+      "itemDescription": "수소 이온 지수(산도)(단위 : pH)"
+     },
+     {
+      "itemNameKo": "산소 감소 전위",
+      "itemNameEn": "orp",
+      "itemSize": "",
+      "sampleData": "227.406",
+      "itemDescription": "산소 감소 전위(단위 : mV)"
+     },
+     {
+      "itemNameKo": "배터리 잔량",
+      "itemNameEn": "batt",
+      "itemSize": "",
+      "sampleData": "79.632",
+      "itemDescription": "배터리 잔량(단위 : %)"
+     },
+     {
+      "itemNameKo": "부표의 유속",
+      "itemNameEn": "flowVelocity",
+      "itemSize": "",
+      "sampleData": "38.9503",
+      "itemDescription": "부표의 유속"
+     },
+     {
+      "itemNameKo": "부표의 수심",
+      "itemNameEn": "waterDepth",
+      "itemSize": "",
+      "sampleData": "17.6059",
+      "itemDescription": "부표의 수심"
+     },
+     {
+      "itemNameKo": "GPS 위도",
+      "itemNameEn": "gpsLati",
+      "itemSize": "",
+      "sampleData": "35.9805",
+      "itemDescription": "부표의 현재 GPS 위도"
+     },
+     {
+      "itemNameKo": "GPS 경도",
+      "itemNameEn": "gpsLongi",
+      "itemSize": "",
+      "sampleData": "129.557",
+      "itemDescription": "부표의 현재 GPS 경도"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S02_011",
+    "serviceType": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+    "serviceName": "해양환경 유해물질 통계 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/marine/sensor/stats/history",
+    "description": "구룡포항 바다에 설치된 해양환경 측정 장비에서 사용자가 지정한 유해물질과 당일 기준으로 전일대비 편차값, 당일 평균수치, 시간별 평균수치, 유해물질의 범례정보 등의 통계데이터를 조회할 수 있습니다.",
+    "createAt": "2025-06-13 13:15:20",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "센서 항목명",
+      "itemNameEn": "type",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "ec",
+      "itemDescription": "센서 항목명"
+     },
+     {
+      "itemNameKo": "시작날짜",
+      "itemNameEn": "startDate",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241210",
+      "itemDescription": "과거 시작 날짜"
+     },
+     {
+      "itemNameKo": "종료날짜",
+      "itemNameEn": "endDate",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241211",
+      "itemDescription": "과거 종료 날짜"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "전날대비 편차값",
+      "itemNameEn": "diffData",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "전날대비 편차값"
+     },
+     {
+      "itemNameKo": "전날대비 평균값 편차",
+      "itemNameEn": "diffAvgVal",
+      "itemSize": "",
+      "sampleData": "-165.94",
+      "itemDescription": "전날대비 평균값 편차"
+     },
+     {
+      "itemNameKo": "전날대비 최대값 편차",
+      "itemNameEn": "diffMaxVal",
+      "itemSize": "",
+      "sampleData": "-170.0",
+      "itemDescription": "전날대비 최대값 편차"
+     },
+     {
+      "itemNameKo": "전날대비 최소값 편차",
+      "itemNameEn": "diffMinVal",
+      "itemSize": "",
+      "sampleData": "0.0",
+      "itemDescription": "전날대비 최소값 편차"
+     },
+     {
+      "itemNameKo": "전날 수치값",
+      "itemNameEn": "staticGenixCalBeforeDay",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "과거 시작날짜 전날 수치값"
+     },
+     {
+      "itemNameKo": "시작날짜",
+      "itemNameEn": "startDate",
+      "itemSize": "8",
+      "sampleData": "20241210",
+      "itemDescription": "과거 시작 날짜"
+     },
+     {
+      "itemNameKo": "종료날짜",
+      "itemNameEn": "endDate",
+      "itemSize": "8",
+      "sampleData": "20241211",
+      "itemDescription": "과거 종료 날짜"
+     },
+     {
+      "itemNameKo": "평균값",
+      "itemNameEn": "avgVal",
+      "itemSize": "",
+      "sampleData": "165.94424",
+      "itemDescription": "일일 평균값"
+     },
+     {
+      "itemNameKo": "평균 최대값",
+      "itemNameEn": "maxVal",
+      "itemSize": "",
+      "sampleData": "170.0",
+      "itemDescription": "일일 평균 최대값"
+     },
+     {
+      "itemNameKo": "평균 최소값",
+      "itemNameEn": "minVal",
+      "itemSize": "",
+      "sampleData": "0.0",
+      "itemDescription": "일일 평균 최소값"
+     },
+     {
+      "itemNameKo": "요청일 수치값",
+      "itemNameEn": "staticGenixCal",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "요청일 수치값"
+     },
+     {
+      "itemNameKo": "시작날짜",
+      "itemNameEn": "startDate",
+      "itemSize": "9",
+      "sampleData": "20241210",
+      "itemDescription": "과거 시작 날짜"
+     },
+     {
+      "itemNameKo": "종료날짜",
+      "itemNameEn": "endDate",
+      "itemSize": "9",
+      "sampleData": "20241211",
+      "itemDescription": "과거 종료 날짜"
+     },
+     {
+      "itemNameKo": "평균값",
+      "itemNameEn": "avgVal",
+      "itemSize": "",
+      "sampleData": "165.94424",
+      "itemDescription": "일일 평균"
+     },
+     {
+      "itemNameKo": "평균 최대값",
+      "itemNameEn": "maxVal",
+      "itemSize": "",
+      "sampleData": "170.0",
+      "itemDescription": "일일 평균 최대값"
+     },
+     {
+      "itemNameKo": "평균 최소값",
+      "itemNameEn": "minVal",
+      "itemSize": "",
+      "sampleData": "0.0",
+      "itemDescription": "일일 평균 최소값"
+     },
+     {
+      "itemNameKo": "요청일 시간별 통계데이터값",
+      "itemNameEn": "staticGenixLinear",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "과거 시작날짜 시간별 통계데이터값"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(0시)",
+      "itemNameEn": "hour0",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(0시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(1시)",
+      "itemNameEn": "hour1",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(1시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(2시)",
+      "itemNameEn": "hour2",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(2시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(3시)",
+      "itemNameEn": "hour3",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(3시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(4시)",
+      "itemNameEn": "hour4",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(4시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(5시)",
+      "itemNameEn": "hour5",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(5시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(6시)",
+      "itemNameEn": "hour6",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(6시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(7시)",
+      "itemNameEn": "hour7",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(7시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(8시)",
+      "itemNameEn": "hour8",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(8시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(9시)",
+      "itemNameEn": "hour9",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(9시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(10시)",
+      "itemNameEn": "hour10",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(10시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(11시)",
+      "itemNameEn": "hour11",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(11시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(12시)",
+      "itemNameEn": "hour12",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(12시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(13시)",
+      "itemNameEn": "hour13",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(13시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(14시)",
+      "itemNameEn": "hour14",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(14시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(15시)",
+      "itemNameEn": "hour15",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(15시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(16시)",
+      "itemNameEn": "hour16",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(16시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(17시)",
+      "itemNameEn": "hour17",
+      "itemSize": "4",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(17시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(18시)",
+      "itemNameEn": "hour18",
+      "itemSize": "4",
+      "sampleData": "158.361",
+      "itemDescription": "시간별 통계데이터(18시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(19시)",
+      "itemNameEn": "hour19",
+      "itemSize": "4",
+      "sampleData": "158.71",
+      "itemDescription": "시간별 통계데이터(19시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(20시)",
+      "itemNameEn": "hour20",
+      "itemSize": "4",
+      "sampleData": "159.003",
+      "itemDescription": "시간별 통계데이터(20시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(21시)",
+      "itemNameEn": "hour21",
+      "itemSize": "4",
+      "sampleData": "159.147",
+      "itemDescription": "시간별 통계데이터(21시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(22시)",
+      "itemNameEn": "hour22",
+      "itemSize": "4",
+      "sampleData": "159.09",
+      "itemDescription": "시간별 통계데이터(22시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(23시)",
+      "itemNameEn": "hour23",
+      "itemSize": "4",
+      "sampleData": "158.912",
+      "itemDescription": "시간별 통계데이터(23시)"
+     },
+     {
+      "itemNameKo": "요청 오염물질 항목의 범례",
+      "itemNameEn": "staticGenixPie",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "요청 오염물질 항목의 범례"
+     },
+     {
+      "itemNameKo": "범례 1단계",
+      "itemNameEn": "lv1",
+      "itemSize": "",
+      "sampleData": "0",
+      "itemDescription": "범례 1단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 2단계",
+      "itemNameEn": "lv2",
+      "itemSize": "",
+      "sampleData": "3",
+      "itemDescription": "범례 2단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 3단계",
+      "itemNameEn": "lv3",
+      "itemSize": "",
+      "sampleData": "0",
+      "itemDescription": "범례 3단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 4단계",
+      "itemNameEn": "lv4",
+      "itemSize": "",
+      "sampleData": "623",
+      "itemDescription": "범례 4단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 5단계",
+      "itemNameEn": "lv5",
+      "itemSize": "",
+      "sampleData": "20989",
+      "itemDescription": "범례 5단계 (기준 수치가 없다면 -1 응답)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S02_012",
+    "serviceType": "경상북도 포항시 구룡포읍_해양오염 트윈 환경분석 예측",
+    "serviceName": "해양환경 유해물질 시간별 통계 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/marine/sensor/stats/hour",
+    "description": "사용자가 지정한 유해물질과 당일 기준으로 구룡포항 바다에 설치된 해양환경 측정 장비의 시간별 평균수치, 범례 등급, 단위 등의 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:19",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "센서 항목명",
+      "itemNameEn": "type",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "ec",
+      "itemDescription": "센서 항목명"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "date",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20250106",
+      "itemDescription": "요청날짜"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "시간",
+      "itemNameEn": "hours",
+      "itemSize": "3",
+      "sampleData": "11",
+      "itemDescription": "측정된 시간"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "센서 항목명",
+      "itemNameEn": "type",
+      "itemSize": "20",
+      "sampleData": "ec",
+      "itemDescription": "센서 항목명"
+     },
+     {
+      "itemNameKo": "평균값",
+      "itemNameEn": "value",
+      "itemSize": "",
+      "sampleData": "120.88009986877441",
+      "itemDescription": "평균값"
+     },
+     {
+      "itemNameKo": "단위",
+      "itemNameEn": "unit",
+      "itemSize": "10",
+      "sampleData": "㎲/㎝",
+      "itemDescription": "센서의 단위"
+     },
+     {
+      "itemNameKo": "범례 등급",
+      "itemNameEn": "level",
+      "itemSize": "4",
+      "sampleData": "4",
+      "itemDescription": "평균값의 범례 등급"
+     }
+    ]
+   }
+  ]
+ },
+ "3": {
+  "typeId": 3,
+  "serviceTitle": "구룡포읍 선박안전",
+  "serviceName": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+  "description": "선박의 입출항, 이동경로를 디지털 트윈으로 표출하여 선박 이동 및 밀집도에 따른 위험상황 예측",
+  "apis": [
+   {
+    "apiId": "INT_S03_001",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포항_선박 기본정보_전체",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ship/devices",
+    "description": "구룡포항에 등록된 선박의 정보 목록을 조회할 수 있습니다.<br/>어선번호, 어업방법, 어선명, 선적항, 선적항 주소, 선체재질, 추진기관, 동력, 엔진수, 추진기, 크기 정보, 총 톤수, 어선표지판, 어선등록일자, 진수일자 정보를 제공를 제공합니다.",
+    "createAt": "2025-06-13 13:15:19",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "어선번호",
+      "itemNameEn": "shipId",
+      "itemSize": "50",
+      "sampleData": "0003005-6491102",
+      "itemDescription": "어선번호"
+     },
+     {
+      "itemNameKo": "어업종류",
+      "itemNameEn": "type",
+      "itemSize": "50",
+      "sampleData": "근해자망어업",
+      "itemDescription": "어업종류"
+     },
+     {
+      "itemNameKo": "어선명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "제33안성호",
+      "itemDescription": "어선명"
+     },
+     {
+      "itemNameKo": "선적항",
+      "itemNameEn": "pol",
+      "itemSize": "50",
+      "sampleData": "포항시 구룡포읍",
+      "itemDescription": "선적항"
+     },
+     {
+      "itemNameKo": "선적항 주소",
+      "itemNameEn": "polAddr",
+      "itemSize": "50",
+      "sampleData": "경상북도 포항시 남구 구룡포읍",
+      "itemDescription": "선적항 주소"
+     },
+     {
+      "itemNameKo": "선체재질",
+      "itemNameEn": "hm",
+      "itemSize": "255",
+      "sampleData": "FRP",
+      "itemDescription": "선체재질"
+     },
+     {
+      "itemNameKo": "추진기관",
+      "itemNameEn": "pe",
+      "itemSize": "255",
+      "sampleData": "선박용디젤",
+      "itemDescription": "선박의 추진을 위해 이용되는 기관"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "ps",
+      "itemSize": "",
+      "sampleData": "720.0",
+      "itemDescription": "선박의 동력(단위 : PS)"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "kw",
+      "itemSize": "",
+      "sampleData": "529.2",
+      "itemDescription": "선박의 동력(단위 : KW)"
+     },
+     {
+      "itemNameKo": "엔진수",
+      "itemNameEn": "engineCnt",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "엔진수"
+     },
+     {
+      "itemNameKo": "선박 추진장비",
+      "itemNameEn": "propeller",
+      "itemSize": "50",
+      "sampleData": "나선일체식",
+      "itemDescription": "선박 추진장비"
+     },
+     {
+      "itemNameKo": "선박 추진장비 개수",
+      "itemNameEn": "propellerCnt",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "선박 추진장비 개수"
+     },
+     {
+      "itemNameKo": "길이",
+      "itemNameEn": "length",
+      "itemSize": "",
+      "sampleData": "25.05",
+      "itemDescription": "길이(단위 : m)"
+     },
+     {
+      "itemNameKo": "너비",
+      "itemNameEn": "breath",
+      "itemSize": "",
+      "sampleData": "5.57",
+      "itemDescription": "너비(단위 : m)"
+     },
+     {
+      "itemNameKo": "깊이",
+      "itemNameEn": "depth",
+      "itemSize": "",
+      "sampleData": "2.0",
+      "itemDescription": "깊이(단위 : m)"
+     },
+     {
+      "itemNameKo": "총 무게",
+      "itemNameEn": "gt",
+      "itemSize": "",
+      "sampleData": "43.0",
+      "itemDescription": "총 무게(단위 : t)"
+     },
+     {
+      "itemNameKo": "어선표지판",
+      "itemNameEn": "sign",
+      "itemSize": "255",
+      "sampleData": "0003005-6491102 근해자망어업(43톤)",
+      "itemDescription": "어선표지판"
+     },
+     {
+      "itemNameKo": "어선등록일자",
+      "itemNameEn": "regYmd",
+      "itemSize": "12",
+      "sampleData": "2000-03-14",
+      "itemDescription": "어선등록일자"
+     },
+     {
+      "itemNameKo": "진수일자",
+      "itemNameEn": "launchingYmd",
+      "itemSize": "12",
+      "sampleData": "2000-03-01",
+      "itemDescription": "진수일자"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_002",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포항_선박 기본정보_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ship/device",
+    "description": "구룡포항에 등록된 선박 중 사용자가 지정한 선박의 정보를 조회할 수 있습니다.<br/>어선번호, 어업방법, 어선명, 선적항, 선적항 주소, 선체재질, 추진기관, 동력, 엔진수, 추진기, 크기 정보, 총 톤수, 어선표지판, 어선등록일자, 진수일자 정보를 제공를 제공합니다.",
+    "createAt": "2025-06-13 13:15:18",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "어선번호",
+      "itemNameEn": "shipId",
+      "itemSize": "50",
+      "sampleData": "0003005-6491102",
+      "itemDescription": "어선번호"
+     },
+     {
+      "itemNameKo": "어업종류",
+      "itemNameEn": "type",
+      "itemSize": "50",
+      "sampleData": "근해자망어업",
+      "itemDescription": "어업종류"
+     },
+     {
+      "itemNameKo": "어선명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "제33안성호",
+      "itemDescription": "어선명"
+     },
+     {
+      "itemNameKo": "선적항",
+      "itemNameEn": "pol",
+      "itemSize": "50",
+      "sampleData": "포항시 구룡포읍",
+      "itemDescription": "선적항"
+     },
+     {
+      "itemNameKo": "선적항 주소",
+      "itemNameEn": "polAddr",
+      "itemSize": "50",
+      "sampleData": "경상북도 포항시 남구 구룡포읍",
+      "itemDescription": "선적항 주소"
+     },
+     {
+      "itemNameKo": "선체재질",
+      "itemNameEn": "hm",
+      "itemSize": "255",
+      "sampleData": "FRP",
+      "itemDescription": "선체재질"
+     },
+     {
+      "itemNameKo": "추진기관",
+      "itemNameEn": "pe",
+      "itemSize": "255",
+      "sampleData": "선박용디젤",
+      "itemDescription": "선박의 추진을 위해 이용되는 기관"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "ps",
+      "itemSize": "",
+      "sampleData": "720.0",
+      "itemDescription": "선박의 동력(단위 : PS)"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "kw",
+      "itemSize": "",
+      "sampleData": "529.2",
+      "itemDescription": "선박의 동력(단위 : KW)"
+     },
+     {
+      "itemNameKo": "엔진수",
+      "itemNameEn": "engineCnt",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "엔진수"
+     },
+     {
+      "itemNameKo": "선박 추진장비",
+      "itemNameEn": "propeller",
+      "itemSize": "50",
+      "sampleData": "나선일체식",
+      "itemDescription": "선박 추진장비"
+     },
+     {
+      "itemNameKo": "선박 추진장비 개수",
+      "itemNameEn": "propellerCnt",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "선박 추진장비 개수"
+     },
+     {
+      "itemNameKo": "길이",
+      "itemNameEn": "length",
+      "itemSize": "",
+      "sampleData": "25.05",
+      "itemDescription": "길이(단위 : m)"
+     },
+     {
+      "itemNameKo": "너비",
+      "itemNameEn": "breath",
+      "itemSize": "",
+      "sampleData": "5.57",
+      "itemDescription": "너비(단위 : m)"
+     },
+     {
+      "itemNameKo": "깊이",
+      "itemNameEn": "depth",
+      "itemSize": "",
+      "sampleData": "2.0",
+      "itemDescription": "깊이(단위 : m)"
+     },
+     {
+      "itemNameKo": "총 무게",
+      "itemNameEn": "gt",
+      "itemSize": "",
+      "sampleData": "43.0",
+      "itemDescription": "총 무게(단위 : t)"
+     },
+     {
+      "itemNameKo": "어선표지판",
+      "itemNameEn": "sign",
+      "itemSize": "255",
+      "sampleData": "0003005-6491102 근해자망어업(43톤)",
+      "itemDescription": "어선표지판"
+     },
+     {
+      "itemNameKo": "어선등록일자",
+      "itemNameEn": "regYmd",
+      "itemSize": "12",
+      "sampleData": "2000-03-14",
+      "itemDescription": "어선등록일자"
+     },
+     {
+      "itemNameKo": "진수일자",
+      "itemNameEn": "launchingYmd",
+      "itemSize": "12",
+      "sampleData": "2000-03-01",
+      "itemDescription": "진수일자"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_003",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포_CCTV 기본정보_전체",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/cctv/devices",
+    "description": "구룡포 내 설치된 AI CCTV, 회전형 CCTV 장비 정보 목록을 조회할 수 있습니다.</br>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:18",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "CCTV명",
+      "itemNameEn": "name",
+      "itemSize": "255",
+      "sampleData": "구룡포 북방파제 AI-01-001",
+      "itemDescription": "CCTV명"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "12",
+      "sampleData": "35.985677",
+      "itemDescription": "장비가 설치된 위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "12",
+      "sampleData": "129.557927",
+      "itemDescription": "장비가 설치된 위치(경도)"
+     },
+     {
+      "itemNameKo": "장비위치 주소",
+      "itemNameEn": "address",
+      "itemSize": "255",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비가 설치된 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_004",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포_CCTV 기본정보_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/cctv/device",
+    "description": "구룡포 내 설치된 AI CCTV, 회전형 CCTV 장비 중 사용자가 지정한 CCTV의 정보를 조회할 수 있습니다.</br>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:18",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "CCTV명",
+      "itemNameEn": "name",
+      "itemSize": "255",
+      "sampleData": "구룡포 북방파제 AI-01-001",
+      "itemDescription": "CCTV명"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "12",
+      "sampleData": "35.985677",
+      "itemDescription": "장비가 설치된 위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "12",
+      "sampleData": "129.557927",
+      "itemDescription": "장비가 설치된 위치(경도)"
+     },
+     {
+      "itemNameKo": "장비위치 주소",
+      "itemNameEn": "address",
+      "itemSize": "255",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비가 설치된 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_005",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포항_LiDAR 기본정보_전체",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/lidar/devices",
+    "description": "구룡포항에 설치된 LiDAR 장비 정보 목록을 조회할 수 있습니다.</br>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:17",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": " 응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "19",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": " 응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": " 응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": " 장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": " LiDAR명",
+      "itemNameEn": "name",
+      "itemSize": "255",
+      "sampleData": "구룡포 북방파제",
+      "itemDescription": "LiDAR명"
+     },
+     {
+      "itemNameKo": " 위도",
+      "itemNameEn": "latitude",
+      "itemSize": "12",
+      "sampleData": "35.985677",
+      "itemDescription": "장비가 설치된 위치(위도)"
+     },
+     {
+      "itemNameKo": " 경도",
+      "itemNameEn": "longitude",
+      "itemSize": "12",
+      "sampleData": "129.557927",
+      "itemDescription": "장비가 설치된 위치(경도)"
+     },
+     {
+      "itemNameKo": " 장비위치 주소",
+      "itemNameEn": "address",
+      "itemSize": "255",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비가 설치된 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_006",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포항_LiDAR 기본정보_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/lidar/device",
+    "description": "구룡포항에 설치된 LiDAR 장비 중 사용자가 지정한 장비의 정보를 조회할 수 있습니다.</br>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:17",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": " 응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": " 응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": " 응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": " 장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": " LiDAR명",
+      "itemNameEn": "name",
+      "itemSize": "255",
+      "sampleData": "구룡포 북방파제",
+      "itemDescription": "LiDAR명"
+     },
+     {
+      "itemNameKo": " 위도",
+      "itemNameEn": "latitude",
+      "itemSize": "12",
+      "sampleData": "35.985677",
+      "itemDescription": "장비가 설치된 위치(위도)"
+     },
+     {
+      "itemNameKo": " 경도",
+      "itemNameEn": "longitude",
+      "itemSize": "12",
+      "sampleData": "129.557927",
+      "itemDescription": "장비가 설치된 위치(경도)"
+     },
+     {
+      "itemNameKo": " 장비위치 주소",
+      "itemNameEn": "address",
+      "itemSize": "255",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비가 설치된 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_007",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포항_선박 실시간 위치 정보_전체",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ship/devices/realtime",
+    "description": "구룡포항에 등록된 선박의 실시간 위치(위·경도), 방위, 침로, 속도 데이터를 조회할 수 있습니다.",
+    "createAt": "2025-06-13 13:15:17",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": " 응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": " 응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": " 응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": " 데이터 수집 시각",
+      "itemNameEn": "logDateTime",
+      "itemSize": "100",
+      "sampleData": "2025-02-27 14:07:38",
+      "itemDescription": "데이터 수집 시각"
+     },
+     {
+      "itemNameKo": " 장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "3",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": " 데이터 수신 시간",
+      "itemNameEn": "rcvDateTime",
+      "itemSize": "100",
+      "sampleData": "2025-02-27 14:07:38",
+      "itemDescription": "데이터 수신 시간"
+     },
+     {
+      "itemNameKo": " 위도",
+      "itemNameEn": "lati",
+      "itemSize": "",
+      "sampleData": "35.9663",
+      "itemDescription": "선박의 현재 위도"
+     },
+     {
+      "itemNameKo": " 경도",
+      "itemNameEn": "long",
+      "itemSize": "",
+      "sampleData": "129.66937",
+      "itemDescription": "선박의 현재 경도"
+     },
+     {
+      "itemNameKo": " 방위",
+      "itemNameEn": "azimuth",
+      "itemSize": "",
+      "sampleData": "51.0",
+      "itemDescription": "선박의 방위 (단위 : °)"
+     },
+     {
+      "itemNameKo": " 진행 방향",
+      "itemNameEn": "course",
+      "itemSize": "",
+      "sampleData": "180.0",
+      "itemDescription": "선박의 진행 방향(단위 : °)"
+     },
+     {
+      "itemNameKo": " 속도",
+      "itemNameEn": "speed",
+      "itemSize": "",
+      "sampleData": "9.01",
+      "itemDescription": "선박의 속도(단위 : knot)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_008",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "구룡포항_선박 실시간 위치 정보_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ship/device/realtime",
+    "description": "구룡포항에 등록된 선박 중 사용자가 지정한 선박의 실시간 위치(위·경도), 방위, 침로, 속도 데이터를 조회할 수 있습니다.",
+    "createAt": "2025-06-13 13:15:16",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": " 응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": " 응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": " 응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": " 데이터 수집 시각",
+      "itemNameEn": "logDateTime",
+      "itemSize": "100",
+      "sampleData": "2025-02-27 14:07:38",
+      "itemDescription": "데이터 수집 시각"
+     },
+     {
+      "itemNameKo": " 장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "3",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": " 데이터 수신 시간",
+      "itemNameEn": "rcvDateTime",
+      "itemSize": "100",
+      "sampleData": "2025-02-27 14:07:38",
+      "itemDescription": "데이터 수신 시간"
+     },
+     {
+      "itemNameKo": " 위도",
+      "itemNameEn": "lati",
+      "itemSize": "",
+      "sampleData": "35.9663",
+      "itemDescription": "선박의 현재 위도"
+     },
+     {
+      "itemNameKo": " 경도",
+      "itemNameEn": "long",
+      "itemSize": "",
+      "sampleData": "129.66937",
+      "itemDescription": "선박의 현재 경도"
+     },
+     {
+      "itemNameKo": " 방위",
+      "itemNameEn": "azimuth",
+      "itemSize": "",
+      "sampleData": "51.0",
+      "itemDescription": "선박의 방위 (단위 : °)"
+     },
+     {
+      "itemNameKo": " 진행 방향",
+      "itemNameEn": "course",
+      "itemSize": "",
+      "sampleData": "180.0",
+      "itemDescription": "선박의 진행 방향(단위 : °)"
+     },
+     {
+      "itemNameKo": " 속도",
+      "itemNameEn": "speed",
+      "itemSize": "",
+      "sampleData": "9.01",
+      "itemDescription": "선박의 속도(단위 : knot)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_019",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "주요 기상 요소 과거 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ship-safe/stats/history",
+    "description": "사용자가 지정한 당일 기준으로 전일, 당일의 기온, 풍속, 풍향 등 주요 기상 요소에 대한 과거 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:16",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "date",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20250102",
+      "itemDescription": "요청날짜"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "요청 데이터 전체 데이터",
+      "itemNameEn": "top",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "요청 데이터 전체 데이터"
+     },
+     {
+      "itemNameKo": "요청날짜의 전날 데이터",
+      "itemNameEn": "beforeDay",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "요청날짜의 전날 데이터"
+     },
+     {
+      "itemNameKo": "기온",
+      "itemNameEn": "temp",
+      "itemSize": "",
+      "sampleData": "1.6",
+      "itemDescription": "기온"
+     },
+     {
+      "itemNameKo": "풍속",
+      "itemNameEn": "winsp",
+      "itemSize": "",
+      "sampleData": "4.4",
+      "itemDescription": "풍속"
+     },
+     {
+      "itemNameKo": "풍향",
+      "itemNameEn": "windir",
+      "itemSize": "",
+      "sampleData": "1022.6",
+      "itemDescription": "풍향"
+     },
+     {
+      "itemNameKo": "측정날짜",
+      "itemNameEn": "logDateTime",
+      "itemSize": "12",
+      "sampleData": "2025-01-01",
+      "itemDescription": "측정날짜"
+     },
+     {
+      "itemNameKo": "요청날짜의 당일 데이터",
+      "itemNameEn": "nowDay",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "요청날짜의 당일 데이터"
+     },
+     {
+      "itemNameKo": "기온",
+      "itemNameEn": "temp",
+      "itemSize": "",
+      "sampleData": "5.9",
+      "itemDescription": "기온"
+     },
+     {
+      "itemNameKo": "풍속",
+      "itemNameEn": "winsp",
+      "itemSize": "",
+      "sampleData": "1.3",
+      "itemDescription": "풍속"
+     },
+     {
+      "itemNameKo": "풍향",
+      "itemNameEn": "windir",
+      "itemSize": "",
+      "sampleData": "1022.2",
+      "itemDescription": "풍향"
+     },
+     {
+      "itemNameKo": "측정날짜",
+      "itemNameEn": "logDateTime",
+      "itemSize": "12",
+      "sampleData": "2025-01-02",
+      "itemDescription": "측정날짜"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S03_020",
+    "serviceType": "경상북도 포항시 구룡포읍_트윈으로 지키는 선박 안전",
+    "serviceName": "해역 선박 밀집도 분석 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ship-safe/traffic",
+    "description": "사용자가 지정한 당일 기준으로 특정 해역 내 선박 밀집도를 분석하고, 격자 단위로 나누어 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:15",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "startDate",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241213",
+      "itemDescription": "요청날짜"
+     },
+     {
+      "itemNameKo": "요청시간",
+      "itemNameEn": "startTime",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1100",
+      "itemDescription": "요청시간"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "격자명",
+      "itemNameEn": "gridName",
+      "itemSize": "10",
+      "sampleData": "A01",
+      "itemDescription": "격자명"
+     },
+     {
+      "itemNameKo": "선박 교통량",
+      "itemNameEn": "cnt",
+      "itemSize": "4",
+      "sampleData": "2",
+      "itemDescription": "해당 격자의 선박교통량"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "",
+      "sampleData": "35.976080499999950",
+      "itemDescription": "격자위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "",
+      "sampleData": "129.554057142857000",
+      "itemDescription": "격자위치(경도)"
+     }
+    ]
+   }
+  ]
+ },
+ "7": {
+  "typeId": 7,
+  "serviceTitle": "구룡포읍 침수예측",
+  "serviceName": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+  "description": "구룡포항 특화 침수예측 및 대응",
+  "apis": [
+   {
+    "apiId": "INT_S05_001",
+    "serviceType": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+    "serviceName": "각 종류별 전체 수위계 장비 정보 목록",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/water/devices",
+    "description": "구룡포 내 설치된 수위 측정 전체 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 장비종류, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-12-08 11:25:19",
+    "updateAt": "2025-12-08 11:25:19",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "지표면 수위계 장비 목록",
+      "itemNameEn": "roadList",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "지표면 수위계 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "하나과메기_지표면 수위계",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.986115",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.549245",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 병포리 585",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameKo": "관로 수위계 장비 목록",
+      "itemNameEn": "holeList",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "관로 수위계 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "하나과메기_스마트맨홀",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985929",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.549278",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 호미로 152",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameKo": "하천 수위계 장비 목록",
+      "itemNameEn": "riverList",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "하천 수위계 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포교_하천수위계",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.987244",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.550467",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 병포리 157-279",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameKo": "강우량계 장비 목록",
+      "itemNameEn": "rainList",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "강우량계 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포읍행정복지센터_강우량계",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.984987",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.546115",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 호미로 133",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S05_002",
+    "serviceType": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+    "serviceName": "특정 지표면 수위계 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/water/roadDevices",
+    "description": "구룡포 내 설치된 특정 지표면수위 측정 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-22 23:39:26",
+    "updateAt": "2025-11-22 23:39:26",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "하나과메기_지표면 수위계",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.986115",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.549245",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 병포리 585",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S05_003",
+    "serviceType": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+    "serviceName": "특정 맨홀 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/water/holeDevices",
+    "description": "구룡포 내 설치된 특정 하수관 측정 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-22 23:52:11",
+    "updateAt": "2025-11-22 23:52:11",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "하나과메기_스마트맨홀",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985929",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.549278",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 호미로 152",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S05_004",
+    "serviceType": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+    "serviceName": "특정 하천 수위계 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/water/riverDevices",
+    "description": "구룡포 내 설치된 특정 하천 측정 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-22 23:52:11",
+    "updateAt": "2025-11-22 23:52:11",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포교_하천수위계",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.987244",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.550467",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 병포리 157-279",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S05_005",
+    "serviceType": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+    "serviceName": "특정 강우량계 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/water/rainDevices",
+    "description": "구룡포 내 설치된 특정 강우량 측정 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-22 23:52:11",
+    "updateAt": "2025-11-22 23:52:11",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포읍행정복지센터_강우량계",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.984987",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.546115",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 호미로 133",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S05_006",
+    "serviceType": "경상북도 포항시 구룡포읍_구룡포항 특화 침수예측 및 대응",
+    "serviceName": "전체 수위계 장비 실시간 수집 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/sensor/latest/sensorLevel",
+    "description": "구룡포 내 설치된 수위계 측정 장비에서 가장 최근에 수집된 데이터를 조회할 수 있습니다.<br/>각 장비의 장비명, 장비 위치, 장비 종류, 실시간 수집 정보 등의 데이터를 제공합니다.",
+    "createAt": "2026-07-08 14:09:44",
+    "updateAt": "2026-07-08 14:09:45",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "8",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "2",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "EUI번호",
+      "itemNameEn": "eui",
+      "itemSize": "50",
+      "sampleData": "0017B2FFFE503373",
+      "itemDescription": "EUI 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "100",
+      "sampleData": "하나과메기_스마트맨홀",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "17",
+      "sampleData": "35.985929",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "18",
+      "sampleData": "129.549278",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "200",
+      "sampleData": "경북 포항시 남구 구룡포읍 호미로 152",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameKo": "장비종류",
+      "itemNameEn": "sensorType",
+      "itemSize": "100",
+      "sampleData": "HOLE",
+      "itemDescription": "장비종류"
+     },
+     {
+      "itemNameKo": "측정값",
+      "itemNameEn": "value",
+      "itemSize": "10",
+      "sampleData": "1454",
+      "itemDescription": "실시간 측정된 수치값"
+     },
+     {
+      "itemNameKo": "수치 등급",
+      "itemNameEn": "level",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "실시간 측정된 수치값에 따른 등급"
+     }
+    ]
+   }
+  ]
+ },
+ "8": {
+  "typeId": 8,
+  "serviceTitle": "구룡포읍 보행자안전",
+  "serviceName": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+  "description": "방파제 보행자 이동 예측 및 안전 경보",
+  "apis": [
+   {
+    "apiId": "INT_S06_001",
+    "serviceType": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+    "serviceName": "보행자 예측 관련 각 종류별 장비 정보 목록",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/pedestrian/device/list",
+    "description": "구룡포 내 설치된 보행자 예측 관련 전체 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보 등을 제공합니다.",
+    "createAt": "2025-11-23 00:00:29",
+    "updateAt": "2025-11-23 00:00:29",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "자외선 측정 장비 목록",
+      "itemNameEn": "uv_devices",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "자외선 측정 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "자외선 측정기",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985240",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.551826",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 병포리 157-294",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameKo": "스피커 장비 목록",
+      "itemNameEn": "speakers",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "스피커 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포 북방파제 SR-01-001",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985667",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.557917",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameKo": "AI CCTV 장비 목록",
+      "itemNameEn": "ai_cctvs",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "AI CCTV 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포 북방파제 AI-01-001",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "각도",
+      "itemNameEn": "angle",
+      "itemSize": "8",
+      "sampleData": "0.0",
+      "itemDescription": "카메라 각도"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985667",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.557917",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S06_002",
+    "serviceType": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+    "serviceName": "특정 자외선 측정 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/uv/devices",
+    "description": "구룡포 내 설치된 특정 자외선 측정 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-23 00:00:29",
+    "updateAt": "2025-11-23 00:00:29",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "자외선 측정기",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985240",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.551826",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 병포리 157-294",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S06_003",
+    "serviceType": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+    "serviceName": "특정 스피커 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/speaker/devices",
+    "description": "구룡포 내 설치된 특정 스피커 장비의 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-23 00:00:29",
+    "updateAt": "2025-11-23 00:00:29",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포 북방파제 SR-01-001",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985667",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.557917",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S06_004",
+    "serviceType": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+    "serviceName": "특정 AI CCTV 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/ai-cctv/devices",
+    "description": "구룡포 내 설치된 AI CCTV의 정보 목록을 조회할 수 있습니다.<br/>장비명, 카메라 각도, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-23 00:00:29",
+    "updateAt": "2025-11-23 00:00:29",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포 북방파제 AI-01-001",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "각도",
+      "itemNameEn": "angle",
+      "itemSize": "8",
+      "sampleData": "0.0",
+      "itemDescription": "카메라 각도"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.985667",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.557917",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S06_005",
+    "serviceType": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+    "serviceName": "자외선 측정 장비 실시간 수집 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/sensor/latest/uvIndex",
+    "description": "구룡포 내 설치된 자외선 측정 장비의 가장 최근에 수집된 데이터를 조회할 수 있습니다.<br/>자외선 수치 데이터를 제공합니다.",
+    "createAt": "2026-07-08 08:19:08.451829",
+    "updateAt": "2026-07-08 08:19:08.451829",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "측정일시",
+      "itemNameEn": "dateTime",
+      "itemSize": "50",
+      "sampleData": "2026-07-08 17:21:17",
+      "itemDescription": "데이터 측정일시"
+     },
+     {
+      "itemNameKo": "자외선 수치",
+      "itemNameEn": "uvIndex",
+      "itemSize": "8",
+      "sampleData": "1.8",
+      "itemDescription": "측정된 장비의 자외선 수치값"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S06_006",
+    "serviceType": "경상북도 포항시 구룡포읍_방파제 보행자 이동 예측 및 안전 경보",
+    "serviceName": "시간대별 이상행동 발생수 통계",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/aicctv/avghour/datas",
+    "description": "구룡포 방파제 내 설치된 AI CCTV로 위험구역에서 측정한 보행자의 이상행동 종류별 발생 횟수를 조회할 수 있습니다.<br/>실족감지,침입감지, 접근경고, 보행자 이상감지 등의 이상행동 발생 횟수 데이터를 제공합니다.",
+    "createAt": "2026-07-08 08:31:32.606286",
+    "updateAt": "2026-07-08 08:31:32.606286",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "남방파제",
+      "itemNameEn": "south",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "남방파제 위험구역 내 이상행동 발생 횟수"
+     },
+     {
+      "itemNameKo": "측정일시",
+      "itemNameEn": "hour",
+      "itemSize": "50",
+      "sampleData": "2026-07-08 08:00:00",
+      "itemDescription": "데이터 측정일시"
+     },
+     {
+      "itemNameKo": "실족감지",
+      "itemNameEn": "warningFallDetectionCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "위험구역 내 실족감지"
+     },
+     {
+      "itemNameKo": "침입감지",
+      "itemNameEn": "warningInsideDetectionCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "위험구역 내 침입감지"
+     },
+     {
+      "itemNameKo": "접근경고",
+      "itemNameEn": "warningApproachCount",
+      "itemSize": "8",
+      "sampleData": "37",
+      "itemDescription": "위험구역 내 접근경고"
+     },
+     {
+      "itemNameKo": "보행자 이상감지",
+      "itemNameEn": "normalFallDetectionCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "보행자 이상감지"
+     },
+     {
+      "itemNameKo": "북방파제",
+      "itemNameEn": "north",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "북방파제 위험구역 내 이상행동 발생 횟수"
+     },
+     {
+      "itemNameKo": "측정일시",
+      "itemNameEn": "hour",
+      "itemSize": "50",
+      "sampleData": "2026-07-08 08:00:00",
+      "itemDescription": "데이터 측정일시"
+     },
+     {
+      "itemNameKo": "실족감지",
+      "itemNameEn": "warningFallDetectionCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "위험구역 내 실족감지"
+     },
+     {
+      "itemNameKo": "침입감지",
+      "itemNameEn": "warningInsideDetectionCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "위험구역 내 침입감지"
+     },
+     {
+      "itemNameKo": "접근경고",
+      "itemNameEn": "warningApproachCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "위험구역 내 접근경고"
+     },
+     {
+      "itemNameKo": "보행자 이상감지",
+      "itemNameEn": "normalFallDetectionCount",
+      "itemSize": "8",
+      "sampleData": "0",
+      "itemDescription": "위험구역 내 접근경고"
+     }
+    ]
+   }
+  ]
+ },
+ "9": {
+  "typeId": 9,
+  "serviceTitle": "구룡포읍 수산물",
+  "serviceName": "경상북도 포항시 구룡포읍_수산물 유통 정보화",
+  "description": "수산물 유통 정보화",
+  "apis": [
+   {
+    "apiId": "INT_S07_001",
+    "serviceType": "경상북도 포항시 구룡포읍_수산물 유통 정보화",
+    "serviceName": "전체 교통감시 장비 정보 목록",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/transp/devices/list",
+    "description": "구룡포 내 설치된 전체 교통감시 장비 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-23 00:10:20",
+    "updateAt": "2025-11-23 00:10:20",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "교통감시 장비 목록",
+      "itemNameEn": "list",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "교통감시 장비 목록"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "교통센서1",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.986384",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.549631",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "포항시 남구 구룡포읍 병포리 518-1",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S07_002",
+    "serviceType": "경상북도 포항시 구룡포읍_수산물 유통 정보화",
+    "serviceName": "특정 교통감시 장비 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/transp/device",
+    "description": "구룡포 내 설치된 특정 교통감시 장비 정보 목록을 조회할 수 있습니다.<br/>장비명, 설치 위치의 위경도, 주소 정보를 제공합니다.",
+    "createAt": "2025-11-23 00:10:20",
+    "updateAt": "2025-11-23 00:10:20",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "교통센서1",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.986384",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.549631",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "포항시 남구 구룡포읍 병포리 518-1",
+      "itemDescription": "장비 상세 위치 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S07_003",
+    "serviceType": "경상북도 포항시 구룡포읍_수산물 유통 정보화",
+    "serviceName": "구룡포 수산물 위탁판매장 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/auctionPlace/Info",
+    "description": "구룡포 수산물 위탁판매장 정보를 조회할 수 있습니다.<br/>구역명, 위경도, 구역 상세 주소 정보를 제공합니다.",
+    "createAt": "2025-11-23 00:10:20",
+    "updateAt": "2025-11-23 00:10:20",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "판매장 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "8",
+      "sampleData": "1",
+      "itemDescription": "판매장 고유번호"
+     },
+     {
+      "itemNameKo": "판매장명",
+      "itemNameEn": "name",
+      "itemSize": "50",
+      "sampleData": "구룡포수산업협동조합위판장",
+      "itemDescription": "판매장명"
+     },
+     {
+      "itemNameKo": "위도",
+      "itemNameEn": "latitude",
+      "itemSize": "20",
+      "sampleData": "35.989544",
+      "itemDescription": "판매장위치(위도)"
+     },
+     {
+      "itemNameKo": "경도",
+      "itemNameEn": "longitude",
+      "itemSize": "20",
+      "sampleData": "129.555828",
+      "itemDescription": "판매장위치(경도)"
+     },
+     {
+      "itemNameKo": "주소",
+      "itemNameEn": "address",
+      "itemSize": "100",
+      "sampleData": "경북 포항시 남구 구룡포읍 호미로 222-1",
+      "itemDescription": "판매장 상세 주소"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S07_004",
+    "serviceType": "경상북도 포항시 구룡포읍_수산물 유통 정보화",
+    "serviceName": "시간대별/차종별 교통량 통계",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/statistics/trafficDatasPerHour",
+    "description": "구룡포 내 차량의 시간대 및 차량 종류별 교통량 통계 데이터를 조회할 수 있습니다.<br/>차량 종류는 승용차, 승합차, 트럭, 화물, 버스, 이륜차 정보를 제공합니다.",
+    "createAt": "2026-07-08 07:37:20.607046",
+    "updateAt": "2026-07-08 07:37:20.607046",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "장비명",
+      "itemNameEn": "{교통센서명}",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "교통센서의 장비명칭"
+     },
+     {
+      "itemNameKo": "측정일시",
+      "itemNameEn": "time",
+      "itemSize": "20",
+      "sampleData": "2026-07-08 08",
+      "itemDescription": "데이터 측정일시"
+     },
+     {
+      "itemNameKo": "승용차",
+      "itemNameEn": "car",
+      "itemSize": "10",
+      "sampleData": "1152",
+      "itemDescription": "차량종류(승용차)"
+     },
+     {
+      "itemNameKo": "승합차",
+      "itemNameEn": "van",
+      "itemSize": "10",
+      "sampleData": "14",
+      "itemDescription": "차량종류(승합차)"
+     },
+     {
+      "itemNameKo": "트럭",
+      "itemNameEn": "truck",
+      "itemSize": "10",
+      "sampleData": "158",
+      "itemDescription": "차량종류(트럭)"
+     },
+     {
+      "itemNameKo": "화물",
+      "itemNameEn": "lorry",
+      "itemSize": "10",
+      "sampleData": "17",
+      "itemDescription": "차량종류(화물)"
+     },
+     {
+      "itemNameKo": "버스",
+      "itemNameEn": "bus",
+      "itemSize": "10",
+      "sampleData": "20",
+      "itemDescription": "차량종류(버스)"
+     },
+     {
+      "itemNameKo": "이륜차",
+      "itemNameEn": "motorcycle",
+      "itemSize": "10",
+      "sampleData": "5",
+      "itemDescription": "차량종류(이륜차)"
+     },
+     {
+      "itemNameKo": "총 합계",
+      "itemNameEn": "sumCnt",
+      "itemSize": "10",
+      "sampleData": "1366",
+      "itemDescription": "측정된 차량의 총 합계"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S07_005",
+    "serviceType": "경상북도 포항시 구룡포읍_수산물 유통 정보화",
+    "serviceName": "시간대별 교통 혼잡율",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/traffic/congestion",
+    "description": "구룡포 내 설치된 교통 측정 장비의 전체 장비의 시간대별 교통 혼잡율 정보를 조회할 수 있습니다.",
+    "createAt": "2026-07-08 08:08:17.057438",
+    "updateAt": "2026-07-08 08:08:17.057438",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "측정일시",
+      "itemNameEn": "hour",
+      "itemSize": "50",
+      "sampleData": "2026-07-07 17:00:00.0",
+      "itemDescription": "데이터 측정일시"
+     },
+     {
+      "itemNameKo": "교통 혼잡율",
+      "itemNameEn": "cntPerc",
+      "itemSize": "8",
+      "sampleData": "37.76",
+      "itemDescription": "전체 장비 통합 교통 혼잡율(%, 백분율)"
+     }
+    ]
+   }
+  ]
+ },
+ "1": {
+  "typeId": 1,
+  "serviceTitle": "구룡포읍 대기환경",
+  "serviceName": "경상북도 포항시 구룡포읍_대기오염 트윈 환경분석 예측",
+  "description": "유해물질 및 대기상태를 실시간 모니터링하고, 유해물질 유출 시 확산 과정 예측",
+  "apis": [
+   {
+    "apiId": "INT_S01_004",
+    "serviceType": "경상북도 포항시 구룡포읍_대기오염 트윈 환경분석 예측",
+    "serviceName": "대기환경 측정 장비 실시간 수집 정보_단일",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/atmosphere/device/realtime",
+    "description": "구룡포 내 설치된 대기환경 측정 장비 중 사용자가 지정한 장비에서 가장 최근에 수집된 데이터를 조회할 수 있습니다.<br/>미세먼지, 초미세먼지, 이산화황, 이산화질소, 오존, 일산화탄소, VOC, 황화수소, 암모니아, 복합악취, 포름알데하이드, 이산화탄소, 온도, 습도, 풍속, 풍향, 배터리 전압 등의 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:23",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "id",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "데이터 수집 시각",
+      "itemNameEn": "logDateTime",
+      "itemSize": "20",
+      "sampleData": "2025-03-26 18:05:18",
+      "itemDescription": "데이터 수집 시각"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "미세먼지",
+      "itemNameEn": "pm10",
+      "itemSize": "",
+      "sampleData": "168.3",
+      "itemDescription": "미세먼지(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "초미세먼지",
+      "itemNameEn": "pm25",
+      "itemSize": "",
+      "sampleData": "74.6834",
+      "itemDescription": "초미세먼지(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "이산화황",
+      "itemNameEn": "so2",
+      "itemSize": "",
+      "sampleData": "0.0781604",
+      "itemDescription": "이산화황(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "이산화질소",
+      "itemNameEn": "no2",
+      "itemSize": "",
+      "sampleData": "0.144819",
+      "itemDescription": "이산화질소(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "오존",
+      "itemNameEn": "o3",
+      "itemSize": "",
+      "sampleData": "0.11596",
+      "itemDescription": "오존(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "일산화탄소",
+      "itemNameEn": "co",
+      "itemSize": "",
+      "sampleData": "4.53955",
+      "itemDescription": "일산화탄소(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "VOC",
+      "itemNameEn": "voc",
+      "itemSize": "",
+      "sampleData": "0.289708",
+      "itemDescription": "VOC(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "황화수소",
+      "itemNameEn": "h2s",
+      "itemSize": "",
+      "sampleData": "0.0204919",
+      "itemDescription": "황화수소(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "암모니아",
+      "itemNameEn": "nh3",
+      "itemSize": "",
+      "sampleData": "0.0775119",
+      "itemDescription": "암모니아(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "복합악취",
+      "itemNameEn": "ou",
+      "itemSize": "",
+      "sampleData": "3.76964",
+      "itemDescription": "복합악취(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "포름알데하이드",
+      "itemNameEn": "hcho",
+      "itemSize": "",
+      "sampleData": "0.0114996",
+      "itemDescription": "포름알데하이드(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "이산화탄소",
+      "itemNameEn": "co2",
+      "itemSize": "",
+      "sampleData": "2106.19",
+      "itemDescription": "이산화탄소(단위 : PPM)"
+     },
+     {
+      "itemNameKo": "온도",
+      "itemNameEn": "temp",
+      "itemSize": "",
+      "sampleData": "35.0",
+      "itemDescription": "온도(단위 : ℃)"
+     },
+     {
+      "itemNameKo": "습도",
+      "itemNameEn": "humi",
+      "itemSize": "",
+      "sampleData": "90.0",
+      "itemDescription": "습도(단위 : %)"
+     },
+     {
+      "itemNameKo": "풍속",
+      "itemNameEn": "winsp",
+      "itemSize": "",
+      "sampleData": "2.902",
+      "itemDescription": "풍속(단위 : ℃)"
+     },
+     {
+      "itemNameKo": "풍향",
+      "itemNameEn": "windir",
+      "itemSize": "",
+      "sampleData": "180.0",
+      "itemDescription": "풍향(단위 : %)"
+     },
+     {
+      "itemNameKo": "배터리 전압",
+      "itemNameEn": "batt",
+      "itemSize": "",
+      "sampleData": "12.0",
+      "itemDescription": "배터리 전압(단위 : 12V)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S01_011",
+    "serviceType": "경상북도 포항시 구룡포읍_대기오염 트윈 환경분석 예측",
+    "serviceName": "대기환경 유해물질 통계 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/atmosphere/sensor/stats/history",
+    "description": "구룡포 내 설치된 대기환경 측정 장비에서 사용자가 지정한 유해물질과 당일 기준으로 전일대비 편차값, 당일 평균수치, 시간별 평균수치, 유해물질의 범례정보 등의 통계데이터를 조회할 수 있습니다.",
+    "createAt": "2025-06-13 13:15:22",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "센서 항목명",
+      "itemNameEn": "type",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "pm10",
+      "itemDescription": "센서 항목명"
+     },
+     {
+      "itemNameKo": "시작날짜",
+      "itemNameEn": "startDate",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241210",
+      "itemDescription": "과거 시작 날짜"
+     },
+     {
+      "itemNameKo": "종료날짜",
+      "itemNameEn": "endDate",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241211",
+      "itemDescription": "과거 종료 날짜"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "전날대비 편차값",
+      "itemNameEn": "diffData",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "전날대비 편차값"
+     },
+     {
+      "itemNameKo": "전날대비 평균값 편차",
+      "itemNameEn": "diffAvgVal",
+      "itemSize": "",
+      "sampleData": "-165.94",
+      "itemDescription": "전날대비 평균값 편차"
+     },
+     {
+      "itemNameKo": "전날대비 최대값 편차",
+      "itemNameEn": "diffMaxVal",
+      "itemSize": "",
+      "sampleData": "-170.0",
+      "itemDescription": "전날대비 최대값 편차"
+     },
+     {
+      "itemNameKo": "전날대비 최소값 편차",
+      "itemNameEn": "diffMinVal",
+      "itemSize": "",
+      "sampleData": "0.0",
+      "itemDescription": "전날대비 최소값 편차"
+     },
+     {
+      "itemNameKo": "전날 수치값",
+      "itemNameEn": "staticGenixCalBeforeDay",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "과거 시작날짜 전날 수치값"
+     },
+     {
+      "itemNameKo": "시작날짜",
+      "itemNameEn": "startDate",
+      "itemSize": "8",
+      "sampleData": "20241210",
+      "itemDescription": "과거 시작 날짜"
+     },
+     {
+      "itemNameKo": "종료날짜",
+      "itemNameEn": "endDate",
+      "itemSize": "8",
+      "sampleData": "20241211",
+      "itemDescription": "과거 종료 날짜"
+     },
+     {
+      "itemNameKo": "평균값",
+      "itemNameEn": "avgVal",
+      "itemSize": "",
+      "sampleData": "165.94424",
+      "itemDescription": "일일 평균값"
+     },
+     {
+      "itemNameKo": "평균 최대값",
+      "itemNameEn": "maxVal",
+      "itemSize": "",
+      "sampleData": "170.0",
+      "itemDescription": "일일 평균 최대값"
+     },
+     {
+      "itemNameKo": "평균 최소값",
+      "itemNameEn": "minVal",
+      "itemSize": "",
+      "sampleData": "0.0",
+      "itemDescription": "일일 평균 최소값"
+     },
+     {
+      "itemNameKo": "요청일 수치값",
+      "itemNameEn": "staticGenixCal",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "과거 시작날짜 수치값"
+     },
+     {
+      "itemNameKo": "시작날짜",
+      "itemNameEn": "startDate",
+      "itemSize": "8",
+      "sampleData": "20241210",
+      "itemDescription": "과거 시작 날짜"
+     },
+     {
+      "itemNameKo": "종료날짜",
+      "itemNameEn": "endDate",
+      "itemSize": "8",
+      "sampleData": "20241211",
+      "itemDescription": "과거 종료 날짜"
+     },
+     {
+      "itemNameKo": "평균값",
+      "itemNameEn": "avgVal",
+      "itemSize": "",
+      "sampleData": "165.94424",
+      "itemDescription": "일일 평균"
+     },
+     {
+      "itemNameKo": "평균 최대값",
+      "itemNameEn": "maxVal",
+      "itemSize": "",
+      "sampleData": "170.0",
+      "itemDescription": "일일 평균 최대값"
+     },
+     {
+      "itemNameKo": "평균 최소값",
+      "itemNameEn": "minVal",
+      "itemSize": "",
+      "sampleData": "0.0",
+      "itemDescription": "일일 평균 최소값"
+     },
+     {
+      "itemNameKo": "요청일 시간별 통계데이터값",
+      "itemNameEn": "staticGenixLinear",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "과거 시작날짜 시간별 통계데이터값"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(0시)",
+      "itemNameEn": "hour0",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(0시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(1시)",
+      "itemNameEn": "hour1",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(1시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(2시)",
+      "itemNameEn": "hour2",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(2시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(3시)",
+      "itemNameEn": "hour3",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(3시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(4시)",
+      "itemNameEn": "hour4",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(4시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(5시)",
+      "itemNameEn": "hour5",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(5시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(6시)",
+      "itemNameEn": "hour6",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(6시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(7시)",
+      "itemNameEn": "hour7",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(7시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(8시)",
+      "itemNameEn": "hour8",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(8시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(9시)",
+      "itemNameEn": "hour9",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(9시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(10시)",
+      "itemNameEn": "hour10",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(10시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(11시)",
+      "itemNameEn": "hour11",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(11시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(12시)",
+      "itemNameEn": "hour12",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(12시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(13시)",
+      "itemNameEn": "hour13",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(13시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(14시)",
+      "itemNameEn": "hour14",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(14시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(15시)",
+      "itemNameEn": "hour15",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(15시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(16시)",
+      "itemNameEn": "hour16",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(16시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(17시)",
+      "itemNameEn": "hour17",
+      "itemSize": "5",
+      "sampleData": "168.3",
+      "itemDescription": "시간별 통계데이터(17시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(18시)",
+      "itemNameEn": "hour18",
+      "itemSize": "5",
+      "sampleData": "158.361",
+      "itemDescription": "시간별 통계데이터(18시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(19시)",
+      "itemNameEn": "hour19",
+      "itemSize": "5",
+      "sampleData": "158.71",
+      "itemDescription": "시간별 통계데이터(19시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(20시)",
+      "itemNameEn": "hour20",
+      "itemSize": "5",
+      "sampleData": "159.003",
+      "itemDescription": "시간별 통계데이터(20시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(21시)",
+      "itemNameEn": "hour21",
+      "itemSize": "5",
+      "sampleData": "159.147",
+      "itemDescription": "시간별 통계데이터(21시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(22시)",
+      "itemNameEn": "hour22",
+      "itemSize": "5",
+      "sampleData": "159.09",
+      "itemDescription": "시간별 통계데이터(22시)"
+     },
+     {
+      "itemNameKo": "시간별 통계데이터(23시)",
+      "itemNameEn": "hour23",
+      "itemSize": "5",
+      "sampleData": "158.912",
+      "itemDescription": "시간별 통계데이터(23시)"
+     },
+     {
+      "itemNameKo": "요청 오염물질 항목의 범례",
+      "itemNameEn": "staticGenixPie",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "요청 오염물질 항목의 범례"
+     },
+     {
+      "itemNameKo": "범례 1단계",
+      "itemNameEn": "lv1",
+      "itemSize": "",
+      "sampleData": "0",
+      "itemDescription": "범례 1단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 2단계",
+      "itemNameEn": "lv2",
+      "itemSize": "",
+      "sampleData": "3",
+      "itemDescription": "범례 2단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 3단계",
+      "itemNameEn": "lv3",
+      "itemSize": "",
+      "sampleData": "0",
+      "itemDescription": "범례 3단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 4단계",
+      "itemNameEn": "lv4",
+      "itemSize": "",
+      "sampleData": "623",
+      "itemDescription": "범례 4단계 (기준 수치가 없다면 -1 응답)"
+     },
+     {
+      "itemNameKo": "범례 5단계",
+      "itemNameEn": "lv5",
+      "itemSize": "",
+      "sampleData": "20989",
+      "itemDescription": "범례 5단계 (기준 수치가 없다면 -1 응답)"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S01_012",
+    "serviceType": "경상북도 포항시 구룡포읍_대기오염 트윈 환경분석 예측",
+    "serviceName": "대기환경 유해물질 시간별 통계 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/atmosphere/sensor/stats/hour",
+    "description": "사용자가 지정한 유해물질과 당일 기준으로 구룡포 내 설치된 대기환경 측정 장비의 시간별 평균수치, 범례 등급, 단위 등의 정보를 제공합니다.",
+    "createAt": "2025-06-13 13:15:22",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "센서 항목명",
+      "itemNameEn": "type",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "pm10",
+      "itemDescription": "센서 항목명"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "date",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20250106",
+      "itemDescription": "요청날짜"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "시간",
+      "itemNameEn": "hours",
+      "itemSize": "3",
+      "sampleData": "11",
+      "itemDescription": "측정된 시간"
+     },
+     {
+      "itemNameKo": "장비 고유번호",
+      "itemNameEn": "devId",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameKo": "센서 항목명",
+      "itemNameEn": "type",
+      "itemSize": "10",
+      "sampleData": "PM10",
+      "itemDescription": "센서 항목명"
+     },
+     {
+      "itemNameKo": "평균값",
+      "itemNameEn": "value",
+      "itemSize": "",
+      "sampleData": "120.88009986877441",
+      "itemDescription": "평균값"
+     },
+     {
+      "itemNameKo": "단위",
+      "itemNameEn": "unit",
+      "itemSize": "10",
+      "sampleData": "㎍/㎥",
+      "itemDescription": "센서의 단위"
+     },
+     {
+      "itemNameKo": "범례 등급",
+      "itemNameEn": "level",
+      "itemSize": "3",
+      "sampleData": "4",
+      "itemDescription": "평균값의 범례 등급"
+     }
+    ]
+   }
+  ]
+ },
+ "4": {
+  "typeId": 4,
+  "serviceTitle": "구룡포읍 선박탄소",
+  "serviceName": "경상북도 포항시 구룡포읍_선박탄소 환경변화 분석관리",
+  "description": "어선 밀집도, 체류시간에 따른 온실가스 변화정도 예측",
+  "apis": [
+   {
+    "apiId": "INT_S04_004",
+    "serviceType": "경상북도 포항시 구룡포읍_선박탄소 환경변화 분석관리",
+    "serviceName": "선박 탄소 배출량 통계 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/dashboard/old-ship/stats",
+    "description": "선박 톤수(t), 선박 연식을 각각 범위에 맞게 분류하여 분류 기준 정보와 시간별 선박 탄소 배출량 평균수치, 각 분류내에서 탄소 배출량 순위 등의 통계 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:15",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": " 응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": " 응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": " 응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": " 연간 탄소 배출량",
+      "itemNameEn": "measureEmissionPerYearly",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "연간 탄소 배출량"
+     },
+     {
+      "itemNameKo": " 시간",
+      "itemNameEn": "hour",
+      "itemSize": "3",
+      "sampleData": "6",
+      "itemDescription": "측정시간"
+     },
+     {
+      "itemNameKo": " 연 타입",
+      "itemNameEn": "yearly",
+      "itemSize": "12",
+      "sampleData": "yearlyType1",
+      "itemDescription": "연 타입"
+     },
+     {
+      "itemNameKo": " 탄소 배출량 값",
+      "itemNameEn": "value",
+      "itemSize": "",
+      "sampleData": "2.71",
+      "itemDescription": "탄소 배출량 값"
+     },
+     {
+      "itemNameKo": " 연간 탄소 배출량 순위",
+      "itemNameEn": "rankEmissionPerYearly",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "연간 탄소 배출량 순위"
+     },
+     {
+      "itemNameKo": " 순위",
+      "itemNameEn": "rank",
+      "itemSize": "2",
+      "sampleData": "1",
+      "itemDescription": "순위"
+     },
+     {
+      "itemNameKo": " 탄소 배출 선박 수",
+      "itemNameEn": "countPerYearly",
+      "itemSize": "4",
+      "sampleData": "41",
+      "itemDescription": "탄소 배출 선박 수"
+     },
+     {
+      "itemNameKo": " 탄소 배출량 평균값",
+      "itemNameEn": "emissionAvg",
+      "itemSize": "",
+      "sampleData": "3.34",
+      "itemDescription": "탄소 배출량 평균값"
+     },
+     {
+      "itemNameKo": " 연 타입",
+      "itemNameEn": "yearly",
+      "itemSize": "12",
+      "sampleData": "yearlyType4",
+      "itemDescription": "연 타입"
+     },
+     {
+      "itemNameKo": " 연간 탄소 배출 선박",
+      "itemNameEn": "countPerYearly",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "연간 탄소 배출 선박"
+     },
+     {
+      "itemNameKo": " 연 타입",
+      "itemNameEn": "yearly",
+      "itemSize": "12",
+      "sampleData": "yearlyType1",
+      "itemDescription": "연 타입"
+     },
+     {
+      "itemNameKo": " 탄소 배출 선박 수",
+      "itemNameEn": "shipCount",
+      "itemSize": "3",
+      "sampleData": "41",
+      "itemDescription": "탄소 배출 선박 수"
+     },
+     {
+      "itemNameKo": " 선박 톤별 탄소 배출량 순위",
+      "itemNameEn": "rankEmssionPerTon",
+      "itemSize": "10",
+      "sampleData": "",
+      "itemDescription": "선박 톤별 탄소 배출량 순위"
+     },
+     {
+      "itemNameKo": " 순위",
+      "itemNameEn": "rank",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "순위"
+     },
+     {
+      "itemNameKo": " 탄소 배출량 평균값",
+      "itemNameEn": "emissionAvgs",
+      "itemSize": "",
+      "sampleData": "2.55",
+      "itemDescription": "탄소 배출량 평균값"
+     },
+     {
+      "itemNameKo": " 탄소 배출 선박 수",
+      "itemNameEn": "shipCount",
+      "itemSize": "",
+      "sampleData": "41",
+      "itemDescription": "탄소 배출 선박 수"
+     },
+     {
+      "itemNameKo": " 선박 타입",
+      "itemNameEn": "shipType",
+      "itemSize": "5",
+      "sampleData": "S3",
+      "itemDescription": "선박 타입"
+     },
+     {
+      "itemNameKo": " 타입 정보",
+      "itemNameEn": "defineObj",
+      "itemSize": "",
+      "sampleData": "shipType",
+      "itemDescription": "타입 정보"
+     },
+     {
+      "itemNameKo": " 선박별 타입 정보",
+      "itemNameEn": "shipType",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "선박별 타입 정보"
+     },
+     {
+      "itemNameKo": " 타입명",
+      "itemNameEn": "objName",
+      "itemSize": "8",
+      "sampleData": "shipType",
+      "itemDescription": "타입명"
+     },
+     {
+      "itemNameKo": " 타입 코드",
+      "itemNameEn": "code",
+      "itemSize": "3",
+      "sampleData": "S1",
+      "itemDescription": "타입 코드"
+     },
+     {
+      "itemNameKo": " 타입 상세 정보",
+      "itemNameEn": "value",
+      "itemSize": "30",
+      "sampleData": "소형",
+      "itemDescription": "타입 상세 정보"
+     },
+     {
+      "itemNameKo": " 연 타입 정보",
+      "itemNameEn": "yearly",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "연 타입 정보"
+     },
+     {
+      "itemNameKo": " 타입명",
+      "itemNameEn": "objName",
+      "itemSize": "8",
+      "sampleData": "yearly",
+      "itemDescription": "타입명"
+     },
+     {
+      "itemNameKo": " 탄소 배출 선박 수",
+      "itemNameEn": "code",
+      "itemSize": "12",
+      "sampleData": "yearlyType1",
+      "itemDescription": "탄소 배출 선박 수"
+     },
+     {
+      "itemNameKo": " 타입 상세 정보",
+      "itemNameEn": "value",
+      "itemSize": "20",
+      "sampleData": "5년이하",
+      "itemDescription": "타입 상세 정보"
+     },
+     {
+      "itemNameKo": " 톤별 탄소 배출량",
+      "itemNameEn": "emssionPerTon",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "톤별 탄소 배출량"
+     },
+     {
+      "itemNameKo": " 시간",
+      "itemNameEn": "hour",
+      "itemSize": "3",
+      "sampleData": "6",
+      "itemDescription": "측정시간"
+     },
+     {
+      "itemNameKo": " 선박 타입",
+      "itemNameEn": "shipType",
+      "itemSize": "3",
+      "sampleData": "S1",
+      "itemDescription": "선박 타입"
+     },
+     {
+      "itemNameKo": " 탄소 배출량 값",
+      "itemNameEn": "value",
+      "itemSize": "4",
+      "sampleData": "1.40",
+      "itemDescription": "탄소 배출량 값"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S04_005",
+    "serviceType": "경상북도 포항시 구룡포읍_선박탄소 환경변화 분석관리",
+    "serviceName": "선박 톤수별 당일 탄소 배출량",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/old-ship/day/ton/emission",
+    "description": "사용자가 지정한 당일 기준으로 선박 톤수(t)를 범위에 맞게 분류하여 당일 탄소 배출량 평균 수치 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:14",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "date",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241217",
+      "itemDescription": "요청날짜(과거기준)"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "톤별 선박타입",
+      "itemNameEn": "shipType",
+      "itemSize": "3",
+      "sampleData": "S1",
+      "itemDescription": "톤별 선박타입"
+     },
+     {
+      "itemNameKo": "탄소배출량 평균값",
+      "itemNameEn": "avgPerEmis",
+      "itemSize": "",
+      "sampleData": "0.1053",
+      "itemDescription": "탄소배출량 평균값"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S04_006",
+    "serviceType": "경상북도 포항시 구룡포읍_선박탄소 환경변화 분석관리",
+    "serviceName": "선박 시간별 탄소 배출량",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/old-ship/hour/co-emission",
+    "description": "사용자가 지정한 당일 기준으로 구룡포항에 등록된 선박의 시간별 탄소 배출량 평균 수치 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:14",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "date",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241217",
+      "itemDescription": "요청날짜(과거기준)"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "어선번호",
+      "itemNameEn": "shipId",
+      "itemSize": "20",
+      "sampleData": "0003005-6491102",
+      "itemDescription": "어선번호"
+     },
+     {
+      "itemNameKo": "통계 시간",
+      "itemNameEn": "hour",
+      "itemSize": "3",
+      "sampleData": "22",
+      "itemDescription": "통계 시간"
+     },
+     {
+      "itemNameKo": "최근 탄소 배출량 값",
+      "itemNameEn": "recentEmi",
+      "itemSize": "",
+      "sampleData": "6",
+      "itemDescription": "최근 탄소 배출량 값"
+     },
+     {
+      "itemNameKo": "범례 등급",
+      "itemNameEn": "level",
+      "itemSize": "3",
+      "sampleData": "4",
+      "itemDescription": "범례 등급"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S04_007",
+    "serviceType": "경상북도 포항시 구룡포읍_선박탄소 환경변화 분석관리",
+    "serviceName": "선박 톤수별 탄소 배출 및 중립 순위 정보",
+    "method": "GET",
+    "apiType": "REST API",
+    "url": "https://genix.pohang-eum.kr/dpg/old-ship/size/history",
+    "description": "선박 톤수(t)를 범위에 맞게 분류하여 톤수(t)별 탄소 배출량 평균 수치, 탄소 중립 실천 선박 순위, 탄소 중립 누적 기여 선박 순위 등의 데이터를 제공합니다.",
+    "createAt": "2025-06-13 13:15:13",
+    "updateAt": "2025-06-18 17:14:25",
+    "requestItems": [
+     {
+      "itemNameKo": "서비스키",
+      "itemNameEn": "serviceKey",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameKo": "요청날짜",
+      "itemNameEn": "date",
+      "itemType": "Parameter",
+      "itemRequired": "Y",
+      "sampleData": "20241217",
+      "itemDescription": "요청날짜(과거기준)"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameKo": "응답상태 고유번호",
+      "itemNameEn": "id",
+      "itemSize": "10",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameKo": "응답상태",
+      "itemNameEn": "status",
+      "itemSize": "50",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameKo": "응답값 객체",
+      "itemNameEn": "data",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameKo": "탄소 중립 실천 선박 순위",
+      "itemNameEn": "top5ContributionShips",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "탄소 중립 실천 선박 순위"
+     },
+     {
+      "itemNameKo": "어선번호",
+      "itemNameEn": "shipId",
+      "itemSize": "20",
+      "sampleData": "0003005-6491102",
+      "itemDescription": "어선번호"
+     },
+     {
+      "itemNameKo": "순위",
+      "itemNameEn": "rank",
+      "itemSize": "3",
+      "sampleData": "1",
+      "itemDescription": "순위"
+     },
+     {
+      "itemNameKo": "어업종류",
+      "itemNameEn": "type",
+      "itemSize": "100",
+      "sampleData": "근해자망어업",
+      "itemDescription": "어업종류"
+     },
+     {
+      "itemNameKo": "어선명",
+      "itemNameEn": "name",
+      "itemSize": "100",
+      "sampleData": "제33안성호",
+      "itemDescription": "어선명"
+     },
+     {
+      "itemNameKo": "선적항",
+      "itemNameEn": "pol",
+      "itemSize": "100",
+      "sampleData": "포항시 구룡포읍",
+      "itemDescription": "선적항"
+     },
+     {
+      "itemNameKo": "선적항 주소",
+      "itemNameEn": "polAddr",
+      "itemSize": "100",
+      "sampleData": "경상북도 포항시 남구 구룡포읍",
+      "itemDescription": "선적항 주소"
+     },
+     {
+      "itemNameKo": "선체재질",
+      "itemNameEn": "hm",
+      "itemSize": "100",
+      "sampleData": "FRP",
+      "itemDescription": "선체재질"
+     },
+     {
+      "itemNameKo": "추진기관",
+      "itemNameEn": "pe",
+      "itemSize": "100",
+      "sampleData": "선박용디젤",
+      "itemDescription": "선박의 추진을 위해 이용되는 기관"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "ps",
+      "itemSize": "",
+      "sampleData": "720.0",
+      "itemDescription": "선박의 동력(단위 : PS)"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "kw",
+      "itemSize": "",
+      "sampleData": "529.2",
+      "itemDescription": "선박의 동력(단위 : KW)"
+     },
+     {
+      "itemNameKo": "엔진수",
+      "itemNameEn": "engineCnt",
+      "itemSize": "3",
+      "sampleData": "1",
+      "itemDescription": "엔진수"
+     },
+     {
+      "itemNameKo": "선박 추진장비",
+      "itemNameEn": "propeller",
+      "itemSize": "20",
+      "sampleData": "나선일체식",
+      "itemDescription": "선박 추진장비"
+     },
+     {
+      "itemNameKo": "선박 추진장비 개수",
+      "itemNameEn": "propellerCnt",
+      "itemSize": "4",
+      "sampleData": "1",
+      "itemDescription": "선박 추진장비 개수"
+     },
+     {
+      "itemNameKo": "길이",
+      "itemNameEn": "length",
+      "itemSize": "",
+      "sampleData": "25.05",
+      "itemDescription": "길이(단위 : m)"
+     },
+     {
+      "itemNameKo": "너비",
+      "itemNameEn": "breath",
+      "itemSize": "",
+      "sampleData": "5.57",
+      "itemDescription": "너비(단위 : m)"
+     },
+     {
+      "itemNameKo": "깊이",
+      "itemNameEn": "depth",
+      "itemSize": "",
+      "sampleData": "2.0",
+      "itemDescription": "깊이(단위 : m)"
+     },
+     {
+      "itemNameKo": "총 무게",
+      "itemNameEn": "gt",
+      "itemSize": "",
+      "sampleData": "43.0",
+      "itemDescription": "총 무게(단위 : t)"
+     },
+     {
+      "itemNameKo": "어선표지판",
+      "itemNameEn": "sign",
+      "itemSize": "250",
+      "sampleData": "0003005-6491102 근해자망어업(43톤)",
+      "itemDescription": "어선표지판"
+     },
+     {
+      "itemNameKo": "어선등록일자",
+      "itemNameEn": "regYmd",
+      "itemSize": "15",
+      "sampleData": "2000-03-14",
+      "itemDescription": "어선등록일자"
+     },
+     {
+      "itemNameKo": "진수일자",
+      "itemNameEn": "launchingYmd",
+      "itemSize": "15",
+      "sampleData": "2000-03-01",
+      "itemDescription": "진수일자"
+     },
+     {
+      "itemNameKo": "탄소 배출량",
+      "itemNameEn": "perc",
+      "itemSize": "",
+      "sampleData": "0.18",
+      "itemDescription": "탄소 배출량"
+     },
+     {
+      "itemNameKo": "선박 톤별 탄소 배출량",
+      "itemNameEn": "emissionPerDayTonTypes",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "선박 톤별 탄소 배출량"
+     },
+     {
+      "itemNameKo": "선박 톤별 종류",
+      "itemNameEn": "shipType",
+      "itemSize": "3",
+      "sampleData": "S1",
+      "itemDescription": "선박 톤별 종류"
+     },
+     {
+      "itemNameKo": "평균 탄소 배출량",
+      "itemNameEn": "avgPerEmis",
+      "itemSize": "",
+      "sampleData": "0.1053",
+      "itemDescription": "평균 탄소 배출량"
+     },
+     {
+      "itemNameKo": "선박 톤별 정보",
+      "itemNameEn": "defineObj",
+      "itemSize": "",
+      "sampleData": "shipType",
+      "itemDescription": "선박 톤별 정보"
+     },
+     {
+      "itemNameKo": "정보명",
+      "itemNameEn": "objName",
+      "itemSize": "10",
+      "sampleData": "shipType",
+      "itemDescription": "정보명"
+     },
+     {
+      "itemNameKo": "선박 톤별 코드",
+      "itemNameEn": "code",
+      "itemSize": "3",
+      "sampleData": "S1",
+      "itemDescription": "선박 톤별 코드"
+     },
+     {
+      "itemNameKo": "선박 톤별 상세명",
+      "itemNameEn": "value",
+      "itemSize": "10",
+      "sampleData": "소형",
+      "itemDescription": "선박 톤별 상세명"
+     },
+     {
+      "itemNameKo": "탄소중립 누적 기여도 선박 순위",
+      "itemNameEn": "top5CarbonNeuturalShips",
+      "itemSize": "",
+      "sampleData": "",
+      "itemDescription": "탄소중립 누적 기여도 선박 순위"
+     },
+     {
+      "itemNameKo": "어선번호",
+      "itemNameEn": "shipId",
+      "itemSize": "20",
+      "sampleData": "0003005-6491102",
+      "itemDescription": "어선번호"
+     },
+     {
+      "itemNameKo": "순위",
+      "itemNameEn": "rank",
+      "itemSize": "3",
+      "sampleData": "1",
+      "itemDescription": "순위"
+     },
+     {
+      "itemNameKo": "어업종류",
+      "itemNameEn": "type",
+      "itemSize": "20",
+      "sampleData": "근해자망어업",
+      "itemDescription": "어업종류"
+     },
+     {
+      "itemNameKo": "어선명",
+      "itemNameEn": "name",
+      "itemSize": "20",
+      "sampleData": "제33안성호",
+      "itemDescription": "어선명"
+     },
+     {
+      "itemNameKo": "선적항",
+      "itemNameEn": "pol",
+      "itemSize": "100",
+      "sampleData": "포항시 구룡포읍",
+      "itemDescription": "선적항"
+     },
+     {
+      "itemNameKo": "선적항 주소",
+      "itemNameEn": "polAddr",
+      "itemSize": "100",
+      "sampleData": "경상북도 포항시 남구 구룡포읍",
+      "itemDescription": "선적항 주소"
+     },
+     {
+      "itemNameKo": "선체재질",
+      "itemNameEn": "hm",
+      "itemSize": "20",
+      "sampleData": "FRP",
+      "itemDescription": "선체재질"
+     },
+     {
+      "itemNameKo": "추진기관",
+      "itemNameEn": "pe",
+      "itemSize": "20",
+      "sampleData": "선박용디젤",
+      "itemDescription": "선박의 추진을 위해 이용되는 기관"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "ps",
+      "itemSize": "",
+      "sampleData": "720.0",
+      "itemDescription": "선박의 동력(단위 : PS)"
+     },
+     {
+      "itemNameKo": "선박의 동력",
+      "itemNameEn": "kw",
+      "itemSize": "",
+      "sampleData": "529.2",
+      "itemDescription": "선박의 동력(단위 : KW)"
+     },
+     {
+      "itemNameKo": "엔진수",
+      "itemNameEn": "engineCnt",
+      "itemSize": "20",
+      "sampleData": "1",
+      "itemDescription": "엔진수"
+     },
+     {
+      "itemNameKo": "선박 추진장비",
+      "itemNameEn": "propeller",
+      "itemSize": "20",
+      "sampleData": "나선일체식",
+      "itemDescription": "선박 추진장비"
+     },
+     {
+      "itemNameKo": "선박 추진장비 개수",
+      "itemNameEn": "propellerCnt",
+      "itemSize": "3",
+      "sampleData": "1",
+      "itemDescription": "선박 추진장비 개수"
+     },
+     {
+      "itemNameKo": "길이",
+      "itemNameEn": "length",
+      "itemSize": "",
+      "sampleData": "25.05",
+      "itemDescription": "길이(단위 : m)"
+     },
+     {
+      "itemNameKo": "너비",
+      "itemNameEn": "breath",
+      "itemSize": "",
+      "sampleData": "5.57",
+      "itemDescription": "너비(단위 : m)"
+     },
+     {
+      "itemNameKo": "깊이",
+      "itemNameEn": "depth",
+      "itemSize": "",
+      "sampleData": "2.0",
+      "itemDescription": "깊이(단위 : m)"
+     },
+     {
+      "itemNameKo": "총 무게",
+      "itemNameEn": "gt",
+      "itemSize": "",
+      "sampleData": "43.0",
+      "itemDescription": "총 무게(단위 : t)"
+     },
+     {
+      "itemNameKo": "어선표지판",
+      "itemNameEn": "sign",
+      "itemSize": "30",
+      "sampleData": "0003005-6491102 근해자망어업(43톤)",
+      "itemDescription": "어선표지판"
+     },
+     {
+      "itemNameKo": "어선등록일자",
+      "itemNameEn": "regYmd",
+      "itemSize": "10",
+      "sampleData": "2000-03-14",
+      "itemDescription": "어선등록일자"
+     },
+     {
+      "itemNameKo": "진수일자",
+      "itemNameEn": "launchingYmd",
+      "itemSize": "10",
+      "sampleData": "2000-03-01",
+      "itemDescription": "진수일자"
+     },
+     {
+      "itemNameKo": "해당 선박의 탄소 배출량 합계",
+      "itemNameEn": "sumEmiPersec",
+      "itemSize": "",
+      "sampleData": "40.56",
+      "itemDescription": "해당 선박의 탄소 배출량 합계"
+     },
+     {
+      "itemNameKo": "탄소 배출량",
+      "itemNameEn": "perc",
+      "itemSize": "",
+      "sampleData": "0.18",
+      "itemDescription": "탄소 배출량"
+     }
+    ]
+   }
+  ]
+ }
+}
