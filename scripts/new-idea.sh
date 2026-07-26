@@ -52,14 +52,25 @@ if git show-ref --verify --quiet "refs/heads/${branch}"; then
 	exit 1
 fi
 
-git switch main >/dev/null 2>&1 || git switch -c main
+if ! git show-ref --verify --quiet refs/heads/main; then
+	echo "main 브랜치가 없다. 레포 상태를 확인할 것." >&2
+	exit 1
+fi
+
+git switch main
 git switch -c "$branch"
 
 cp -R ideas/_template "$dir"
 
-date_str="$(date +%Y-%m-%d)"
+# 치환값은 환경변수로 넘긴다. 제목에 슬래시나 따옴표가 들어가도 안전하다.
 for f in "$dir/README.md" "$dir/data.md"; do
-	perl -pi -e "s/\Q{{TITLE}}\E/$title/g; s/\Q{{NUM}}\E/$num/g; s/\Q{{BRANCH}}\E/\Q$branch\E/g; s/\Q{{DATE}}\E/$date_str/g" "$f"
+	IDEA_TITLE="$title" IDEA_NUM="$num" IDEA_BRANCH="$branch" IDEA_DATE="$(date +%Y-%m-%d)" \
+		perl -pi -e '
+			s/\{\{TITLE\}\}/$ENV{IDEA_TITLE}/g;
+			s/\{\{NUM\}\}/$ENV{IDEA_NUM}/g;
+			s/\{\{BRANCH\}\}/$ENV{IDEA_BRANCH}/g;
+			s/\{\{DATE\}\}/$ENV{IDEA_DATE}/g;
+		' "$f"
 done
 
 echo
