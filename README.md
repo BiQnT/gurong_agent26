@@ -24,6 +24,8 @@
 ## 디렉토리 구조
 
 ```
+ideas/         아이디어 하나 = 폴더 하나 = 브랜치 하나 (ideas/README.md 참고)
+  _template/   복사해서 쓰는 템플릿
 docs/
   api-catalog/ E-UM Open API 전체 카탈로그 (40개, 요청·응답 필드 포함)
   대회자료/    주최 측 제공 원본 (안내 PDF, 신청서 양식 hwp/docx)
@@ -32,8 +34,21 @@ data/
   eum-api-catalog.json   위 카탈로그의 기계 판독용 원본
 research/
   api-tests/   API 호출 테스트 기록 + 카탈로그 수집 스크립트
-prototype/     AI Agent 프로토타입 코드
+scripts/
+  new-idea.sh  아이디어 브랜치 + 폴더 생성
+prototype/     확정된 아이디어의 AI Agent 프로토타입 코드
 ```
+
+## 아이디어 관리
+
+아이디어는 각자 브랜치를 파서 `ideas/` 아래에 정리한다. 문서든 코드든 데이터 조사든 한 폴더에 모은다.
+
+```bash
+scripts/new-idea.sh breakwater-guard "방파제 보행자 위험 경보 에이전트"
+```
+
+`main`에서 `idea/NNN-<slug>` 브랜치를 파고 `ideas/NNN-<slug>/`에 템플릿을 복사한다.
+자세한 규칙은 [ideas/README.md](ideas/README.md).
 
 ## 데이터 소스
 
