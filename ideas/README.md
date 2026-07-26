@@ -53,4 +53,4 @@ ideas/NNN-<slug>/
 폴더에 **실제 호출한 API 응답**과 **돌아가는 코드 조각**이 같이 있으면
 기획서의 "기술적 구현 방법"에 그대로 옮겨 쓸 수 있다.
 
-관련: [API 카탈로그](../docs/api-catalog/README.md) · [노션 아이디어 보드](https://www.notion.so/3726333509038301b90d0183ba492277)
+관련: [API 카탈로그](../docs/api-catalog/README.md) · [노션 아이디어 보드](https://app.notion.com/p/183d9a77d21882288fe501ad8fc2397d)
