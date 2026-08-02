@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { LEVEL_LABEL, LEVEL_STYLE, SCENARIO_OPTIONS, type AgentResponse } from "./types";
 
@@ -53,12 +54,12 @@ export default function ChatPage() {
             E-UM 디지털트윈 실시간 데이터로 위험을 판정하고 방송 문안을 만듭니다
           </p>
         </div>
-        <a
+        <Link
           href="/monitor"
           className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700"
         >
           관제 화면
-        </a>
+        </Link>
       </header>
 
       <div className="mb-4 flex flex-wrap gap-2">

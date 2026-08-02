@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import MapView from "./MapView";
 import {
   LEVEL_LABEL,
@@ -20,32 +21,42 @@ import { hasCoordsClient } from "../util";
  */
 export default function MonitorPage() {
   const [scenario, setScenario] = useState("");
-  const [assess, setAssess] = useState<AssessResponse | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [agent, setAgent] = useState<AgentResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [drafting, setDrafting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async (s: string) => {
-    setLoading(true);
-    setError(null);
-    setAgent(null);
-    try {
-      const res = await fetch(`/api/assess${s ? `?scenario=${s}` : ""}`);
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
-      setAssess(json as AssessResponse);
-    } catch (e) {
-      setError((e as Error).message);
-      setAssess(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  /**
+   * 판정 결과를 어느 시나리오로 받았는지 함께 들고 있는다.
+   * 이러면 로딩 여부를 `loaded.scenario !== scenario` 로 유도할 수 있어서
+   * effect 안에서 동기적으로 setState 를 부르지 않아도 된다
+   * (react-hooks/set-state-in-effect).
+   */
+  const [loaded, setLoaded] = useState<{ scenario: string; data: AssessResponse } | null>(null);
 
   useEffect(() => {
-    void load(scenario);
-  }, [scenario, load]);
+    const ctrl = new AbortController();
+    fetch(`/api/assess${scenario ? `?scenario=${scenario}` : ""}`, { signal: ctrl.signal })
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+        return json as AssessResponse;
+      })
+      .then((data) => {
+        setLoaded({ scenario, data });
+        setError(null);
+        setAgent(null);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      });
+    // 시나리오가 바뀌면 이전 요청 결과가 늦게 도착해 덮어쓰지 않게 취소한다.
+    return () => ctrl.abort();
+  }, [scenario, reloadKey]);
+
+  const assess = loaded?.scenario === scenario ? loaded.data : null;
+  const loading = assess === null && error === null;
 
   const draft = async () => {
     setDrafting(true);
@@ -101,17 +112,17 @@ export default function MonitorPage() {
             ))}
           </select>
           <button
-            onClick={() => void load(scenario)}
+            onClick={() => setReloadKey((k) => k + 1)}
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
           >
             새로고침
           </button>
-          <a
+          <Link
             href="/"
             className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700"
           >
             사용자 화면
-          </a>
+          </Link>
         </div>
       </header>
 

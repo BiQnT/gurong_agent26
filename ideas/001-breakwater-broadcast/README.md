@@ -111,12 +111,14 @@
 
 본선 개발 기간은 **2026-09-07 ~ 09-28 (3주)** 뿐이다.
 
-**꼭 만드는 것 (MVP)**
+**꼭 만드는 것 (MVP)** — 전부 동작함. 실행법은 [`prototype/web/README.md`](prototype/web/README.md)
 
-- [x] E-UM API 4개 래퍼 — 데이터 레이어 (`prototype/eum_client.py`). *실호출 검증은 아직*
-- [ ] 규칙 기반 위험도 판정 (임계값은 실호출 분포를 보고 확정)
-- [ ] LLM 방송 문안 생성 (한국어 + 영어)
-- [ ] 스피커·CCTV 위치 지도와 대상 구역 표시
+- [x] E-UM API 실호출 데이터 레이어 (`prototype/web/lib/eum.ts`, `prototype/eum_client.py`)
+- [x] 규칙 기반 위험도 판정 (`lib/risk.ts`) — 임계값 전부 기상청 공인 기준 + 출처 필드
+- [x] LLM 방송 문안 생성 (`lib/agent.ts`) — Gemini 2.5-flash 툴콜링, 한국어 + 영어
+- [x] 스피커·CCTV 위치 지도와 방송 대상 강조 (`/monitor`)
+- [x] 사용자용 자연어 화면 (`/`)
+- [x] 데이터 흐름도 ([`design/dataflow.drawio`](design/dataflow.drawio)) · 루프 설계 ([`design/agent-loop.md`](design/agent-loop.md))
 
 **되면 좋은 것**
 
