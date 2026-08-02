@@ -1,0 +1,3282 @@
+{
+  "api_id": "INT_S01_012",
+  "service": "대기환경",
+  "name": "유해물질 시간별 통계",
+  "url": "https://genix.pohang-eum.kr/dpg/atmosphere/sensor/stats/hour",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "type": "pm10",
+    "date": "2026-08-02"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "hours": 0,
+        "devId": 1,
+        "type": "PM10",
+        "value": 11.775,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 3,
+        "type": "PM10",
+        "value": 23.306,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 4,
+        "type": "PM10",
+        "value": 21.441,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 8,
+        "type": "PM10",
+        "value": 27.898,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 9,
+        "type": "PM10",
+        "value": 33.907,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 0,
+        "devId": 10,
+        "type": "PM10",
+        "value": 13.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 11,
+        "type": "PM10",
+        "value": 30.346,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 0,
+        "devId": 12,
+        "type": "PM10",
+        "value": 24.265,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 0,
+        "devId": 14,
+        "type": "PM10",
+        "value": 40.775,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 0,
+        "devId": 15,
+        "type": "PM10",
+        "value": 19.03,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 0,
+        "devId": 16,
+        "type": "PM10",
+        "value": 32.227,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 0,
+        "devId": 17,
+        "type": "PM10",
+        "value": 27.982,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 1,
+        "type": "PM10",
+        "value": 12.51,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 3,
+        "type": "PM10",
+        "value": 23.957,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 4,
+        "type": "PM10",
+        "value": 22.373,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 8,
+        "type": "PM10",
+        "value": 29.727,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 9,
+        "type": "PM10",
+        "value": 35.473,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 1,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 11,
+        "type": "PM10",
+        "value": 31.5,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 1,
+        "devId": 12,
+        "type": "PM10",
+        "value": 25.883,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 1,
+        "devId": 14,
+        "type": "PM10",
+        "value": 30.115,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 1,
+        "devId": 15,
+        "type": "PM10",
+        "value": 21.337,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 1,
+        "devId": 16,
+        "type": "PM10",
+        "value": 33.957,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 1,
+        "devId": 17,
+        "type": "PM10",
+        "value": 29.962,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 1,
+        "type": "PM10",
+        "value": 12.79,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 3,
+        "type": "PM10",
+        "value": 23.88,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 4,
+        "type": "PM10",
+        "value": 22.172,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 8,
+        "type": "PM10",
+        "value": 28.87,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 9,
+        "type": "PM10",
+        "value": 36.038,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 2,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 11,
+        "type": "PM10",
+        "value": 31.725,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 2,
+        "devId": 12,
+        "type": "PM10",
+        "value": 25.551,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 2,
+        "devId": 14,
+        "type": "PM10",
+        "value": 34.73,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 2,
+        "devId": 15,
+        "type": "PM10",
+        "value": 21.025,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 2,
+        "devId": 16,
+        "type": "PM10",
+        "value": 32.536,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 2,
+        "devId": 17,
+        "type": "PM10",
+        "value": 29.218,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 1,
+        "type": "PM10",
+        "value": 13.917,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 3,
+        "type": "PM10",
+        "value": 25.65,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 4,
+        "type": "PM10",
+        "value": 23.082,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 8,
+        "type": "PM10",
+        "value": 29.842,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 9,
+        "type": "PM10",
+        "value": 37.008,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 3,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 11,
+        "type": "PM10",
+        "value": 31.97,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 3,
+        "devId": 12,
+        "type": "PM10",
+        "value": 26.723,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 3,
+        "devId": 14,
+        "type": "PM10",
+        "value": 37.152,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 3,
+        "devId": 15,
+        "type": "PM10",
+        "value": 21.497,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 3,
+        "devId": 16,
+        "type": "PM10",
+        "value": 35.677,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 3,
+        "devId": 17,
+        "type": "PM10",
+        "value": 30.442,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 4,
+        "devId": 1,
+        "type": "PM10",
+        "value": 18.033,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 3,
+        "type": "PM10",
+        "value": 27.2,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 4,
+        "type": "PM10",
+        "value": 22.626,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 8,
+        "type": "PM10",
+        "value": 29.122,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 9,
+        "type": "PM10",
+        "value": 37.222,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 4,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 11,
+        "type": "PM10",
+        "value": 31.875,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 4,
+        "devId": 12,
+        "type": "PM10",
+        "value": 26.887,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 4,
+        "devId": 14,
+        "type": "PM10",
+        "value": 30.598,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 4,
+        "devId": 15,
+        "type": "PM10",
+        "value": 20.505,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 4,
+        "devId": 16,
+        "type": "PM10",
+        "value": 35.347,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 4,
+        "devId": 17,
+        "type": "PM10",
+        "value": 29.567,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 1,
+        "type": "PM10",
+        "value": 16.915,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 3,
+        "type": "PM10",
+        "value": 27.431,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 4,
+        "type": "PM10",
+        "value": 22.98,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 8,
+        "type": "PM10",
+        "value": 31.498,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 5,
+        "devId": 9,
+        "type": "PM10",
+        "value": 39.072,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 5,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 11,
+        "type": "PM10",
+        "value": 35.967,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 5,
+        "devId": 12,
+        "type": "PM10",
+        "value": 28.768,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 5,
+        "devId": 14,
+        "type": "PM10",
+        "value": 33.971,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 5,
+        "devId": 15,
+        "type": "PM10",
+        "value": 21.298,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 5,
+        "devId": 16,
+        "type": "PM10",
+        "value": 35.7,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 5,
+        "devId": 17,
+        "type": "PM10",
+        "value": 30.167,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 1,
+        "type": "PM10",
+        "value": 14.544,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 3,
+        "type": "PM10",
+        "value": 26.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 4,
+        "type": "PM10",
+        "value": 24.033,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 8,
+        "type": "PM10",
+        "value": 32.463,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 9,
+        "type": "PM10",
+        "value": 39.538,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 11,
+        "type": "PM10",
+        "value": 35.224,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 12,
+        "type": "PM10",
+        "value": 30.7,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 6,
+        "devId": 14,
+        "type": "PM10",
+        "value": 38.345,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 15,
+        "type": "PM10",
+        "value": 22.713,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 6,
+        "devId": 16,
+        "type": "PM10",
+        "value": 38.978,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 6,
+        "devId": 17,
+        "type": "PM10",
+        "value": 33.625,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 1,
+        "type": "PM10",
+        "value": 16.5,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 2,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 3,
+        "type": "PM10",
+        "value": 25.92,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 4,
+        "type": "PM10",
+        "value": 28.488,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 8,
+        "type": "PM10",
+        "value": 35.547,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 9,
+        "type": "PM10",
+        "value": 39.605,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 10,
+        "type": "PM10",
+        "value": 17.95,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 11,
+        "type": "PM10",
+        "value": 36.532,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 12,
+        "type": "PM10",
+        "value": 33.115,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 7,
+        "devId": 14,
+        "type": "PM10",
+        "value": 60.486,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 15,
+        "type": "PM10",
+        "value": 24.748,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 7,
+        "devId": 16,
+        "type": "PM10",
+        "value": 39.951,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 7,
+        "devId": 17,
+        "type": "PM10",
+        "value": 37.735,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 1,
+        "type": "PM10",
+        "value": 15.71,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 2,
+        "type": "PM10",
+        "value": 15.506,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 3,
+        "type": "PM10",
+        "value": 29.341,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 4,
+        "type": "PM10",
+        "value": 30.907,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 8,
+        "type": "PM10",
+        "value": 39.51,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 9,
+        "type": "PM10",
+        "value": 41.188,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 10,
+        "type": "PM10",
+        "value": 17.95,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 11,
+        "type": "PM10",
+        "value": 40.775,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 12,
+        "type": "PM10",
+        "value": 36.388,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 8,
+        "devId": 14,
+        "type": "PM10",
+        "value": 49.602,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 15,
+        "type": "PM10",
+        "value": 26.152,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 8,
+        "devId": 16,
+        "type": "PM10",
+        "value": 43.932,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 8,
+        "devId": 17,
+        "type": "PM10",
+        "value": 39.705,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 1,
+        "type": "PM10",
+        "value": 15.885,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 2,
+        "type": "PM10",
+        "value": 12.537,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 3,
+        "type": "PM10",
+        "value": 29.614,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 4,
+        "type": "PM10",
+        "value": 27.737,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 8,
+        "type": "PM10",
+        "value": 33.24,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 9,
+        "type": "PM10",
+        "value": 38.37,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 10,
+        "type": "PM10",
+        "value": 17.17,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 11,
+        "type": "PM10",
+        "value": 36.554,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 12,
+        "type": "PM10",
+        "value": 30.73,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 9,
+        "devId": 14,
+        "type": "PM10",
+        "value": 39.09,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 15,
+        "type": "PM10",
+        "value": 23.85,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 9,
+        "devId": 16,
+        "type": "PM10",
+        "value": 43.446,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 9,
+        "devId": 17,
+        "type": "PM10",
+        "value": 45.593,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 10,
+        "devId": 1,
+        "type": "PM10",
+        "value": 9.195,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 2,
+        "type": "PM10",
+        "value": 10.068,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 3,
+        "type": "PM10",
+        "value": 18.428,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 4,
+        "type": "PM10",
+        "value": 17.888,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 8,
+        "type": "PM10",
+        "value": 21.403,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 9,
+        "type": "PM10",
+        "value": 23.447,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 10,
+        "type": "PM10",
+        "value": 15.161,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 11,
+        "type": "PM10",
+        "value": 24.251,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 12,
+        "type": "PM10",
+        "value": 20.668,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 10,
+        "devId": 14,
+        "type": "PM10",
+        "value": 25.483,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 15,
+        "type": "PM10",
+        "value": 13.348,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 16,
+        "type": "PM10",
+        "value": 24.993,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 10,
+        "devId": 17,
+        "type": "PM10",
+        "value": 27.458,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 1,
+        "type": "PM10",
+        "value": 7.749,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 2,
+        "type": "PM10",
+        "value": 6.23,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 3,
+        "type": "PM10",
+        "value": 14.458,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 4,
+        "type": "PM10",
+        "value": 20.642,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 8,
+        "type": "PM10",
+        "value": 19.913,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 9,
+        "type": "PM10",
+        "value": 21.147,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 10,
+        "type": "PM10",
+        "value": 10.128,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 11,
+        "type": "PM10",
+        "value": 22.025,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 12,
+        "type": "PM10",
+        "value": 15.297,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 11,
+        "devId": 14,
+        "type": "PM10",
+        "value": 45.88,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 11,
+        "devId": 15,
+        "type": "PM10",
+        "value": 13.162,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 16,
+        "type": "PM10",
+        "value": 23.864,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 11,
+        "devId": 17,
+        "type": "PM10",
+        "value": 27.13,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 1,
+        "type": "PM10",
+        "value": 9.232,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 2,
+        "type": "PM10",
+        "value": 8.646,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 3,
+        "type": "PM10",
+        "value": 19.338,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 4,
+        "type": "PM10",
+        "value": 26.992,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 8,
+        "type": "PM10",
+        "value": 20.658,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 9,
+        "type": "PM10",
+        "value": 21.998,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 10,
+        "type": "PM10",
+        "value": 12.472,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 11,
+        "type": "PM10",
+        "value": 27.198,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 12,
+        "type": "PM10",
+        "value": 15.922,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 12,
+        "devId": 14,
+        "type": "PM10",
+        "value": 146.322,
+        "unit": "㎍/㎥",
+        "level": "4"
+      },
+      {
+        "hours": 12,
+        "devId": 15,
+        "type": "PM10",
+        "value": 16.517,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 16,
+        "type": "PM10",
+        "value": 24.442,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 12,
+        "devId": 17,
+        "type": "PM10",
+        "value": 29.377,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 1,
+        "type": "PM10",
+        "value": 8.713,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 2,
+        "type": "PM10",
+        "value": 8.48,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 3,
+        "type": "PM10",
+        "value": 18.235,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 4,
+        "type": "PM10",
+        "value": 26.875,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 8,
+        "type": "PM10",
+        "value": 22.58,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 9,
+        "type": "PM10",
+        "value": 23.71,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 10,
+        "type": "PM10",
+        "value": 12.268,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 11,
+        "type": "PM10",
+        "value": 23.244,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 12,
+        "type": "PM10",
+        "value": 15.935,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 13,
+        "devId": 14,
+        "type": "PM10",
+        "value": 30.983,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 13,
+        "devId": 15,
+        "type": "PM10",
+        "value": 16.28,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 16,
+        "type": "PM10",
+        "value": 22.837,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 13,
+        "devId": 17,
+        "type": "PM10",
+        "value": 27.785,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 1,
+        "type": "PM10",
+        "value": 7.877,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 2,
+        "type": "PM10",
+        "value": 6.369,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 3,
+        "type": "PM10",
+        "value": 14.437,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 4,
+        "type": "PM10",
+        "value": 18.893,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 8,
+        "type": "PM10",
+        "value": 21.852,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 9,
+        "type": "PM10",
+        "value": 24.065,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 10,
+        "type": "PM10",
+        "value": 12.711,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 11,
+        "type": "PM10",
+        "value": 23.078,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 12,
+        "type": "PM10",
+        "value": 15.625,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 14,
+        "devId": 14,
+        "type": "PM10",
+        "value": 44.719,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 14,
+        "devId": 15,
+        "type": "PM10",
+        "value": 16.045,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 16,
+        "type": "PM10",
+        "value": 23.592,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 14,
+        "devId": 17,
+        "type": "PM10",
+        "value": 30.07,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 15,
+        "devId": 1,
+        "type": "PM10",
+        "value": 8.685,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 2,
+        "type": "PM10",
+        "value": 7.78,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 3,
+        "type": "PM10",
+        "value": 16.072,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 4,
+        "type": "PM10",
+        "value": 16.751,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 8,
+        "type": "PM10",
+        "value": 22.847,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 9,
+        "type": "PM10",
+        "value": 23.562,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 10,
+        "type": "PM10",
+        "value": 12.785,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 11,
+        "type": "PM10",
+        "value": 24.863,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 12,
+        "type": "PM10",
+        "value": 16.822,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 15,
+        "devId": 14,
+        "type": "PM10",
+        "value": 48.719,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 15,
+        "devId": 15,
+        "type": "PM10",
+        "value": 16.165,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 15,
+        "devId": 16,
+        "type": "PM10",
+        "value": 32.702,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 15,
+        "devId": 17,
+        "type": "PM10",
+        "value": 36.412,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 16,
+        "devId": 1,
+        "type": "PM10",
+        "value": 9.55,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 2,
+        "type": "PM10",
+        "value": 6.818,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 3,
+        "type": "PM10",
+        "value": 18.248,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 4,
+        "type": "PM10",
+        "value": 16.967,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 8,
+        "type": "PM10",
+        "value": 23.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 9,
+        "type": "PM10",
+        "value": 21.94,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 11,
+        "type": "PM10",
+        "value": 22.061,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 12,
+        "type": "PM10",
+        "value": 18.643,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 16,
+        "devId": 14,
+        "type": "PM10",
+        "value": 20.238,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 15,
+        "type": "PM10",
+        "value": 15.308,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 16,
+        "type": "PM10",
+        "value": 27.698,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 16,
+        "devId": 17,
+        "type": "PM10",
+        "value": 31.417,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 17,
+        "devId": 1,
+        "type": "PM10",
+        "value": 10.025,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 2,
+        "type": "PM10",
+        "value": 6.112,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 3,
+        "type": "PM10",
+        "value": 20.604,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 4,
+        "type": "PM10",
+        "value": 16.097,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 7,
+        "type": "PM10",
+        "value": 1.502,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 8,
+        "type": "PM10",
+        "value": 22.498,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 9,
+        "type": "PM10",
+        "value": 24.19,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 10,
+        "type": "PM10",
+        "value": 13.206,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 11,
+        "type": "PM10",
+        "value": 22.07,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 12,
+        "type": "PM10",
+        "value": 17.02,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 17,
+        "devId": 14,
+        "type": "PM10",
+        "value": 29.525,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 15,
+        "type": "PM10",
+        "value": 16.19,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 17,
+        "devId": 16,
+        "type": "PM10",
+        "value": 30.503,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 17,
+        "devId": 17,
+        "type": "PM10",
+        "value": 32.253,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 18,
+        "devId": 1,
+        "type": "PM10",
+        "value": 11.588,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 2,
+        "type": "PM10",
+        "value": 9.58,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 3,
+        "type": "PM10",
+        "value": 28.776,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 4,
+        "type": "PM10",
+        "value": 18.086,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 8,
+        "type": "PM10",
+        "value": 28.432,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 9,
+        "type": "PM10",
+        "value": 27.905,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 10,
+        "type": "PM10",
+        "value": 15.343,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 11,
+        "type": "PM10",
+        "value": 26.88,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 12,
+        "type": "PM10",
+        "value": 19.813,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 18,
+        "devId": 14,
+        "type": "PM10",
+        "value": 24.143,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 15,
+        "type": "PM10",
+        "value": 17.957,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 18,
+        "devId": 16,
+        "type": "PM10",
+        "value": 38.765,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 18,
+        "devId": 17,
+        "type": "PM10",
+        "value": 38.307,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 19,
+        "devId": 1,
+        "type": "PM10",
+        "value": 11.555,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 2,
+        "type": "PM10",
+        "value": 9.376,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 3,
+        "type": "PM10",
+        "value": 18.65,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 4,
+        "type": "PM10",
+        "value": 16.779,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 8,
+        "type": "PM10",
+        "value": 26.847,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 9,
+        "type": "PM10",
+        "value": 28.885,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 10,
+        "type": "PM10",
+        "value": 16.85,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 11,
+        "type": "PM10",
+        "value": 27.32,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 12,
+        "type": "PM10",
+        "value": 22.072,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 19,
+        "devId": 14,
+        "type": "PM10",
+        "value": 39.653,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 19,
+        "devId": 15,
+        "type": "PM10",
+        "value": 17.59,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 19,
+        "devId": 16,
+        "type": "PM10",
+        "value": 34.785,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 19,
+        "devId": 17,
+        "type": "PM10",
+        "value": 37.407,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 20,
+        "devId": 1,
+        "type": "PM10",
+        "value": 10.425,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 2,
+        "type": "PM10",
+        "value": 9.815,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 3,
+        "type": "PM10",
+        "value": 20.8,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 4,
+        "type": "PM10",
+        "value": 16.613,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 8,
+        "type": "PM10",
+        "value": 28.982,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 9,
+        "type": "PM10",
+        "value": 30.603,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 20,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 11,
+        "type": "PM10",
+        "value": 24.842,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 12,
+        "type": "PM10",
+        "value": 19.063,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 20,
+        "devId": 14,
+        "type": "PM10",
+        "value": 28.823,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 15,
+        "type": "PM10",
+        "value": 17.44,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 16,
+        "type": "PM10",
+        "value": 29.602,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 20,
+        "devId": 17,
+        "type": "PM10",
+        "value": 31.655,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 21,
+        "devId": 1,
+        "type": "PM10",
+        "value": 9.613,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 2,
+        "type": "PM10",
+        "value": 9.607,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 3,
+        "type": "PM10",
+        "value": 17.32,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 4,
+        "type": "PM10",
+        "value": 15.045,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 8,
+        "type": "PM10",
+        "value": 30.59,
+        "unit": "㎍/㎥",
+        "level": "3"
+      },
+      {
+        "hours": 21,
+        "devId": 9,
+        "type": "PM10",
+        "value": 28.107,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 11,
+        "type": "PM10",
+        "value": 25.452,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 12,
+        "type": "PM10",
+        "value": 17.717,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 21,
+        "devId": 14,
+        "type": "PM10",
+        "value": 23.498,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 15,
+        "type": "PM10",
+        "value": 15.942,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 16,
+        "type": "PM10",
+        "value": 26.535,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 21,
+        "devId": 17,
+        "type": "PM10",
+        "value": 27.67,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 1,
+        "type": "PM10",
+        "value": 9.642,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 2,
+        "type": "PM10",
+        "value": 8.248,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 3,
+        "type": "PM10",
+        "value": 18.307,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 4,
+        "type": "PM10",
+        "value": 14.617,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 8,
+        "type": "PM10",
+        "value": 23.868,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 9,
+        "type": "PM10",
+        "value": 27.417,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 11,
+        "type": "PM10",
+        "value": 21.75,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 12,
+        "type": "PM10",
+        "value": 18.323,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 22,
+        "devId": 14,
+        "type": "PM10",
+        "value": 22.015,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 15,
+        "type": "PM10",
+        "value": 14.78,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 16,
+        "type": "PM10",
+        "value": 24.27,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 22,
+        "devId": 17,
+        "type": "PM10",
+        "value": 25.28,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 1,
+        "type": "PM10",
+        "value": 9.89,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 2,
+        "type": "PM10",
+        "value": 8.783,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 3,
+        "type": "PM10",
+        "value": 16.571,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 4,
+        "type": "PM10",
+        "value": 13.96,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 5,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 6,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 7,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 8,
+        "type": "PM10",
+        "value": 21.293,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 9,
+        "type": "PM10",
+        "value": 26.06,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 10,
+        "type": "PM10",
+        "value": 0.0,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 11,
+        "type": "PM10",
+        "value": 22.686,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 12,
+        "type": "PM10",
+        "value": 15.837,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 13,
+        "type": "PM10",
+        "value": 36000.0,
+        "unit": "㎍/㎥",
+        "level": "5"
+      },
+      {
+        "hours": 23,
+        "devId": 14,
+        "type": "PM10",
+        "value": 19.237,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 15,
+        "type": "PM10",
+        "value": 15.435,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 16,
+        "type": "PM10",
+        "value": 24.553,
+        "unit": "㎍/㎥",
+        "level": "2"
+      },
+      {
+        "hours": 23,
+        "devId": 17,
+        "type": "PM10",
+        "value": 25.005,
+        "unit": "㎍/㎥",
+        "level": "2"
+      }
+    ]
+  }
+}

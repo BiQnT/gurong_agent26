@@ -1,0 +1,32 @@
+{
+  "api_id": "INT_S02_004",
+  "service": "해양환경",
+  "name": "실시간 수집_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/marine/device/realtime",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "logDateTime": "2026-08-03 00:05:47",
+      "devId": 1,
+      "timestamp": "2026-08-03 00:05:47",
+      "temper": 22.06,
+      "doxygen": 2.0,
+      "ec": 42356.48,
+      "salinity": 27.29,
+      "tds": 27914.28,
+      "ph": 8.23,
+      "orp": -59.61,
+      "batt": 93.0,
+      "flowVelocity": 13.44,
+      "gpsLati": 0.0,
+      "gpsLongi": 0.0,
+      "waterDepth": 0.0
+    }
+  }
+}

@@ -1,0 +1,422 @@
+{
+  "api_id": "INT_S04_004",
+  "service": "선박탄소",
+  "name": "탄소 배출량 통계",
+  "url": "https://genix.pohang-eum.kr/dpg/dashboard/old-ship/stats",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "measureEmissionPerYearly": [
+        {
+          "hour": 19,
+          "yearly": "yearlyType1",
+          "value": 1.49
+        },
+        {
+          "hour": 19,
+          "yearly": "yearlyType2",
+          "value": 1.33
+        },
+        {
+          "hour": 19,
+          "yearly": "yearlyType3",
+          "value": 2.19
+        },
+        {
+          "hour": 19,
+          "yearly": "yearlyType4",
+          "value": 2.88
+        },
+        {
+          "hour": 20,
+          "yearly": "yearlyType1",
+          "value": 1.36
+        },
+        {
+          "hour": 20,
+          "yearly": "yearlyType2",
+          "value": 2.26
+        },
+        {
+          "hour": 20,
+          "yearly": "yearlyType3",
+          "value": 1.32
+        },
+        {
+          "hour": 20,
+          "yearly": "yearlyType4",
+          "value": 2.81
+        },
+        {
+          "hour": 21,
+          "yearly": "yearlyType1",
+          "value": 2.69
+        },
+        {
+          "hour": 21,
+          "yearly": "yearlyType2",
+          "value": 3.0
+        },
+        {
+          "hour": 21,
+          "yearly": "yearlyType3",
+          "value": 2.47
+        },
+        {
+          "hour": 21,
+          "yearly": "yearlyType4",
+          "value": 3.66
+        },
+        {
+          "hour": 22,
+          "yearly": "yearlyType1",
+          "value": 2.12
+        },
+        {
+          "hour": 22,
+          "yearly": "yearlyType2",
+          "value": 2.85
+        },
+        {
+          "hour": 22,
+          "yearly": "yearlyType3",
+          "value": 2.74
+        },
+        {
+          "hour": 22,
+          "yearly": "yearlyType4",
+          "value": 3.71
+        },
+        {
+          "hour": 23,
+          "yearly": "yearlyType1",
+          "value": 1.33
+        },
+        {
+          "hour": 23,
+          "yearly": "yearlyType2",
+          "value": 2.19
+        },
+        {
+          "hour": 23,
+          "yearly": "yearlyType3",
+          "value": 2.46
+        },
+        {
+          "hour": 23,
+          "yearly": "yearlyType4",
+          "value": 3.56
+        },
+        {
+          "hour": 0,
+          "yearly": "yearlyType1",
+          "value": 1.88
+        },
+        {
+          "hour": 0,
+          "yearly": "yearlyType2",
+          "value": 2.3
+        },
+        {
+          "hour": 0,
+          "yearly": "yearlyType3",
+          "value": 1.74
+        },
+        {
+          "hour": 0,
+          "yearly": "yearlyType4",
+          "value": 3.4
+        },
+        {
+          "hour": 0,
+          "yearly": "yearlyType1",
+          "value": 1.99
+        }
+      ],
+      "rankEmissionPerYearly": [
+        {
+          "rank": 1,
+          "countPerYearly": 44,
+          "emissionAvg": 3.34,
+          "yearly": "yearlyType3"
+        },
+        {
+          "rank": 2,
+          "countPerYearly": 42,
+          "emissionAvg": 3.34,
+          "yearly": "yearlyType4"
+        },
+        {
+          "rank": 3,
+          "countPerYearly": 42,
+          "emissionAvg": 2.9,
+          "yearly": "yearlyType1"
+        },
+        {
+          "rank": 4,
+          "countPerYearly": 43,
+          "emissionAvg": 1.3,
+          "yearly": "yearlyType2"
+        }
+      ],
+      "countPerYearly": [
+        {
+          "yearly": "yearlyType1",
+          "shipCount": 41
+        },
+        {
+          "yearly": "yearlyType2",
+          "shipCount": 42
+        },
+        {
+          "yearly": "yearlyType3",
+          "shipCount": 43
+        },
+        {
+          "yearly": "yearlyType4",
+          "shipCount": 44
+        }
+      ],
+      "rankEmssionPerTon": [
+        {
+          "rank": 1,
+          "emissionAvgs": 2.37,
+          "shipCount": 41.0,
+          "shipType": "S4"
+        },
+        {
+          "rank": 2,
+          "emissionAvgs": 1.88,
+          "shipCount": 43.0,
+          "shipType": "S1"
+        },
+        {
+          "rank": 3,
+          "emissionAvgs": 1.77,
+          "shipCount": 44.0,
+          "shipType": "S2"
+        },
+        {
+          "rank": 4,
+          "emissionAvgs": 1.29,
+          "shipCount": 43.0,
+          "shipType": "S5"
+        },
+        {
+          "rank": 5,
+          "emissionAvgs": 1.28,
+          "shipCount": 44.0,
+          "shipType": "S3"
+        }
+      ],
+      "defineObj": {
+        "shipType": [
+          {
+            "objName": "shipType",
+            "code": "S1",
+            "value": "소형"
+          },
+          {
+            "objName": "shipType",
+            "code": "S2",
+            "value": "중형"
+          },
+          {
+            "objName": "shipType",
+            "code": "S3",
+            "value": "대형"
+          },
+          {
+            "objName": "shipType",
+            "code": "S4",
+            "value": "초대형"
+          },
+          {
+            "objName": "shipType",
+            "code": "S5",
+            "value": "초대형어선이상"
+          }
+        ],
+        "yearly": [
+          {
+            "objName": "yearly",
+            "code": "yearlyType1",
+            "value": "5년이하"
+          },
+          {
+            "objName": "yearly",
+            "code": "yearlyType2",
+            "value": "6~10년"
+          },
+          {
+            "objName": "yearly",
+            "code": "yearlyType3",
+            "value": "11~15년"
+          },
+          {
+            "objName": "yearly",
+            "code": "yearlyType4",
+            "value": "16년이상"
+          }
+        ]
+      },
+      "emssionPerTon": [
+        {
+          "hour": 19,
+          "shipType": "S1",
+          "value": "1.64"
+        },
+        {
+          "hour": 19,
+          "shipType": "S2",
+          "value": "3.87"
+        },
+        {
+          "hour": 19,
+          "shipType": "S3",
+          "value": "1.66"
+        },
+        {
+          "hour": 19,
+          "shipType": "S4",
+          "value": "1.26"
+        },
+        {
+          "hour": 19,
+          "shipType": "S5",
+          "value": "1.77"
+        },
+        {
+          "hour": 20,
+          "shipType": "S1",
+          "value": "2.19"
+        },
+        {
+          "hour": 20,
+          "shipType": "S2",
+          "value": "2.34"
+        },
+        {
+          "hour": 20,
+          "shipType": "S3",
+          "value": "1.55"
+        },
+        {
+          "hour": 20,
+          "shipType": "S4",
+          "value": "1.67"
+        },
+        {
+          "hour": 20,
+          "shipType": "S5",
+          "value": "1.40"
+        },
+        {
+          "hour": 21,
+          "shipType": "S1",
+          "value": "2.43"
+        },
+        {
+          "hour": 21,
+          "shipType": "S2",
+          "value": "3.21"
+        },
+        {
+          "hour": 21,
+          "shipType": "S3",
+          "value": "1.51"
+        },
+        {
+          "hour": 21,
+          "shipType": "S4",
+          "value": "1.68"
+        },
+        {
+          "hour": 21,
+          "shipType": "S5",
+          "value": "1.82"
+        },
+        {
+          "hour": 22,
+          "shipType": "S1",
+          "value": "2.36"
+        },
+        {
+          "hour": 22,
+          "shipType": "S2",
+          "value": "1.29"
+        },
+        {
+          "hour": 22,
+          "shipType": "S3",
+          "value": "1.53"
+        },
+        {
+          "hour": 22,
+          "shipType": "S4",
+          "value": "1.47"
+        },
+        {
+          "hour": 22,
+          "shipType": "S5",
+          "value": "1.61"
+        },
+        {
+          "hour": 23,
+          "shipType": "S1",
+          "value": "2.28"
+        },
+        {
+          "hour": 23,
+          "shipType": "S2",
+          "value": "3.25"
+        },
+        {
+          "hour": 23,
+          "shipType": "S3",
+          "value": "1.55"
+        },
+        {
+          "hour": 23,
+          "shipType": "S4",
+          "value": "1.64"
+        },
+        {
+          "hour": 23,
+          "shipType": "S5",
+          "value": "1.42"
+        },
+        {
+          "hour": 0,
+          "shipType": "S1",
+          "value": "2.42"
+        },
+        {
+          "hour": 0,
+          "shipType": "S2",
+          "value": "1.32"
+        },
+        {
+          "hour": 0,
+          "shipType": "S3",
+          "value": "1.29"
+        },
+        {
+          "hour": 0,
+          "shipType": "S4",
+          "value": "1.38"
+        },
+        {
+          "hour": 0,
+          "shipType": "S5",
+          "value": "1.79"
+        }
+      ]
+    }
+  }
+}

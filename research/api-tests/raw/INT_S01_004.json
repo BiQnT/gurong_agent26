@@ -1,0 +1,36 @@
+{
+  "api_id": "INT_S01_004",
+  "service": "대기환경",
+  "name": "측정 장비 실시간_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/atmosphere/device/realtime",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "logDateTime": "2026-08-02 15:11:05",
+      "devId": 1,
+      "pm10": 9.4,
+      "pm25": 8.2,
+      "so2": 0.048,
+      "no2": 0.004,
+      "o3": 0.025,
+      "co": 0.493,
+      "voc": 0.096,
+      "h2s": 0.002,
+      "nh3": 0.005,
+      "ou": 6.0,
+      "hcho": 0.001,
+      "co2": 0.0527,
+      "temp": 23.9,
+      "humi": 76.2,
+      "winsp": 0.63,
+      "windir": 281.7,
+      "batt": 12.4
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "api_id": "INT_S04_005",
+  "service": "선박탄소",
+  "name": "톤수별 당일 배출량",
+  "url": "https://genix.pohang-eum.kr/dpg/old-ship/day/ton/emission",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "date": "20260802"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "shipType": "S1",
+        "avgPerEmis": 0.0
+      },
+      {
+        "shipType": "S2",
+        "avgPerEmis": 0.0
+      },
+      {
+        "shipType": "S3",
+        "avgPerEmis": 0.0
+      },
+      {
+        "shipType": "S4",
+        "avgPerEmis": 0.0
+      },
+      {
+        "shipType": "S5",
+        "avgPerEmis": 0.0
+      }
+    ]
+  }
+}

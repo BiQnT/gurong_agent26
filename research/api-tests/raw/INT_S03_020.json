@@ -1,0 +1,56 @@
+{
+  "api_id": "INT_S03_020",
+  "service": "선박안전",
+  "name": "해역 선박 밀집도",
+  "url": "https://genix.pohang-eum.kr/dpg/ship-safe/traffic",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "startDate": "20260802",
+    "startTime": "0900",
+    "endDate": "20260802",
+    "endTime": "1000"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "gridName": "A01",
+        "latitude": 35.97608049999995,
+        "cnt": 2,
+        "longitude": 129.554057142857
+      },
+      {
+        "gridName": "A47",
+        "latitude": 35.9973625,
+        "cnt": 1,
+        "longitude": 129.579314285714
+      },
+      {
+        "gridName": "A56",
+        "latitude": 35.9938155,
+        "cnt": 2,
+        "longitude": 129.585628571428
+      },
+      {
+        "gridName": "A57",
+        "latitude": 35.9973625,
+        "cnt": 2,
+        "longitude": 129.585628571428
+      },
+      {
+        "gridName": "A58",
+        "latitude": 36.0009095,
+        "cnt": 1,
+        "longitude": 129.585628571428
+      },
+      {
+        "gridName": "A69",
+        "latitude": 36.0044565,
+        "cnt": 2,
+        "longitude": 129.5919428571425
+      }
+    ]
+  }
+}

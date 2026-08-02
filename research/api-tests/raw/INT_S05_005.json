@@ -1,0 +1,12 @@
+{
+  "api_id": "INT_S05_005",
+  "service": "침수예측",
+  "name": "강우량계",
+  "url": "https://genix.pohang-eum.kr/dpg/water/rainDevices",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "2"
+  },
+  "http_status": 400,
+  "response": "장비 정보가 없습니다."
+}

@@ -1,0 +1,101 @@
+{
+  "api_id": "INT_S02_003",
+  "service": "해양환경",
+  "name": "실시간 수집_전체",
+  "url": "https://genix.pohang-eum.kr/dpg/marine/devices/realtime",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "logDateTime": "2026-08-03 00:05:47",
+        "devId": 1,
+        "timestamp": "2026-08-03 00:05:47",
+        "temper": 22.06,
+        "doxygen": 2.0,
+        "ec": 42356.48,
+        "salinity": 27.29,
+        "tds": 27914.28,
+        "ph": 8.23,
+        "orp": -59.61,
+        "batt": 93.0,
+        "flowVelocity": 13.44,
+        "gpsLati": 0.0,
+        "gpsLongi": 0.0,
+        "waterDepth": 0.0
+      },
+      {
+        "logDateTime": "2026-08-03 00:05:48",
+        "devId": 2,
+        "timestamp": "2026-08-03 00:05:48",
+        "temper": 21.77,
+        "doxygen": 1.68,
+        "ec": 42498.55,
+        "salinity": 26.85,
+        "tds": 28140.38,
+        "ph": 8.19,
+        "orp": -65.14,
+        "batt": 94.0,
+        "flowVelocity": 12.62,
+        "gpsLati": 0.0,
+        "gpsLongi": 0.0,
+        "waterDepth": 0.0
+      },
+      {
+        "logDateTime": "2026-08-03 00:05:49",
+        "devId": 3,
+        "timestamp": "2026-08-03 00:05:49",
+        "temper": 22.94,
+        "doxygen": 1.93,
+        "ec": 41557.48,
+        "salinity": 26.7,
+        "tds": 28026.05,
+        "ph": 8.24,
+        "orp": -59.7,
+        "batt": 95.0,
+        "flowVelocity": 12.98,
+        "gpsLati": 0.0,
+        "gpsLongi": 0.0,
+        "waterDepth": 0.0
+      },
+      {
+        "logDateTime": "2026-08-03 00:05:50",
+        "devId": 4,
+        "timestamp": "2026-08-03 00:05:50",
+        "temper": 22.33,
+        "doxygen": 1.72,
+        "ec": 42311.86,
+        "salinity": 26.57,
+        "tds": 27750.95,
+        "ph": 8.19,
+        "orp": -72.24,
+        "batt": 93.0,
+        "flowVelocity": 12.92,
+        "gpsLati": 0.0,
+        "gpsLongi": 0.0,
+        "waterDepth": 0.0
+      },
+      {
+        "logDateTime": "2026-08-03 00:05:51",
+        "devId": 5,
+        "timestamp": "2026-08-03 00:05:51",
+        "temper": 22.77,
+        "doxygen": 1.82,
+        "ec": 42027.15,
+        "salinity": 27.4,
+        "tds": 28151.03,
+        "ph": 8.22,
+        "orp": -65.23,
+        "batt": 91.0,
+        "flowVelocity": 12.54,
+        "gpsLati": 0.0,
+        "gpsLongi": 0.0,
+        "waterDepth": 0.0
+      }
+    ]
+  }
+}

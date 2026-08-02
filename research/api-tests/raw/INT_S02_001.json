@@ -1,0 +1,51 @@
+{
+  "api_id": "INT_S02_001",
+  "service": "해양환경",
+  "name": "측정 장비 목록_전체",
+  "url": "https://genix.pohang-eum.kr/dpg/marine/devices",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "id": 1,
+        "name": "NET-PH-01",
+        "latitude": "35.978844",
+        "longitude": "129.56334",
+        "nickname": "구룡포 항 연안"
+      },
+      {
+        "id": 2,
+        "name": "NET-PH-02",
+        "latitude": "35.963597",
+        "longitude": "129.55684",
+        "nickname": "하정1리 방파제 앞"
+      },
+      {
+        "id": 3,
+        "name": "NET-PH-03",
+        "latitude": "35.946864",
+        "longitude": "129.55044",
+        "nickname": "장길방파제 앞"
+      },
+      {
+        "id": 4,
+        "name": "NET-PH-04",
+        "latitude": "35.942303",
+        "longitude": "129.5429",
+        "nickname": "구평포구 앞"
+      },
+      {
+        "id": 5,
+        "name": "NET-PH-05",
+        "latitude": "35.933235",
+        "longitude": "129.53835",
+        "nickname": "모모방파제 앞"
+      }
+    ]
+  }
+}

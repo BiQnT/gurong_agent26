@@ -1,0 +1,115 @@
+{
+  "api_id": "INT_S07_001",
+  "service": "수산물유통",
+  "name": "교통감시 장비 목록",
+  "url": "https://genix.pohang-eum.kr/dpg/transp/devices/list",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "id": 1,
+        "name": "교통센서1",
+        "latitude": "35.986351",
+        "longitude": "129.549484",
+        "address": "포항시 남구 구룡포읍 병포리 518-1",
+        "poleId": 18,
+        "nickname": "병포리 교차로"
+      },
+      {
+        "id": 2,
+        "name": "교통센서2",
+        "latitude": "35.985863",
+        "longitude": "129.548065",
+        "address": "포항시 남구 구룡포읍 눌태리 61-4",
+        "poleId": 19,
+        "nickname": "구룡포행정복지센터"
+      },
+      {
+        "id": 3,
+        "name": "교통센서3",
+        "latitude": "35.989895",
+        "longitude": "129.555084",
+        "address": "포항시 남구 구룡포읍 구룡포리 984-1",
+        "poleId": 20,
+        "nickname": "구룡포 수협 위판장"
+      },
+      {
+        "id": 4,
+        "name": "교통센서4",
+        "latitude": "35.98999",
+        "longitude": "129.562576",
+        "address": "포항시 남구 구룡포읍 구룡포리 214",
+        "poleId": 21,
+        "nickname": "구룡포 근대역사관"
+      },
+      {
+        "id": 5,
+        "name": "교통센서5",
+        "latitude": "35.998985",
+        "longitude": "129.565887",
+        "address": "포항시 남구 구룡포읍 구룡포리 24-2",
+        "poleId": 22,
+        "nickname": "구룡포 주상절리"
+      },
+      {
+        "id": 6,
+        "name": "교통센서6",
+        "latitude": "36.036598",
+        "longitude": "129.577667",
+        "address": "포항시 남구 호미곶면 강사리 202-1",
+        "poleId": 23,
+        "nickname": "다무포(강사리) 마을"
+      },
+      {
+        "id": 7,
+        "name": "교통센서7",
+        "latitude": "36.064137",
+        "longitude": "129.570724",
+        "address": "포항시 남구 호미곶면 대보리 21-1",
+        "poleId": 24,
+        "nickname": "호미반도 해파랑길"
+      },
+      {
+        "id": 8,
+        "name": "교통센서8",
+        "latitude": "36.07349",
+        "longitude": "129.56189",
+        "address": "포항시 남구 호미곶면 대보리 332-3",
+        "poleId": 25,
+        "nickname": "새천년기념관"
+      },
+      {
+        "id": 9,
+        "name": "교통센서9",
+        "latitude": "36.07349",
+        "longitude": "129.56189",
+        "address": "포항시 남구 호미곶면 대보리 332-3",
+        "poleId": 26,
+        "nickname": "호미곶해맞이광장"
+      },
+      {
+        "id": 10,
+        "name": "교통센서10",
+        "latitude": "36.077816",
+        "longitude": "129.561874",
+        "address": "포항시 남구 호미곶면 대보리 256-4",
+        "poleId": 27,
+        "nickname": "국립등대박물관"
+      },
+      {
+        "id": 11,
+        "name": "교통센서11",
+        "latitude": "36.074493",
+        "longitude": "129.56633",
+        "address": "포항시 남구 호미곶면 대보리 293-2",
+        "poleId": 28,
+        "nickname": "호미곶 방면 진입로"
+      }
+    ]
+  }
+}

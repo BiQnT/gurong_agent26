@@ -1,0 +1,516 @@
+{
+  "api_id": "INT_S03_007",
+  "service": "선박안전",
+  "name": "선박 실시간 위치_전체",
+  "url": "https://genix.pohang-eum.kr/dpg/ship/devices/realtime",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 1,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.9663,
+        "longitude": 129.66937,
+        "azimuth": 51.0,
+        "course": 180.0,
+        "speed": 9.01
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 2,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.9787,
+        "longitude": 129.65884,
+        "azimuth": 59.0,
+        "course": 0.0,
+        "speed": 4.11
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 3,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.986954,
+        "longitude": 129.63475,
+        "azimuth": 50.0,
+        "course": 121.0,
+        "speed": 5.29
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 4,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.98401,
+        "longitude": 129.65694,
+        "azimuth": 56.0,
+        "course": 144.0,
+        "speed": 5.68
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 5,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.996056,
+        "longitude": 129.64435,
+        "azimuth": 56.0,
+        "course": 19.0,
+        "speed": 4.3
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 6,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.96334,
+        "longitude": 129.6423,
+        "azimuth": 59.0,
+        "course": 187.0,
+        "speed": 2.1
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 7,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.989796,
+        "longitude": 129.63782,
+        "azimuth": 55.0,
+        "course": 65.0,
+        "speed": 6.97
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 8,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.967674,
+        "longitude": 129.64302,
+        "azimuth": 52.0,
+        "course": 56.0,
+        "speed": 1.0
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 9,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.981556,
+        "longitude": 129.6622,
+        "azimuth": 51.0,
+        "course": 327.0,
+        "speed": 7.16
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:38",
+        "devId": 10,
+        "rcvDateTime": "2025-04-27 14:07:38",
+        "latitude": 35.966717,
+        "longitude": 129.66002,
+        "azimuth": 54.0,
+        "course": 111.0,
+        "speed": 5.56
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 11,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.969193,
+        "longitude": 129.65112,
+        "azimuth": 55.0,
+        "course": 263.0,
+        "speed": 10.0
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 12,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.97427,
+        "longitude": 129.66005,
+        "azimuth": 58.0,
+        "course": 278.0,
+        "speed": 3.6
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 13,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.975082,
+        "longitude": 129.62297,
+        "azimuth": 57.0,
+        "course": 88.0,
+        "speed": 10.0
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 14,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.982224,
+        "longitude": 129.6439,
+        "azimuth": 54.0,
+        "course": 183.0,
+        "speed": 3.23
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 15,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98559,
+        "longitude": 129.65848,
+        "azimuth": 53.0,
+        "course": 153.0,
+        "speed": 8.24
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 16,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.977535,
+        "longitude": 129.65822,
+        "azimuth": 57.0,
+        "course": 26.0,
+        "speed": 6.64
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 17,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.97836,
+        "longitude": 129.6357,
+        "azimuth": 59.0,
+        "course": 90.0,
+        "speed": 8.35
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 18,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.984097,
+        "longitude": 129.6565,
+        "azimuth": 55.0,
+        "course": 25.0,
+        "speed": 7.72
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 19,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.97638,
+        "longitude": 129.65189,
+        "azimuth": 54.0,
+        "course": 187.0,
+        "speed": 5.91
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 20,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.99342,
+        "longitude": 129.63496,
+        "azimuth": 57.0,
+        "course": 114.0,
+        "speed": 6.74
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 21,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.97022,
+        "longitude": 129.63943,
+        "azimuth": 54.0,
+        "course": 39.0,
+        "speed": 8.38
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 22,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98212,
+        "longitude": 129.62222,
+        "azimuth": 54.0,
+        "course": 201.0,
+        "speed": 5.01
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 23,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98549,
+        "longitude": 129.63977,
+        "azimuth": 51.0,
+        "course": 315.0,
+        "speed": 1.0
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 24,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.965813,
+        "longitude": 129.6577,
+        "azimuth": 54.0,
+        "course": 93.0,
+        "speed": 8.87
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 25,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.95978,
+        "longitude": 129.66074,
+        "azimuth": 55.0,
+        "course": 279.0,
+        "speed": 5.56
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 26,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.965565,
+        "longitude": 129.64954,
+        "azimuth": 54.0,
+        "course": 244.0,
+        "speed": 2.82
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 27,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.97464,
+        "longitude": 129.64177,
+        "azimuth": 58.0,
+        "course": 207.0,
+        "speed": 1.87
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 28,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98641,
+        "longitude": 129.64679,
+        "azimuth": 59.0,
+        "course": 72.0,
+        "speed": 5.04
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 29,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.980186,
+        "longitude": 129.64415,
+        "azimuth": 53.0,
+        "course": 221.0,
+        "speed": 10.0
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 30,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.960045,
+        "longitude": 129.659,
+        "azimuth": 59.0,
+        "course": 151.0,
+        "speed": 5.85
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 31,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.97301,
+        "longitude": 129.64386,
+        "azimuth": 50.0,
+        "course": 243.0,
+        "speed": 1.14
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 32,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.970585,
+        "longitude": 129.63875,
+        "azimuth": 59.0,
+        "course": 179.0,
+        "speed": 6.95
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 33,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98376,
+        "longitude": 129.66591,
+        "azimuth": 54.0,
+        "course": 48.0,
+        "speed": 9.88
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 34,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98041,
+        "longitude": 129.66039,
+        "azimuth": 57.0,
+        "course": 126.0,
+        "speed": 8.35
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 35,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98649,
+        "longitude": 129.62633,
+        "azimuth": 53.0,
+        "course": 254.0,
+        "speed": 3.69
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 36,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.991886,
+        "longitude": 129.64015,
+        "azimuth": 59.0,
+        "course": 231.0,
+        "speed": 6.47
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 37,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.973656,
+        "longitude": 129.64893,
+        "azimuth": 54.0,
+        "course": 234.0,
+        "speed": 8.96
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 38,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.975388,
+        "longitude": 129.64452,
+        "azimuth": 50.0,
+        "course": 60.0,
+        "speed": 5.17
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 39,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.956783,
+        "longitude": 129.63722,
+        "azimuth": 58.0,
+        "course": 56.0,
+        "speed": 6.83
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 40,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98352,
+        "longitude": 129.63472,
+        "azimuth": 50.0,
+        "course": 30.0,
+        "speed": 1.0
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 41,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.985104,
+        "longitude": 129.64386,
+        "azimuth": 55.0,
+        "course": 207.0,
+        "speed": 2.17
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 42,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.972065,
+        "longitude": 129.67062,
+        "azimuth": 56.0,
+        "course": 255.0,
+        "speed": 6.42
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 43,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.981144,
+        "longitude": 129.63533,
+        "azimuth": 50.0,
+        "course": 218.0,
+        "speed": 7.09
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 44,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98197,
+        "longitude": 129.65353,
+        "azimuth": 55.0,
+        "course": 100.0,
+        "speed": 6.07
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 45,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.983612,
+        "longitude": 129.63965,
+        "azimuth": 57.0,
+        "course": 255.0,
+        "speed": 6.73
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 46,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.980522,
+        "longitude": 129.65604,
+        "azimuth": 58.0,
+        "course": 18.0,
+        "speed": 2.62
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 47,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.987892,
+        "longitude": 129.6724,
+        "azimuth": 50.0,
+        "course": 312.0,
+        "speed": 8.4
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 48,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.98843,
+        "longitude": 129.66896,
+        "azimuth": 51.0,
+        "course": 310.0,
+        "speed": 8.4
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 49,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.983875,
+        "longitude": 129.65318,
+        "azimuth": 53.0,
+        "course": 9.0,
+        "speed": 6.32
+      },
+      {
+        "logDateTime": "2025-04-27 14:07:37",
+        "devId": 50,
+        "rcvDateTime": "2025-04-27 14:07:37",
+        "latitude": 35.992775,
+        "longitude": 129.64673,
+        "azimuth": 57.0,
+        "course": 186.0,
+        "speed": 9.9
+      }
+    ]
+  }
+}

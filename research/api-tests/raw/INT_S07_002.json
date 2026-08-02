@@ -1,0 +1,23 @@
+{
+  "api_id": "INT_S07_002",
+  "service": "수산물유통",
+  "name": "교통감시 장비_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/transp/device",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 1,
+      "name": "교통센서1",
+      "latitude": "35.986351",
+      "longitude": "129.549484",
+      "address": "포항시 남구 구룡포읍 병포리 518-1",
+      "poleId": 18
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "api_id": "INT_S06_005",
+  "service": "보행자안전",
+  "name": "자외선 실시간",
+  "url": "https://genix.pohang-eum.kr/dpg/sensor/latest/uvIndex",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "dateTime": "2026-08-03 00:11:27",
+      "uvIndex": 0.3
+    }
+  }
+}

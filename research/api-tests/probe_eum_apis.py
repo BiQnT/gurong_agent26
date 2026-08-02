@@ -50,21 +50,35 @@ YESTERDAY = (date.today() - timedelta(days=1)).strftime("%Y%m%d")
 # '필수'라고 적어둔 것과 실제 동작이 다른 경우가 흔해서, 빈 후보({})를
 # 먼저 넣어 파라미터 없이도 되는지부터 본다.
 NO_ARG = [{}]
-BY_ID = [{}, {"id": "1"}]
+# 장비 id 는 1부터 시작하지 않는다. 실측상 2,3,4,5,7 등이 쓰인다.
+BY_ID = [{}, {"id": "1"}, {"id": "2"}]
 BY_DATE = [{}, {"date": YESTERDAY}]
+
+# 아래 다섯은 1차 실행에서 400 이 났다. 에러 메시지가 필요한 파라미터를 하나씩
+# 알려줘서 그대로 따라간 결과다. **엔드포인트마다 날짜 형식이 다르다** —
+# stats/history 계열은 yyyyMMdd, stats/hour 계열은 yyyy-MM-dd 를 받는다.
+TWO_DAYS_AGO = (date.today() - timedelta(days=2)).strftime("%Y%m%d")
+ISO_YESTERDAY = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+# startDate 와 endDate 는 "정확히 하루 차이"만 허용된다 (서버 제약).
+BY_RANGE = [{"startDate": TWO_DAYS_AGO, "endDate": YESTERDAY}]
+BY_TYPE_AIR = [{"type": "pm10", "date": ISO_YESTERDAY}]
+BY_TYPE_SEA = [{"type": "doxygen", "date": ISO_YESTERDAY}]
+# 선박 밀집도는 날짜(yyyyMMdd) + 시각(HHmm) 을 시작·종료 모두 요구한다.
+BY_GRID = [{"startDate": YESTERDAY, "startTime": "0900", "endDate": YESTERDAY, "endTime": "1000"}]
 
 PROBES = [
     # --- 01 대기환경 ---
     ("INT_S01_004", "대기환경", "측정 장비 실시간_단일", "/dpg/atmosphere/device/realtime", BY_ID),
-    ("INT_S01_011", "대기환경", "유해물질 통계", "/dpg/atmosphere/sensor/stats/history", BY_DATE),
-    ("INT_S01_012", "대기환경", "유해물질 시간별 통계", "/dpg/atmosphere/sensor/stats/hour", BY_DATE),
+    ("INT_S01_011", "대기환경", "유해물질 통계", "/dpg/atmosphere/sensor/stats/history", BY_RANGE),
+    ("INT_S01_012", "대기환경", "유해물질 시간별 통계", "/dpg/atmosphere/sensor/stats/hour", BY_TYPE_AIR),
     # --- 02 해양환경 ---
     ("INT_S02_001", "해양환경", "측정 장비 목록_전체", "/dpg/marine/devices", NO_ARG),
     ("INT_S02_002", "해양환경", "측정 장비 목록_단일", "/dpg/marine/device", BY_ID),
     ("INT_S02_003", "해양환경", "실시간 수집_전체", "/dpg/marine/devices/realtime", NO_ARG),
     ("INT_S02_004", "해양환경", "실시간 수집_단일", "/dpg/marine/device/realtime", BY_ID),
-    ("INT_S02_011", "해양환경", "유해물질 통계", "/dpg/marine/sensor/stats/history", BY_DATE),
-    ("INT_S02_012", "해양환경", "유해물질 시간별 통계", "/dpg/marine/sensor/stats/hour", BY_DATE),
+    ("INT_S02_011", "해양환경", "유해물질 통계", "/dpg/marine/sensor/stats/history", BY_TYPE_SEA),
+    ("INT_S02_012", "해양환경", "유해물질 시간별 통계", "/dpg/marine/sensor/stats/hour", BY_TYPE_SEA),
     # --- 03 선박안전 ---
     ("INT_S03_001", "선박안전", "선박 기본정보_전체", "/dpg/ship/devices", NO_ARG),
     ("INT_S03_002", "선박안전", "선박 기본정보_단일", "/dpg/ship/device", BY_ID),
@@ -75,7 +89,7 @@ PROBES = [
     ("INT_S03_007", "선박안전", "선박 실시간 위치_전체", "/dpg/ship/devices/realtime", NO_ARG),
     ("INT_S03_008", "선박안전", "선박 실시간 위치_단일", "/dpg/ship/device/realtime", BY_ID),
     ("INT_S03_019", "선박안전", "주요 기상 요소 과거", "/dpg/ship-safe/stats/history", BY_DATE),
-    ("INT_S03_020", "선박안전", "해역 선박 밀집도", "/dpg/ship-safe/traffic", BY_DATE),
+    ("INT_S03_020", "선박안전", "해역 선박 밀집도", "/dpg/ship-safe/traffic", BY_GRID),
     # --- 04 선박탄소 ---
     ("INT_S04_004", "선박탄소", "탄소 배출량 통계", "/dpg/dashboard/old-ship/stats", BY_DATE),
     ("INT_S04_005", "선박탄소", "톤수별 당일 배출량", "/dpg/old-ship/day/ton/emission", BY_DATE),
@@ -123,8 +137,11 @@ def load_key() -> str:
 
 def call(path: str, params: dict, key: str) -> tuple[int, object]:
     """(HTTP 상태, 파싱된 JSON 또는 원문). 예외는 상태 0 으로 돌려준다."""
-    query = urllib.parse.urlencode({"serviceKey": key, **params})
-    url = f"{BASE}{path}?{query}"
+    # serviceKey 는 발급 시점에 이미 URL 인코딩된 문자열이다. urlencode 에 넣으면
+    # 퍼센트 기호가 한 번 더 인코딩돼 401 "유효하지 않은 이용자 서비스 키"가 난다.
+    # 키는 원문 그대로 붙이고 나머지 파라미터만 인코딩한다.
+    rest = urllib.parse.urlencode(params)
+    url = f"{BASE}{path}?serviceKey={key}" + (f"&{rest}" if rest else "")
     req = urllib.request.Request(url, headers={"Accept": "application/json"})
     # E-UM 서버 인증서 체인이 불완전한 경우가 있어 검증 실패 시 한 번 더 시도한다.
     for ctx in (None, ssl._create_unverified_context()):
@@ -149,7 +166,17 @@ def call(path: str, params: dict, key: str) -> tuple[int, object]:
 
 
 def is_success(payload: object) -> bool:
-    return isinstance(payload, dict) and payload.get("status") == "success"
+    """E-UM 응답이 성공인가.
+
+    대부분은 공통 껍데기 `{id, status, data}` 로 오지만, 일부(`INT_S01_011` 등)는
+    껍데기 없이 값을 바로 돌려준다. 그래서 status 가 아예 없는 dict/list 도
+    성공으로 본다 — 에러는 항상 `status` 나 문자열 메시지로 오기 때문이다.
+    """
+    if isinstance(payload, dict):
+        if "status" in payload:
+            return payload["status"] == "success"
+        return bool(payload)  # 껍데기 없는 직접 응답
+    return isinstance(payload, list) and bool(payload)
 
 
 def count_items(payload: object) -> int:

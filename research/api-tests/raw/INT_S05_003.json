@@ -1,0 +1,22 @@
+{
+  "api_id": "INT_S05_003",
+  "service": "침수예측",
+  "name": "맨홀 장비",
+  "url": "https://genix.pohang-eum.kr/dpg/water/holeDevices",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "2"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 2,
+      "name": "포항시 스마트맨홀 #01",
+      "latitude": "35.985929",
+      "longitude": "129.549278",
+      "address": "경북 포항시 남구 구룡포읍 호미로 152"
+    }
+  }
+}

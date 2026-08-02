@@ -1,0 +1,978 @@
+{
+  "api_id": "INT_S02_012",
+  "service": "해양환경",
+  "name": "유해물질 시간별 통계",
+  "url": "https://genix.pohang-eum.kr/dpg/marine/sensor/stats/hour",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "type": "doxygen",
+    "date": "2026-08-02"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "hours": 0,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 0,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.77,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 0,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 0,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 0,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 1,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 1,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.81,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 1,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 1,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.76,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 1,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.75,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 2,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.84,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 2,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.83,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 2,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.77,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 2,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 2,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 3,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.81,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 3,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.81,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 3,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 3,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.84,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 3,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.73,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 4,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 4,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.84,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 4,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.86,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 4,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 4,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.86,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 5,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.78,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 5,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.87,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 5,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.75,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 5,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 5,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.81,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 6,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.54,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 6,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.47,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 6,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.49,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 6,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.48,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 6,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.49,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 7,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.54,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 7,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 7,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.56,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 7,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 7,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.41,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 8,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.48,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 8,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.45,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 8,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.52,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 8,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 8,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 9,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.52,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 9,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 9,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 9,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.58,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 9,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.48,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 10,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.53,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 10,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.51,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 10,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.44,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 10,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 10,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.52,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 11,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.48,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 11,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.52,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 11,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 11,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 11,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 12,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 12,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 12,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.55,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 12,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 12,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.46,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 13,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.47,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 13,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 13,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.47,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 13,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.53,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 13,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.45,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 14,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.45,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 14,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.51,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 14,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.48,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 14,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.45,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 14,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.55,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 15,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.53,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 15,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.45,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 15,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.47,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 15,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.53,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 15,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.49,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 16,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.51,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 16,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.52,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 16,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.39,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 16,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.51,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 16,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 17,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.55,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 17,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.5,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 17,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.51,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 17,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.52,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 17,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.56,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 18,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 18,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.77,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 18,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 18,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 18,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 19,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 19,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.83,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 19,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.74,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 19,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.85,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 19,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 20,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.78,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 20,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 20,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.82,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 20,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.75,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 20,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.85,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 21,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.83,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 21,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.83,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 21,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 21,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.81,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 21,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.8,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 22,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.76,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 22,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 22,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.76,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 22,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.75,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 22,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.81,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 23,
+        "devId": 1,
+        "type": "DOXYGEN",
+        "value": 1.79,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 23,
+        "devId": 2,
+        "type": "DOXYGEN",
+        "value": 1.78,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 23,
+        "devId": 3,
+        "type": "DOXYGEN",
+        "value": 1.78,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 23,
+        "devId": 4,
+        "type": "DOXYGEN",
+        "value": 1.76,
+        "unit": "mg/L",
+        "level": "4"
+      },
+      {
+        "hours": 23,
+        "devId": 5,
+        "type": "DOXYGEN",
+        "value": 1.77,
+        "unit": "mg/L",
+        "level": "4"
+      }
+    ]
+  }
+}

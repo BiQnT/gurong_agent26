@@ -1,0 +1,12 @@
+{
+  "api_id": "INT_S06_002",
+  "service": "보행자안전",
+  "name": "자외선 측정 장비",
+  "url": "https://genix.pohang-eum.kr/dpg/uv/devices",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "2"
+  },
+  "http_status": 400,
+  "response": "장비 정보가 없습니다."
+}

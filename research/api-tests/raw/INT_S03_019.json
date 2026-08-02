@@ -1,0 +1,12 @@
+{
+  "api_id": "INT_S03_019",
+  "service": "선박안전",
+  "name": "주요 기상 요소 과거",
+  "url": "https://genix.pohang-eum.kr/dpg/ship-safe/stats/history",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "date": "20260802"
+  },
+  "http_status": 500,
+  "response": "서버 내부 오류: class java.lang.String cannot be cast to class java.util.Date (java.lang.String and java.util.Date are in module java.base of loader 'bootstrap')"
+}
