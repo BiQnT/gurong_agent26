@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import MapView from "./MapView";
 import {
   LEVEL_LABEL,
   LEVEL_STYLE,
@@ -11,6 +11,19 @@ import {
   type AssessResponse,
 } from "../types";
 import { hasCoordsClient, toKst } from "../util";
+
+/**
+ * leaflet 은 window 에 의존해서 서버 렌더링에서 죽는다. `ssr: false` 동적 임포트는
+ * 클라이언트 컴포넌트 안에서만 쓸 수 있는데 이 파일이 이미 그렇다.
+ */
+const MapInner = dynamic(() => import("./MapInner"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+      지도를 불러오는 중…
+    </div>
+  ),
+});
 
 /**
  * 지자체 모니터링 화면.
@@ -151,7 +164,7 @@ export default function MonitorPage() {
               불러오는 중…
             </div>
           ) : (
-            <MapView
+            <MapInner
               speakers={speakers}
               cctvs={cctvs}
               uvSensors={uvSensors}
