@@ -1,0 +1,8 @@
+# 빌드 스크립트 허용 목록.
+# pnpm 11 은 승인되지 않은 빌드 스크립트가 있으면 install 을 실패시키는데,
+# `pnpm approve-builds` 는 대화형이라 무인 실행에서 쓸 수 없다. 여기서 명시한다.
+allowBuilds:
+  '@google/genai': true   # Gemini SDK
+  protobufjs: true        # @google/genai 의존
+  sharp: true             # next/image 최적화
+  unrs-resolver: true     # eslint 모듈 해석
