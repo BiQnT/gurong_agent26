@@ -10,7 +10,7 @@ import {
   type AgentResponse,
   type AssessResponse,
 } from "../types";
-import { hasCoordsClient } from "../util";
+import { hasCoordsClient, toKst } from "../util";
 
 /**
  * 지자체 모니터링 화면.
@@ -186,7 +186,7 @@ export default function MonitorPage() {
                 <dt className="text-slate-500">자외선</dt>
                 <dd>{uv && !("error" in uv) ? uv.uvIndex : "—"}</dd>
                 <dt className="text-slate-500">측정 시각</dt>
-                <dd className="text-xs">{air.logDateTime}</dd>
+                <dd className="text-xs">{toKst(air.logDateTime, "utc")}</dd>
               </dl>
             )}
 
@@ -196,6 +196,7 @@ export default function MonitorPage() {
                   <li key={i} className="rounded bg-slate-50 p-2 text-sm dark:bg-slate-900">
                     <div>{r.message}</div>
                     <div className="mt-1 text-xs text-slate-500">기준 출처: {r.source}</div>
+                    <div className="mt-1 text-xs text-slate-500">등급 판단: {r.levelRationale}</div>
                   </li>
                 ))}
               </ul>

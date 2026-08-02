@@ -195,7 +195,16 @@ export type Snapshot = {
   abnormal: (AbnormalEvents & { total: number; detectorLive: boolean }) | { error: string };
 };
 
-/** 위험 판정과 방송 문안 생성의 입력. 개별 API 실패가 전체를 죽이지 않는다. */
+/**
+ * 위험 판정과 방송 문안 생성의 입력.
+ *
+ * 기상·자외선·이상행동은 개별 실패를 `{error}` 로 격리해서 하나가 죽어도
+ * 나머지로 판정한다. 못 본 것은 `assessRisk` 가 limitations 에 남긴다.
+ *
+ * **장비 목록(`pedestrianDevices`)만은 격리하지 않는다.** 스피커를 모르면
+ * 방송 대상을 정할 수 없어 이 서비스가 성립하지 않기 때문이다. 실패하면
+ * 요청 전체가 502 로 떨어진다.
+ */
 export async function snapshot(): Promise<Snapshot> {
   const devices = await pedestrianDevices();
 

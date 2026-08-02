@@ -159,6 +159,7 @@ export default function ChatPage() {
                   <li key={i} className="rounded bg-slate-50 p-2 text-sm dark:bg-slate-900">
                     <div>{r.message}</div>
                     <div className="mt-1 text-xs text-slate-500">기준 출처: {r.source}</div>
+                    <div className="mt-1 text-xs text-slate-500">등급 판단: {r.levelRationale}</div>
                   </li>
                 ))}
               </ul>

@@ -9,13 +9,28 @@
 | 하는 일 | 담당 | 이유 |
 | --- | --- | --- |
 | 위험한가 / 방송할 것인가 | **규칙** (`lib/risk.ts`) | 환각이 안전 판단에 끼어들면 안 된다. "왜 그 시점에 경보가 나갔나"에 답할 수 있어야 한다 |
-| 어느 스피커에 보낼 것인가 | **코드** (`buildBroadcast`) | 실제 장비 목록에 바인딩하는 일이다. 모델이 장비명을 지어내면 안 된다 |
+| 어느 스피커에 보낼 것인가 | **코드** (`broadcastZone` + `buildBroadcast`) | 아래 1.1 참고. 모델에게 아예 묻지 않는다 |
 | 뭐라고 방송할 것인가 | **LLM** | 새벽 조업 어민과 주말 낮 가족 관광객에게 할 말이 다르다. 규칙으로 못 만든다 |
 | 사람에게 어떻게 설명할 것인가 | **LLM** | 자연어 질의응답 |
 
 이 경계가 이 아이디어의 차별점이다. 주최 측 예시("방파제 보행자/기상 데이터로
 위험 접근을 경보")와 소재가 겹치므로, 기획서에서는 **경보 자체가 아니라
 문안 생성**을 앞세워야 한다.
+
+### 1.1 구역(zone)을 모델에게 묻지 않는 이유
+
+초안에서는 `draftBroadcast({zone, korean, english})` 로 모델이 남/북을 고르게 했다.
+**설계 검토에서 이게 뚫린 지점으로 지적됐고, 실제로 위험했다.**
+
+기상 소스가 `INT_S01_004` 단일 관측소(`devId 1`)라 **남/북 방파제를 구분할 데이터가
+애초에 없다.** 그런데 스키마에 `zone` 이 있으면 모델은 근거 없이 `"north"` 를 고른다.
+그러면 `speakersFor()` 가 남방파제 4대를 조용히 떨어뜨린다 — 풍속 22m/s 에
+남방파제 관광객만 방송을 못 받고, 화면에는 "대상 스피커 4대"라고만 뜬다.
+
+그래서 `zone` 을 툴 스키마와 구조화 출력 스키마 **양쪽에서 제거**하고
+`broadcastZone()` 이 `"all"` 을 반환한다. 관측소가 구역별로 생기면 그때 이 함수가
+구역을 나눈다. `listSpeakers` 는 조회용이라 zone 인자를 남겨뒀다 — 모델이 볼 수는
+있지만 방송 대상을 정하지는 못한다.
 
 ## 2. 루프 구조
 
@@ -46,7 +61,7 @@ E-UM 을 다시 때리지 않는다. 한 요청 안에서 데이터가 흔들리
 | `getSnapshot` | 없음 | `{fetchedAt, air, uv, abnormal:{total,detectorLive}, deviceCounts}` | 원시 수치 |
 | `assessRisk` | 없음 | `{level, levelLabel, shouldBroadcast, reasons[], limitations[]}` | **위험 판정의 유일한 출처** |
 | `listSpeakers` | `{zone: north\|south\|all}` | `{zone, speakers:[{id,name}]}` | 실제 장비 목록 |
-| `draftBroadcast` | `{zone, korean, english}` | `{accepted, targetSpeakers[], speakersWithoutCoords[]}` 또는 `{rejected, reason}` | 등급이 낮으면 **코드가 거부**한다 |
+| `draftBroadcast` | `{korean, english}` | `{accepted, targetSpeakers[], speakersWithoutCoords[]}` 또는 `{rejected, reason}` | 등급이 낮으면 **코드가 거부**한다 |
 
 `draftBroadcast` 가 거부권을 갖는 것이 중요하다. 시스템 프롬프트로 "safe 면
 방송하지 마라"고 시켜도 모델은 어길 수 있다. 툴 실행기에서 `shouldBroadcast()`
@@ -65,7 +80,7 @@ E-UM 을 다시 때리지 않는다. 한 요청 안에서 데이터가 흔들리
 
 그래서 루프가 끝난 뒤 **`shouldBroadcast()` 가 참인데 문안이 없으면 별도의
 구조화 출력 호출로 강제 생성**한다 (`generateBroadcast`). `responseSchema` 로
-`{zone, korean, english}` 를 받고, 스피커 바인딩은 코드가 한다.
+`{korean, english}` 만 받고, 대상 스피커는 `broadcastZone()` 이 정한다 (1.1).
 
 즉 모델의 협조에 의존하는 경로가 없다. 모델이 툴을 부르면 그 결과를 쓰고,
 안 부르면 우리가 만든다.
@@ -76,7 +91,9 @@ E-UM 을 다시 때리지 않는다. 한 요청 안에서 데이터가 흔들리
 | --- | --- |
 | `GEMINI_API_KEY` 없음 | 규칙 기반 문안으로 즉시 폴백. `fallback: true` 표시 |
 | 모델 404 / rate limit | `gemini-2.5-flash` → `gemini-2.0-flash` 순으로 재시도 |
+| 툴도 텍스트도 없는 빈 응답 | 다음 모델로 넘어간다. `SAFETY`/`MAX_TOKENS`/`RECITATION` 이면 `res.text` 가 undefined 다 — 성공으로 포장하면 폴백 배지가 안 뜬다 |
 | 6턴 안에 답 없음 | 규칙 폴백 |
+| 모델이 빈 문안을 넘김 | `usableText()` 가 10자 미만을 거르고 규칙 문안으로 대체 |
 | 구조화 출력 파싱 실패 | `fallbackBroadcastText()` — 지표별 정형 문안 |
 | E-UM 개별 API 실패 | `snapshot()` 이 `{error}` 로 격리. 나머지로 판정하고 못 본 것을 `limitations` 에 남김 |
 | E-UM 장비 목록 실패 | 전체 요청 실패 (502). 스피커를 모르면 방송 대상을 정할 수 없다 |
@@ -115,6 +132,10 @@ E-UM 을 다시 때리지 않는다. 한 요청 안에서 데이터가 흔들리
 - **임계값 재조정** — 지금은 기상청 공인 기준만 쓴다. 방파제 고유의 위험(예:
   월파가 시작되는 풍속)은 실측 분포를 수집해야 정할 수 있다. 근거 없는
   중간값을 지어내지 않았다.
+- **등급 매핑 검증** — 임계값은 기상청 기준이지만 *그 특보를 우리 4단계 중
+  어디에 놓을 것인가*는 팀 판단이다 (`Reason.levelRationale` 에 실어 화면에
+  노출한다). 특히 자외선 '매우높음'을 caution 에 둬서 방송이 안 나가게 한 것은
+  한여름 정오마다 방송이 나가면 경보가 무뎌진다는 판단인데, 현장 확인이 필요하다.
 - **이상행동 검출 복귀** — `INT_S06_006` 이 살아나면 "지금 사람이 있는가"를
   판정에 넣을 수 있다. 주최 측 문의 대기 중.
 - **파고·조위** — E-UM 전체에 없다. 기상청 해양기상부이로 보충 검토.

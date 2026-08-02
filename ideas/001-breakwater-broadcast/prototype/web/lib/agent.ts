@@ -49,12 +49,21 @@ function speakersFor(snap: Snapshot, zone: string): Device[] {
   return all.filter((s) => zoneOf(s) === zone);
 }
 
-function buildBroadcast(
-  snap: Snapshot,
-  zone: "north" | "south" | "all",
-  korean: string,
-  english: string,
-): Broadcast {
+/**
+ * 방송 대상 구역은 **코드가 정한다. 모델에게 묻지 않는다.**
+ *
+ * 기상 소스가 INT_S01_004 단일 관측소(devId 1)라 남/북 방파제를 구분할 데이터가
+ * 애초에 없다. 그런데 모델에게 zone 을 물으면 근거 없이 "north" 를 골라서
+ * 남방파제 4대가 조용히 빠진다 — 풍속 22m/s 에 남방파제 관광객만 방송을 못 받는다.
+ *
+ * 관측소가 구역별로 생기면 그때 이 함수가 구역을 나누면 된다.
+ */
+function broadcastZone(): "north" | "south" | "all" {
+  return "all";
+}
+
+function buildBroadcast(snap: Snapshot, korean: string, english: string): Broadcast {
+  const zone = broadcastZone();
   const targets = speakersFor(snap, zone);
   return {
     zone,
@@ -99,11 +108,11 @@ const DECLARATIONS: FunctionDeclaration[] = [
     name: "draftBroadcast",
     description:
       "작성한 방송 문안을 실제 스피커에 묶어 확정한다. 한국어와 영어를 모두 넣어야 한다. " +
-      "assessRisk 결과가 warning 또는 danger 일 때만 호출하라. safe/caution 에서는 방송하지 않는다.",
+      "assessRisk 결과가 warning 또는 danger 일 때만 호출하라. safe/caution 에서는 방송하지 않는다. " +
+      "대상 스피커는 시스템이 정하므로 네가 고르지 않는다.",
     parameters: {
       type: Type.OBJECT,
       properties: {
-        zone: { type: Type.STRING, description: "north / south / all" },
         korean: {
           type: Type.STRING,
           description: "한국어 방송 문안. 실제로 스피커로 읽힐 문장. 2~3문장.",
@@ -113,7 +122,7 @@ const DECLARATIONS: FunctionDeclaration[] = [
           description: "영어 방송 문안. 외국인 관광객 대상. 2~3문장.",
         },
       },
-      required: ["zone", "korean", "english"],
+      required: ["korean", "english"],
     },
   },
 ];
@@ -133,8 +142,18 @@ const SYSTEM = `너는 경상북도 포항시 구룡포 방파제의 안내방�
 
 // --- 폴백 ---------------------------------------------------------------
 
+/** 방송 문안으로 쓸 만한 문자열인가. 빈 문자열·공백만 있는 값을 막는다. */
+function usableText(v: unknown): string | null {
+  const s = typeof v === "string" ? v.trim() : "";
+  // 실제 방송 문장은 아무리 짧아도 10자는 넘는다.
+  return s.length >= 10 ? s : null;
+}
+
 function fallbackBroadcastText(a: Assessment): { korean: string; english: string } {
-  const top = a.reasons[0];
+  // reasons 는 삽입 순서(wind → temp → uv)라 [0] 이 최고 등급이 아닐 수 있다.
+  // 기온 34℃(caution) + 자외선 11(warning) 이면 danger 사유를 놔두고
+  // "기온이 높습니다" 를 방송하게 된다. 등급이 가장 높은 사유를 고른다.
+  const top = a.reasons.find((r) => r.level === a.level) ?? a.reasons[0];
   if (!top) {
     return {
       korean: "현재 기상 조건은 양호합니다. 안전에 유의하시기 바랍니다.",
@@ -193,7 +212,7 @@ function fallbackResult(
   return {
     answer: lines.join("\n"),
     assessment: a,
-    broadcast: need ? buildBroadcast(snap, "all", text.korean, text.english) : null,
+    broadcast: need ? buildBroadcast(snap, text.korean, text.english) : null,
     fallback: true,
     fallbackReason: reason,
     toolCalls: [],
@@ -235,31 +254,24 @@ async function generateBroadcast(
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            zone: { type: Type.STRING, description: "north / south / all" },
             korean: { type: Type.STRING },
             english: { type: Type.STRING },
           },
-          required: ["zone", "korean", "english"],
+          required: ["korean", "english"],
         },
       },
     });
-    const parsed = JSON.parse(res.text ?? "{}") as {
-      zone?: string;
-      korean?: string;
-      english?: string;
-    };
-    const zone = (["north", "south", "all"].includes(parsed.zone ?? "") ? parsed.zone : "all") as
-      | "north"
-      | "south"
-      | "all";
-    if (parsed.korean && parsed.english) {
-      return buildBroadcast(snap, zone, parsed.korean, parsed.english);
+    const parsed = JSON.parse(res.text ?? "{}") as { korean?: string; english?: string };
+    const korean = usableText(parsed.korean);
+    const english = usableText(parsed.english);
+    if (korean && english) {
+      return buildBroadcast(snap, korean, english);
     }
   } catch {
     // 구조화 호출이 실패하면 규칙 기반 문안으로 간다.
   }
   const text = fallbackBroadcastText(a);
-  return buildBroadcast(snap, "all", text.korean, text.english);
+  return buildBroadcast(snap, text.korean, text.english);
 }
 
 // --- 에이전트 루프 ------------------------------------------------------
@@ -320,12 +332,11 @@ export async function runAgent(
             reason: `위험 등급이 ${assessment.level} 이라 방송하지 않는다. warning 이상에서만 방송한다.`,
           };
         }
-        const zoneArg = String(args.zone ?? "all");
-        const zone = (["north", "south", "all"].includes(zoneArg) ? zoneArg : "all") as
-          | "north"
-          | "south"
-          | "all";
-        broadcast = buildBroadcast(snap, zone, String(args.korean ?? ""), String(args.english ?? ""));
+        broadcast = buildBroadcast(
+          snap,
+          usableText(args.korean) ?? fallbackBroadcastText(assessment).korean,
+          usableText(args.english) ?? fallbackBroadcastText(assessment).english,
+        );
         return { accepted: true, ...broadcast };
       }
       default:
@@ -350,12 +361,20 @@ export async function runAgent(
 
         const calls = res.functionCalls ?? [];
         if (calls.length === 0) {
+          // 툴도 텍스트도 없으면 모델이 죽은 것이다 (SAFETY / MAX_TOKENS /
+          // RECITATION 이면 res.text 가 undefined 다). 성공으로 포장하면 화면에
+          // 폴백 배지가 안 뜨고 "(빈 응답)" 이 답변으로 렌더된다. 다음 모델로 넘긴다.
+          const text = res.text?.trim();
+          if (!text) {
+            lastError = `${model} 이 툴도 텍스트도 없는 빈 응답을 돌려줬다`;
+            break;
+          }
           // 모델이 draftBroadcast 를 안 불렀어도 필요한 등급이면 문안을 만든다.
           if (!broadcast && shouldBroadcast(assessment)) {
             broadcast = await generateBroadcast(ai, model, snap, assessment);
           }
           return {
-            answer: res.text ?? "(모델이 빈 응답을 돌려줬다)",
+            answer: text,
             assessment,
             broadcast,
             fallback: false,

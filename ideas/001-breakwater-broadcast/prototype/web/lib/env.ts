@@ -1,3 +1,7 @@
+// 이 모듈이 클라이언트 번들에 딸려 들어가면 빌드가 깨진다.
+// 주석 경고만으로는 언젠가 실수가 난다 — 기계가 막게 한다.
+import "server-only";
+
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 

@@ -14,6 +14,23 @@ import type { Snapshot } from "./eum";
  * 기본값은 항상 실측이다. `?scenario=` 를 명시해야만 켜진다.
  */
 
+/**
+ * 시나리오가 채워야 하는 기상 필드. 넷 다 필수다.
+ *
+ * 하나라도 빠지면 `applyScenario` 가 `winsp: undefined` 인 스냅샷을 만들고,
+ * 그건 판정에서 조용한 '안전' 으로 떨어진다. 타입으로 막는다.
+ */
+type ScenarioAir = { winsp: number; windir: number; temp: number; humi: number };
+
+type ScenarioDef = {
+  label: string;
+  description: string;
+  air: ScenarioAir;
+  uv: { uvIndex: number };
+};
+
+// `satisfies` 라야 키 리터럴이 살아남아 ScenarioName 이 유니온으로 좁혀진다.
+// `Record<string, …>` 로 주석을 달면 ScenarioName 이 string 으로 넓어진다.
 export const SCENARIOS = {
   storm: {
     label: "강풍 (강풍경보 수준)",
@@ -33,7 +50,7 @@ export const SCENARIOS = {
     air: { winsp: 2.1, windir: 130.0, temp: 35.8, humi: 62.0 },
     uv: { uvIndex: 9.4 },
   },
-} as const;
+} as const satisfies Record<string, ScenarioDef>;
 
 export type ScenarioName = keyof typeof SCENARIOS;
 
@@ -51,6 +68,7 @@ export function applyScenario(snap: Snapshot, name: ScenarioName): Snapshot {
 
   return {
     ...snap,
+    // ScenarioAir 가 4개 필드를 모두 강제하므로 결손이 생길 수 없다.
     air: { ...baseAir, ...s.air } as Snapshot["air"],
     uv: { dateTime: snap.fetchedAt, uvIndex: s.uv.uvIndex },
   };
