@@ -27,3 +27,6 @@ dist/
 
 # agent state
 .omc/
+
+# claude code local settings (개인용, 팀 공유 안 함)
+.claude/settings.local.json
