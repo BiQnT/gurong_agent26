@@ -3845,6 +3845,331 @@
   "description": "유해물질 및 대기상태를 실시간 모니터링하고, 유해물질 유출 시 확산 과정 예측",
   "apis": [
    {
+    "apiId": "INT_S01_001",
+    "serviceName": "대기환경 측정 장비 기본 정보 목록_전체 (⚠ E-UM 자료실 미등록, genix 직접 확인)",
+    "description": "구룡포 내 설치된 대기환경 측정 장비의 정보 목록을 조회할 수 있습니다. 장비명, 설치 위치의 위경도, 주소 정보를 제공합니다. E-UM API 자료실 메타데이터에는 등록돼 있지 않지만 genix.pohang-eum.kr 서버에서 2026-08-04에 실제 호출 성공을 확인했다(구룡포~호미곶 24개 장비 응답).",
+    "method": "GET",
+    "url": "https://genix.pohang-eum.kr/dpg/atmosphere/devices",
+    "apiType": "REST API",
+    "updateAt": "2026-08-04",
+    "requestItems": [
+     {
+      "itemNameEn": "serviceKey",
+      "itemNameKo": "서비스키",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameEn": "id",
+      "itemNameKo": "응답상태 고유번호",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameEn": "status",
+      "itemNameKo": "응답상태",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameEn": "data",
+      "itemNameKo": "응답값 배열",
+      "sampleData": "",
+      "itemDescription": "응답값 배열"
+     },
+     {
+      "itemNameEn": "id",
+      "itemNameKo": "장비 고유번호",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameEn": "name",
+      "itemNameKo": "장비명",
+      "sampleData": "유해물질 측정기 외1",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameEn": "latitude",
+      "itemNameKo": "위도",
+      "sampleData": "35.980946",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameEn": "longitude",
+      "itemNameKo": "경도",
+      "sampleData": "129.540324",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameEn": "address",
+      "itemNameKo": "주소",
+      "sampleData": "포항시 남구 구룡포읍 병포리 469-52",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameEn": "firm",
+      "itemNameKo": "펌웨어 버전",
+      "sampleData": "1.0.0",
+      "itemDescription": "장비 펌웨어 버전"
+     },
+     {
+      "itemNameEn": "nickname",
+      "itemNameKo": "장비 별칭",
+      "sampleData": "구룡포행정복지센터 남서측",
+      "itemDescription": "장비 설치 위치 별칭"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S01_002",
+    "serviceName": "대기환경 측정 장비 기본 정보 목록_단일 (⚠ E-UM 자료실 미등록, genix 직접 확인)",
+    "description": "구룡포 내 설치된 대기환경 측정 장비 중 사용자가 지정한 장비의 정보를 조회할 수 있습니다. 장비명, 설치 위치의 위경도, 주소 정보를 제공합니다. E-UM API 자료실 메타데이터에는 등록돼 있지 않지만 genix.pohang-eum.kr 서버에서 2026-08-04에 실제 호출 성공을 확인했다.",
+    "method": "GET",
+    "url": "https://genix.pohang-eum.kr/dpg/atmosphere/device",
+    "apiType": "REST API",
+    "updateAt": "2026-08-04",
+    "requestItems": [
+     {
+      "itemNameEn": "serviceKey",
+      "itemNameKo": "서비스키",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     },
+     {
+      "itemNameEn": "id",
+      "itemNameKo": "장비 고유번호",
+      "itemRequired": "Y",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameEn": "id",
+      "itemNameKo": "응답상태 고유번호",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameEn": "status",
+      "itemNameKo": "응답상태",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameEn": "data",
+      "itemNameKo": "응답값 객체",
+      "sampleData": "",
+      "itemDescription": "응답값 객체"
+     },
+     {
+      "itemNameEn": "id",
+      "itemNameKo": "장비 고유번호",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameEn": "name",
+      "itemNameKo": "장비명",
+      "sampleData": "유해물질 측정기 외1",
+      "itemDescription": "장비명칭"
+     },
+     {
+      "itemNameEn": "latitude",
+      "itemNameKo": "위도",
+      "sampleData": "35.980946",
+      "itemDescription": "장비위치(위도)"
+     },
+     {
+      "itemNameEn": "longitude",
+      "itemNameKo": "경도",
+      "sampleData": "129.540324",
+      "itemDescription": "장비위치(경도)"
+     },
+     {
+      "itemNameEn": "address",
+      "itemNameKo": "주소",
+      "sampleData": "포항시 남구 구룡포읍 병포리 469-52",
+      "itemDescription": "장비 상세 위치 주소"
+     },
+     {
+      "itemNameEn": "firm",
+      "itemNameKo": "펌웨어 버전",
+      "sampleData": "1.0.0",
+      "itemDescription": "장비 펌웨어 버전"
+     },
+     {
+      "itemNameEn": "poleId",
+      "itemNameKo": "전주 고유번호",
+      "sampleData": "1",
+      "itemDescription": "장비가 설치된 전주 고유번호"
+     },
+     {
+      "itemNameEn": "nickname",
+      "itemNameKo": "장비 별칭",
+      "sampleData": "구룡포행정복지센터 남서측",
+      "itemDescription": "장비 설치 위치 별칭"
+     }
+    ]
+   },
+   {
+    "apiId": "INT_S01_003",
+    "serviceName": "대기환경 측정 장비 실시간 수집 정보_전체 (⚠ E-UM 자료실 미등록, genix 직접 확인)",
+    "description": "구룡포 내 설치된 대기환경 측정 장비 전체에서 가장 최근에 수집된 데이터를 조회할 수 있습니다. 미세먼지, 초미세먼지, 이산화황, 이산화질소, 오존, 일산화탄소, VOC, 황화수소, 암모니아, 복합악취, 포름알데하이드, 이산화탄소, 온도, 습도, 풍속, 풍향, 배터리 전압 등의 데이터를 제공합니다. E-UM API 자료실 메타데이터에는 등록돼 있지 않지만 genix.pohang-eum.kr 서버에서 2026-08-04에 실제 호출 성공을 확인했다(24개 장비 응답).",
+    "method": "GET",
+    "url": "https://genix.pohang-eum.kr/dpg/atmosphere/devices/realtime",
+    "apiType": "REST API",
+    "updateAt": "2026-08-04",
+    "requestItems": [
+     {
+      "itemNameEn": "serviceKey",
+      "itemNameKo": "서비스키",
+      "itemRequired": "Y",
+      "sampleData": "yqfuaX1YKzxki2YCEvIgG...",
+      "itemDescription": "API 활용 시 필요한 서비스 인증키"
+     }
+    ],
+    "responseItems": [
+     {
+      "itemNameEn": "id",
+      "itemNameKo": "응답상태 고유번호",
+      "sampleData": "1",
+      "itemDescription": "응답 상태 고유번호"
+     },
+     {
+      "itemNameEn": "status",
+      "itemNameKo": "응답상태",
+      "sampleData": "success",
+      "itemDescription": "응답상태"
+     },
+     {
+      "itemNameEn": "data",
+      "itemNameKo": "응답값 배열",
+      "sampleData": "",
+      "itemDescription": "응답값 배열"
+     },
+     {
+      "itemNameEn": "logDateTime",
+      "itemNameKo": "데이터 수집 시각",
+      "sampleData": "2026-08-03 20:01:14",
+      "itemDescription": "데이터 수집 시각"
+     },
+     {
+      "itemNameEn": "devId",
+      "itemNameKo": "장비 고유번호",
+      "sampleData": "1",
+      "itemDescription": "장비 고유번호"
+     },
+     {
+      "itemNameEn": "pm10",
+      "itemNameKo": "미세먼지",
+      "sampleData": "19.3",
+      "itemDescription": "미세먼지(단위 : PPM, 실측상 ㎍/㎥ 관례 가능성 있어 재검증 필요)"
+     },
+     {
+      "itemNameEn": "pm25",
+      "itemNameKo": "초미세먼지",
+      "sampleData": "13.0",
+      "itemDescription": "초미세먼지(단위 : PPM, 실측상 ㎍/㎥ 관례 가능성 있어 재검증 필요)"
+     },
+     {
+      "itemNameEn": "so2",
+      "itemNameKo": "이산화황",
+      "sampleData": "0.051",
+      "itemDescription": "이산화황(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "no2",
+      "itemNameKo": "이산화질소",
+      "sampleData": "0.001",
+      "itemDescription": "이산화질소(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "o3",
+      "itemNameKo": "오존",
+      "sampleData": "0.025",
+      "itemDescription": "오존(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "co",
+      "itemNameKo": "일산화탄소",
+      "sampleData": "0.388",
+      "itemDescription": "일산화탄소(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "voc",
+      "itemNameKo": "VOC",
+      "sampleData": "0.079",
+      "itemDescription": "VOC(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "h2s",
+      "itemNameKo": "황화수소",
+      "sampleData": "0.002",
+      "itemDescription": "황화수소(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "nh3",
+      "itemNameKo": "암모니아",
+      "sampleData": "0.001",
+      "itemDescription": "암모니아(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "ou",
+      "itemNameKo": "복합악취",
+      "sampleData": "6.0",
+      "itemDescription": "복합악취(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "hcho",
+      "itemNameKo": "포름알데하이드",
+      "sampleData": "0.006",
+      "itemDescription": "포름알데하이드(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "co2",
+      "itemNameKo": "이산화탄소",
+      "sampleData": "0.0486",
+      "itemDescription": "이산화탄소(단위 : PPM)"
+     },
+     {
+      "itemNameEn": "temp",
+      "itemNameKo": "온도",
+      "sampleData": "24.5",
+      "itemDescription": "온도(단위 : ℃)"
+     },
+     {
+      "itemNameEn": "humi",
+      "itemNameKo": "습도",
+      "sampleData": "83.2",
+      "itemDescription": "습도(단위 : %)"
+     },
+     {
+      "itemNameEn": "winsp",
+      "itemNameKo": "풍속",
+      "sampleData": "0.17",
+      "itemDescription": "풍속(단위 : m/s)"
+     },
+     {
+      "itemNameEn": "windir",
+      "itemNameKo": "풍향",
+      "sampleData": "286.9",
+      "itemDescription": "풍향(단위 : °)"
+     },
+     {
+      "itemNameEn": "batt",
+      "itemNameKo": "배터리 전압",
+      "sampleData": "12.4",
+      "itemDescription": "배터리 전압(단위 : V)"
+     }
+    ]
+   },
+   {
     "apiId": "INT_S01_004",
     "serviceType": "경상북도 포항시 구룡포읍_대기오염 트윈 환경분석 예측",
     "serviceName": "대기환경 측정 장비 실시간 수집 정보_단일",

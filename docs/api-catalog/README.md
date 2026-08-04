@@ -1,6 +1,6 @@
 # E-UM 디지털트윈 포항 Open API 카탈로그
 
-출처: <https://pohang-eum.kr/data> · 자동 수집 · **총 40개 API / 7개 서비스**
+출처: <https://pohang-eum.kr/data> · 자동 수집 · **총 43개 API / 7개 서비스**
 
 재생성: `python3 research/api-tests/fetch_eum_catalog.py`
 
@@ -11,12 +11,13 @@
   API 자료실에서 신청(`/api/apply`)해야 나온다. 키는 저장소에 커밋하지 말고 `.env`에 둔다.
 - 호출 형태: `GET https://genix.pohang-eum.kr/dpg/<path>?serviceKey=<KEY>&...`
 - 응답 공통 껍데기: `{ id, status, data }` — 실제 값은 `data` 안에 있다.
+- **⚠ 표시가 붙은 3개 API는 E-UM API 자료실 메타데이터(`/netro/api/*`)에 정식 등록이 안 돼 있다.** genix 서버에 직접 요청해 실제 동작을 확인하고 `research/api-tests/fetch_eum_catalog.py`의 `MANUAL_SUPPLEMENT`에 수동으로 채워 넣은 것이다. apiId는 E-UM이 동일 역할에 실제로 쓰는 번호 규칙을 따랐을 뿐 공식 발급 ID가 아니다. 조사 기록: [research/api-tests/2026-08-04-atmosphere-undocumented-apis.md](../../research/api-tests/2026-08-04-atmosphere-undocumented-apis.md)
 
 ## 서비스별 문서
 
 | # | 서비스 | API 수 | 문서 |
 | --- | --- | --- | --- |
-| 1 | 구룡포읍 대기환경 | 3 | [대기환경](01-대기환경.md) |
+| 1 | 구룡포읍 대기환경 | 6 | [대기환경](01-대기환경.md) |
 | 2 | 구룡포읍 해양환경 | 6 | [해양환경](02-해양환경.md) |
 | 3 | 구룡포읍 선박안전 | 10 | [선박안전](03-선박안전.md) |
 | 4 | 구룡포읍 선박탄소 | 4 | [선박탄소](04-선박탄소.md) |
@@ -28,6 +29,9 @@
 
 | API ID | 서비스 | 기능 | 엔드포인트 |
 | --- | --- | --- | --- |
+| `INT_S01_001` | 구룡포읍 대기환경 | 대기환경 측정 장비 기본 정보 목록_전체 (⚠ E-UM 자료실 미등록, genix 직접 확인) | `/dpg/atmosphere/devices` |
+| `INT_S01_002` | 구룡포읍 대기환경 | 대기환경 측정 장비 기본 정보 목록_단일 (⚠ E-UM 자료실 미등록, genix 직접 확인) | `/dpg/atmosphere/device` |
+| `INT_S01_003` | 구룡포읍 대기환경 | 대기환경 측정 장비 실시간 수집 정보_전체 (⚠ E-UM 자료실 미등록, genix 직접 확인) | `/dpg/atmosphere/devices/realtime` |
 | `INT_S01_004` | 구룡포읍 대기환경 | 대기환경 측정 장비 실시간 수집 정보_단일 | `/dpg/atmosphere/device/realtime` |
 | `INT_S01_011` | 구룡포읍 대기환경 | 대기환경 유해물질 통계 정보 | `/dpg/atmosphere/sensor/stats/history` |
 | `INT_S01_012` | 구룡포읍 대기환경 | 대기환경 유해물질 시간별 통계 정보 | `/dpg/atmosphere/sensor/stats/hour` |
