@@ -200,7 +200,7 @@
 
     <div class="card">
       <h2>환경 지표 추이</h2>
-      <div class="hint">점선 = 이 지표가 넘으면 위험도를 한 단계 올리는 실제 경보 기준값 (risk_logic.py와 동일한 값을 서버에서 가져옴). 지표마다 단위가 달라 축을 따로 그린다. 그래프 위에 마우스를 올리면 그 시점의 정확한 수치가 뜬다.</div>
+      <div class="hint">점선 = 이 지표가 넘으면 위험도를 한 단계 올리는 실제 경보 기준값 (risk_logic.py와 동일한 값을 서버에서 가져옴). 지표마다 단위가 달라 축을 따로 그린다. 세로축은 0부터가 아니라 <b>실제 움직인 범위에 맞춰 확대</b>돼 있다 — 값이 좁은 범위 안에서만 오르내려도 변화가 잘 보이게 하기 위함. 기준값이 지금 보이는 범위 밖이면 점선 없이 위 숫자로만 확인한다. 그래프 위에 마우스를 올리면 그 시점의 정확한 수치가 뜬다.</div>
 
       <div class="mini-chart">
         <div class="mini-chart-head">
@@ -269,7 +269,7 @@
   <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px;">
       <h2 style="margin-bottom:0;">경보 피드</h2>
-      <button class="secondary" onclick="clearAllAlerts()">🗑 전체 삭제</button>
+      <button class="secondary" onclick="clearAllAlerts(this)">🗑 전체 삭제</button>
     </div>
     <div class="hint">⏳ <b>방송 대기</b> = 사람이 문구를 확인/수정한 뒤 "🔊 방송"을 눌러야 소리가 난다 · ✅ <b>방송 완료</b> = 이미 재생/기록됨 · 각 알림 우측 ✕로 개별 삭제</div>
     <div class="alert-list" id="alerts"><div class="empty">아직 경보 없음</div></div>
@@ -391,6 +391,25 @@ function niceMax(v) {
   return step * mag;
 }
 
+// 위험 점수 차트처럼 0이 의미 있는 기준선인 지표는 0~niceMax(임계값)로 고정한다.
+// 자외선/풍속/기온처럼 특정 범위 안에서만 오르내리는 지표를 0~40 같은 고정축에 그리면
+// 실제 변화(예: 28도→30도)가 축 전체에서 5%도 안 돼 거의 안 보인다 — adaptive는 그
+// 지표가 실제로 움직인 범위에 맞춰 축을 확대해서 오르내림이 눈에 띄게 한다. 이 경우
+// 임계값이 지금 보이는 범위 밖에 있으면 기준선을 억지로 끌어오지 않고 그냥 생략한다
+// (차트 위 상시 표시되는 "위험 기준 N" 텍스트로 숫자는 계속 확인 가능).
+function computeRange(series, thresholds, adaptive) {
+  const allVals = series.flat().filter(v => v !== null && v !== undefined);
+  if (!adaptive) {
+    const thresholdVals = thresholds.map(t => t.value * 1.15);
+    return { bottom: 0, top: niceMax(Math.max(1, ...allVals, ...thresholdVals)) };
+  }
+  if (!allVals.length) return { bottom: 0, top: 1 };
+  const dataMin = Math.min(...allVals), dataMax = Math.max(...allVals);
+  const span = dataMax - dataMin;
+  const pad = span > 0 ? span * 0.35 : Math.max(Math.abs(dataMax) * 0.08, 0.5);
+  return { bottom: dataMin - pad, top: dataMax + pad };
+}
+
 function fmtTime(ts, withSeconds) {
   const d = new Date(ts);
   if (isNaN(d)) return '';
@@ -415,25 +434,24 @@ function drawChart(canvas, series, colors, timestamps, options = {}) {
   const w = cssW - padL - padR, h = cssH - padT - padB;
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const allVals = series.flat().filter(v => v !== null && v !== undefined);
-  const thresholdVals = thresholds.map(t => t.value * 1.15); // 기준선이 항상 보이도록 여유를 둔다
-  const top = niceMax(Math.max(1, ...allVals, ...thresholdVals));
+  const { bottom, top } = computeRange(series, thresholds, options.adaptive);
   const { grid: gridColor, axis: axisColor, muted: mutedColor } = themeColors();
 
-  const yOf = (v) => padT + h - (v / top) * h;
+  const yOf = (v) => padT + h - ((v - bottom) / (top - bottom || 1)) * h;
   const xOf = (idx, n) => padL + (idx / (n - 1 || 1)) * w;
 
-  // Y gridlines + labels (0, mid, top)
+  // Y gridlines + labels (bottom, mid, top — adaptive면 0이 아닐 수 있다)
   ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.font = '10px system-ui';
   ctx.fillStyle = mutedColor; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
   [0, 0.5, 1].forEach(frac => {
     const y = padT + h - frac * h;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
-    ctx.fillText(String(Math.round(frac * top * 10) / 10), padL - 6, y);
+    ctx.fillText(String(Math.round((bottom + frac * (top - bottom)) * 10) / 10), padL - 6, y);
   });
 
-  // 경보 기준선 (점선) — risk_logic.py의 실제 임계값과 같은 값
-  thresholds.forEach(t => {
+  // 경보 기준선 (점선) — risk_logic.py의 실제 임계값과 같은 값. adaptive 축에서
+  // 지금 보이는 범위 밖에 있으면(예: 기온이 33도 근처까지 안 올라옴) 억지로 안 그린다.
+  thresholds.filter(t => t.value >= bottom && t.value <= top).forEach(t => {
     const y = yOf(t.value);
     ctx.save();
     ctx.setLineDash([4, 3]);
@@ -586,10 +604,30 @@ async function deleteAlert(timestamp) {
   loadAlerts();
 }
 
-async function clearAllAlerts() {
-  if (!confirm('경보 피드를 전부 삭제할까? (되돌릴 수 없다)')) return;
-  await fetch('/api/alerts/clear', { method: 'POST' });
-  loadAlerts();
+// window.confirm()은 임베디드/자동화 브라우저 컨텍스트에서 조용히 씹히는 경우가 있어
+// (팝업이 아예 안 뜨고 그냥 취소된 것처럼 동작) 네이티브 다이얼로그 대신 버튼 자체를
+// "정말 삭제?"로 한 번 바꿨다가, 그 상태에서 한 번 더 누르면 실제로 지우는 2단계 확인으로 바꿨다.
+let clearArmed = false;
+function clearAllAlerts(btn) {
+  if (!clearArmed) {
+    clearArmed = true;
+    btn.textContent = '정말 삭제? (다시 클릭)';
+    btn.style.background = 'rgba(208,59,59,0.25)';
+    btn.style.color = 'var(--critical)';
+    setTimeout(() => {
+      if (!clearArmed) return; // 이미 확정 클릭으로 처리됨
+      clearArmed = false;
+      btn.textContent = '🗑 전체 삭제';
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 3000);
+    return;
+  }
+  clearArmed = false;
+  btn.textContent = '🗑 전체 삭제';
+  btn.style.background = '';
+  btn.style.color = '';
+  fetch('/api/alerts/clear', { method: 'POST' }).then(loadAlerts);
 }
 
 async function loadAlerts() {
@@ -657,21 +695,21 @@ async function loadSnapshot() {
     [history.map(h => h.uv_index ?? null)],
     ['#199e70'],
     timestamps,
-    { thresholds: [{ value: THRESHOLDS.uv_index, label: '위험', color: '#d03b3b' }] },
+    { adaptive: true, thresholds: [{ value: THRESHOLDS.uv_index, label: '위험', color: '#d03b3b' }] },
   );
   drawChart(
     document.getElementById('windChart'),
     [history.map(h => h.wind_speed ?? null)],
     ['#c98500'],
     timestamps,
-    { thresholds: [{ value: THRESHOLDS.wind_speed, label: '위험', color: '#d03b3b' }] },
+    { adaptive: true, thresholds: [{ value: THRESHOLDS.wind_speed, label: '위험', color: '#d03b3b' }] },
   );
   drawChart(
     document.getElementById('tempChart'),
     [history.map(h => h.temperature ?? null)],
     ['#d55181'],
     timestamps,
-    { thresholds: [{ value: THRESHOLDS.temperature, label: '위험', color: '#d03b3b' }] },
+    { adaptive: true, thresholds: [{ value: THRESHOLDS.temperature, label: '위험', color: '#d03b3b' }] },
   );
 }
 
