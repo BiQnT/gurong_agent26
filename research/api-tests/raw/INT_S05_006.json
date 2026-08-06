@@ -19,7 +19,7 @@
         "longitude": 129.549278,
         "address": "경북 포항시 남구 구룡포읍 호미로 152",
         "sensorType": "HOLE",
-        "value": "1464",
+        "value": "1459",
         "level": "1"
       },
       {
@@ -30,7 +30,7 @@
         "longitude": 129.551115,
         "address": "경북 포항시 남구 구룡포읍 호미로 174-1",
         "sensorType": "HOLE",
-        "value": "1060",
+        "value": "1059",
         "level": "1"
       },
       {
@@ -41,7 +41,7 @@
         "longitude": 129.557327,
         "address": "경북 포항시 구룡포읍 구룡포리 954-30",
         "sensorType": "HOLE",
-        "value": "1235",
+        "value": "1152",
         "level": "1"
       },
       {

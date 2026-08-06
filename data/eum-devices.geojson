@@ -6,6 +6,456 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
+          129.561874,
+          36.077816
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교10",
+        "address": "포항시 남구 호미곶면 대보리 256-4",
+        "device_id": 24,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56189,
+          36.07349
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교8",
+        "address": "포항시 남구 호미곶면 대보리 332-3",
+        "device_id": 23,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.570724,
+          36.064137
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교7",
+        "address": "포항시 남구 호미곶면 대보리 21-1",
+        "device_id": 22,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.577667,
+          36.036598
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교6",
+        "address": "포항시 남구 호미곶면 강사리 202-1",
+        "device_id": 21,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.565887,
+          35.998985
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교5",
+        "address": "포항시 남구 구룡포읍 구룡포리 24-2",
+        "device_id": 20,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.562576,
+          35.98999
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교4",
+        "address": "포항시 남구 구룡포읍 구룡포리 214",
+        "device_id": 19,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.548065,
+          35.985863
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교2",
+        "address": "포항시 남구 구룡포읍 눌태리 61-4",
+        "device_id": 18,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구14",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 17,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구13",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 16,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559608,
+          35.985344
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구12",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 15,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구10",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 14,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.552333,
+          35.987417
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구8",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-11",
+        "device_id": 13,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557444,
+          35.991111
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구5",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-30",
+        "device_id": 12,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구2",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 11,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구11",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 10,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.551833,
+          35.9855
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구9",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-12",
+        "device_id": 9,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555917,
+          35.990694
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구6",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-34",
+        "device_id": 8,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구3",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구1",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555812,
+          35.9944638
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외5",
+        "address": "포항시 남구 구룡포읍 구룡포리 494-2",
+        "device_id": 5,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.552637,
+          35.991333
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외4",
+        "address": "포항시 남구 구룡포읍 구룡포리 730-3",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.548842,
+          35.966798
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외3",
+        "address": "포항시 남구 구룡포읍 하정리 242-1",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.534046,
+          35.942012
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외2",
+        "address": "포항시 남구 구룡포읍 구평리 177-3",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.540324,
+          35.980946
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외1",
+        "address": "포항시 남구 구룡포읍 병포리 469-52",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.540324,
+          35.980946
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_002",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외1",
+        "address": "포항시 남구 구룡포읍 병포리 469-52",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
           129.53835,
           35.933235
         ]

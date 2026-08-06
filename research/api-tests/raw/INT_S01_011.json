@@ -5,62 +5,62 @@
   "url": "https://genix.pohang-eum.kr/dpg/atmosphere/sensor/stats/history",
   "params": {
     "serviceKey": "<REDACTED>",
-    "startDate": "20260801",
-    "endDate": "20260802"
+    "startDate": "20260804",
+    "endDate": "20260805"
   },
   "http_status": 200,
   "response": {
     "diffData": {
-      "diffAvgVal": 28.0,
+      "diffAvgVal": 1.0,
       "diffMaxVal": 0.0,
       "diffMinVal": 0.0
     },
     "staticGenixCalBeforeDay": {
-      "startDate": "20260801",
-      "endDate": "20260801",
-      "avgVal": 1840.0,
+      "startDate": "20260804",
+      "endDate": "20260804",
+      "avgVal": 1885.0,
       "maxVal": 36000.0,
       "minVal": 0.0
     },
     "staticGenixCal": {
-      "startDate": "20260802",
-      "endDate": "20260802",
-      "avgVal": 1868.0,
+      "startDate": "20260805",
+      "endDate": "20260805",
+      "avgVal": 1886.0,
       "maxVal": 36000.0,
       "minVal": 0.0
     },
     "staticGenixLinear": {
-      "hour0": "1917.69",
-      "hour1": "2023.83",
-      "hour2": "2023.78",
-      "hour3": "2141.87",
-      "hour4": "2025.29",
-      "hour5": "2026.13",
-      "hour6": "2275.62",
-      "hour7": "1924.33",
-      "hour8": "1829.46",
-      "hour9": "1741.82",
-      "hour10": "1655.33",
-      "hour11": "1655.10",
-      "hour12": "1661.42",
-      "hour13": "1732.50",
-      "hour14": "1732.60",
-      "hour15": "1734.66",
-      "hour16": "1733.28",
-      "hour17": "1819.27",
-      "hour18": "1736.88",
-      "hour19": "1822.66",
-      "hour20": "2020.48",
-      "hour21": "1915.24",
-      "hour22": "2017.15",
-      "hour23": "2016.22"
+      "hour0": "1824.52",
+      "hour1": "1920.49",
+      "hour2": "2025.32",
+      "hour3": "1919.79",
+      "hour4": "1919.09",
+      "hour5": "1921.60",
+      "hour6": "2023.93",
+      "hour7": "2027.03",
+      "hour8": "1923.15",
+      "hour9": "1738.96",
+      "hour10": "1738.83",
+      "hour11": "1739.39",
+      "hour12": "1739.68",
+      "hour13": "1738.02",
+      "hour14": "1916.58",
+      "hour15": "1736.92",
+      "hour16": "1818.90",
+      "hour17": "1914.82",
+      "hour18": "1916.04",
+      "hour19": "1919.58",
+      "hour20": "1916.83",
+      "hour21": "2022.49",
+      "hour22": "2021.02",
+      "hour23": "2018.65"
     },
     "staticGenixPie": {
       "lv1": 0,
-      "lv2": 15240,
-      "lv3": 5333,
-      "lv4": 71,
-      "lv5": 1473
+      "lv2": 14515,
+      "lv3": 5551,
+      "lv4": 169,
+      "lv5": 1492
     }
   }
 }

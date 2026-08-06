@@ -5,7 +5,7 @@
   "url": "https://genix.pohang-eum.kr/dpg/ship-safe/stats/history",
   "params": {
     "serviceKey": "<REDACTED>",
-    "date": "20260802"
+    "date": "20260805"
   },
   "http_status": 500,
   "response": "서버 내부 오류: class java.lang.String cannot be cast to class java.util.Date (java.lang.String and java.util.Date are in module java.base of loader 'bootstrap')"

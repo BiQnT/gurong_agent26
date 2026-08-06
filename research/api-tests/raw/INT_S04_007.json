@@ -5,7 +5,7 @@
   "url": "https://genix.pohang-eum.kr/dpg/old-ship/size/history",
   "params": {
     "serviceKey": "<REDACTED>",
-    "date": "20260802"
+    "date": "20260805"
   },
   "http_status": 200,
   "response": {
@@ -137,23 +137,23 @@
       "emissionPerDayTonTypes": [
         {
           "shipType": "S1",
-          "avgPerEmis": 0.018933
+          "avgPerEmis": 0.0155378
         },
         {
           "shipType": "S2",
-          "avgPerEmis": 0.0136341
+          "avgPerEmis": 0.0178771
         },
         {
           "shipType": "S3",
-          "avgPerEmis": 0.0176436
+          "avgPerEmis": 0.0171565
         },
         {
           "shipType": "S4",
-          "avgPerEmis": 0.0145519
+          "avgPerEmis": 0.0191247
         },
         {
           "shipType": "S5",
-          "avgPerEmis": 0.0111844
+          "avgPerEmis": 0.019192
         }
       ],
       "defineObj": [

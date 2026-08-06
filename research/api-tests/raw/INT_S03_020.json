@@ -5,9 +5,9 @@
   "url": "https://genix.pohang-eum.kr/dpg/ship-safe/traffic",
   "params": {
     "serviceKey": "<REDACTED>",
-    "startDate": "20260802",
+    "startDate": "20260805",
     "startTime": "0900",
-    "endDate": "20260802",
+    "endDate": "20260805",
     "endTime": "1000"
   },
   "http_status": 200,

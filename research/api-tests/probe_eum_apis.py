@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E-UM Open API 40개를 전부 실제로 호출해보고 무엇이 살아 있는지 판정한다.
+"""E-UM Open API 를 전부 실제로 호출해보고 무엇이 살아 있는지 판정한다.
 
 아이디어를 확정하기 전에 '호출되는 API'를 먼저 확보하기 위한 도구다.
 카탈로그(docs/api-catalog/)는 E-UM이 문서에 적어둔 스펙일 뿐이고, 실제로
@@ -69,6 +69,11 @@ BY_GRID = [{"startDate": YESTERDAY, "startTime": "0900", "endDate": YESTERDAY, "
 
 PROBES = [
     # --- 01 대기환경 ---
+    # 001~003 은 E-UM 자료실에 미등록이고 genix 에서 직접 확인된 API 다
+    # (research/api-tests/2026-08-04-atmosphere-undocumented-apis.md).
+    ("INT_S01_001", "대기환경", "측정 장비 목록_전체", "/dpg/atmosphere/devices", NO_ARG),
+    ("INT_S01_002", "대기환경", "측정 장비 목록_단일", "/dpg/atmosphere/device", BY_ID),
+    ("INT_S01_003", "대기환경", "측정 장비 실시간_전체", "/dpg/atmosphere/devices/realtime", NO_ARG),
     ("INT_S01_004", "대기환경", "측정 장비 실시간_단일", "/dpg/atmosphere/device/realtime", BY_ID),
     ("INT_S01_011", "대기환경", "유해물질 통계", "/dpg/atmosphere/sensor/stats/history", BY_RANGE),
     ("INT_S01_012", "대기환경", "유해물질 시간별 통계", "/dpg/atmosphere/sensor/stats/hour", BY_TYPE_AIR),
@@ -118,19 +123,34 @@ PROBES = [
 ]
 
 
+# 키를 찾아볼 곳. 팀원마다 키를 어디 두는지 달라서 여러 곳을 훑는다.
+# 루트 .env 만 보게 했더니 "아이디어 폴더에만 키를 넣은" 사람이 전부 실패했다.
+ENV_CANDIDATES = [
+    ROOT / ".env",
+    ROOT / ".env.local",
+    *sorted(ROOT.glob("ideas/*/prototype/.env")),
+    *sorted(ROOT.glob("ideas/*/prototype/*/.env")),
+]
+
+
 def load_key() -> str:
     key = os.environ.get("EUM_SERVICE_KEY", "").strip()
     if key:
         return key
-    env = ROOT / ".env"
-    if env.exists():
+    for env in ENV_CANDIDATES:
+        if not env.exists():
+            continue
         for line in env.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line.startswith("EUM_SERVICE_KEY="):
-                return line.split("=", 1)[1].strip().strip("\"'")
+                value = line.split("=", 1)[1].strip().strip("\"'")
+                if value:
+                    print(f"키를 {env.relative_to(ROOT)} 에서 읽었다.")
+                    return value
     sys.exit(
-        "EUM_SERVICE_KEY 가 없다.\n"
-        "  .env 에 EUM_SERVICE_KEY=... 를 넣거나 환경변수로 넘길 것.\n"
+        "EUM_SERVICE_KEY 를 못 찾았다. 아래 중 한 곳에 넣거나 환경변수로 넘길 것:\n"
+        + "\n".join(f"  {p.relative_to(ROOT)}" for p in ENV_CANDIDATES[:2])
+        + "\n  ideas/<아이디어>/prototype/.env\n"
         "  발급: https://pohang-eum.kr/data 로그인 → API 자료실 → 활용 신청"
     )
 
