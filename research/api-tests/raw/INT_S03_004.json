@@ -1,0 +1,24 @@
+{
+  "api_id": "INT_S03_004",
+  "service": "선박안전",
+  "name": "CCTV 기본정보_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/cctv/device",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 1,
+      "name": "구룡포 북방파제 AI-01-001",
+      "latitude": "35.98573",
+      "longitude": "129.557888",
+      "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "url": "https://hls-cctv.pohang-eum.kr/cam1/index.m3u8",
+      "poleId": 6
+    }
+  }
+}

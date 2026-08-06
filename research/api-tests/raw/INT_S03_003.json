@@ -1,0 +1,250 @@
+{
+  "api_id": "INT_S03_003",
+  "service": "선박안전",
+  "name": "CCTV 기본정보_전체",
+  "url": "https://genix.pohang-eum.kr/dpg/cctv/devices",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": [
+      {
+        "id": 2,
+        "name": "구룡포 북방파제 ROTT-01-001",
+        "latitude": "35.98573",
+        "longitude": "129.557888",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam2/index.m3u8",
+        "poleId": 6
+      },
+      {
+        "id": 5,
+        "name": "구룡포 북방파제 ROTT-02-001",
+        "latitude": "35.988738",
+        "longitude": "129.560098",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam5/index.m3u8",
+        "poleId": 9
+      },
+      {
+        "id": 8,
+        "name": "구룡포 북방파제 ROTT-03-001",
+        "latitude": "35.988078",
+        "longitude": "129.559279",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam8/index.m3u8",
+        "poleId": 8
+      },
+      {
+        "id": 11,
+        "name": "구룡포 북방파제 ROTT-04-001",
+        "latitude": "35.987397",
+        "longitude": "129.558444",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam11/index.m3u8",
+        "poleId": 7
+      },
+      {
+        "id": 12,
+        "name": "구룡포수협맞은편 ROTT-01-001",
+        "latitude": "35.991111",
+        "longitude": "129.557444",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-30",
+        "url": "https://hls-cctv.pohang-eum.kr/cam12/index.m3u8",
+        "poleId": 10
+      },
+      {
+        "id": 13,
+        "name": "구룡포항구어시장맞은편 ROTT-01-001",
+        "latitude": "35.990694",
+        "longitude": "129.555917",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-34",
+        "url": "https://hls-cctv.pohang-eum.kr/cam13/index.m3u8",
+        "poleId": 11
+      },
+      {
+        "id": 14,
+        "name": "구룡포 공영주차장(신축) ROTT-01-001",
+        "latitude": "35.987417",
+        "longitude": "129.552333",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-11",
+        "url": "https://hls-cctv.pohang-eum.kr/cam14/index.m3u8",
+        "poleId": 12
+      },
+      {
+        "id": 15,
+        "name": "구룡포수협냉동공장맞은편 ROTT-01-001",
+        "latitude": "35.9855",
+        "longitude": "129.551833",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-12",
+        "url": "https://hls-cctv.pohang-eum.kr/cam15/index.m3u8",
+        "poleId": 13
+      },
+      {
+        "id": 18,
+        "name": "구룡포 남방파제 ROTT-01-001",
+        "latitude": "35.98256",
+        "longitude": "129.557068",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam18/index.m3u8",
+        "poleId": 14
+      },
+      {
+        "id": 20,
+        "name": "구룡포 남방파제 ROTT-02-001",
+        "latitude": "35.984143",
+        "longitude": "129.558226",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam20/index.m3u8",
+        "poleId": 15
+      },
+      {
+        "id": 23,
+        "name": "구룡포 남방파제 ROTT-04-001",
+        "latitude": "35.985344",
+        "longitude": "129.559608",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam23/index.m3u8",
+        "poleId": 17
+      },
+      {
+        "id": 1,
+        "name": "구룡포 북방파제 AI-01-001",
+        "latitude": "35.98573",
+        "longitude": "129.557888",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam1/index.m3u8",
+        "poleId": 6
+      },
+      {
+        "id": 3,
+        "name": "구룡포 북방파제 AI-02-002",
+        "latitude": "35.988738",
+        "longitude": "129.560098",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam3/index.m3u8",
+        "poleId": 9
+      },
+      {
+        "id": 4,
+        "name": "구룡포 북방파제 AI-02-001",
+        "latitude": "35.988738",
+        "longitude": "129.560098",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam4/index.m3u8",
+        "poleId": 9
+      },
+      {
+        "id": 6,
+        "name": "구룡포 북방파제 AI-03-001",
+        "latitude": "35.988078",
+        "longitude": "129.559279",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam6/index.m3u8",
+        "poleId": 8
+      },
+      {
+        "id": 7,
+        "name": "구룡포 북방파제 AI-03-002",
+        "latitude": "35.988078",
+        "longitude": "129.559279",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam7/index.m3u8",
+        "poleId": 8
+      },
+      {
+        "id": 9,
+        "name": "구룡포 북방파제 AI-04-002",
+        "latitude": "35.987397",
+        "longitude": "129.558444",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam9/index.m3u8",
+        "poleId": 7
+      },
+      {
+        "id": 10,
+        "name": "구룡포 북방파제 AI-04-001",
+        "latitude": "35.987397",
+        "longitude": "129.558444",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "url": "https://hls-cctv.pohang-eum.kr/cam10/index.m3u8",
+        "poleId": 7
+      },
+      {
+        "id": 16,
+        "name": "구룡포 남방파제 AI-01-001",
+        "latitude": "35.98256",
+        "longitude": "129.557068",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam16/index.m3u8",
+        "poleId": 14
+      },
+      {
+        "id": 17,
+        "name": "구룡포 남방파제 AI-01-002",
+        "latitude": "35.98256",
+        "longitude": "129.557068",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam17/index.m3u8",
+        "poleId": 14
+      },
+      {
+        "id": 19,
+        "name": "구룡포 남방파제 AI-02-001",
+        "latitude": "35.984143",
+        "longitude": "129.558226",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam19/index.m3u8",
+        "poleId": 15
+      },
+      {
+        "id": 21,
+        "name": "구룡포 남방파제 AI-03-001",
+        "latitude": "35.984879",
+        "longitude": "129.559033",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam21/index.m3u8",
+        "poleId": 16
+      },
+      {
+        "id": 22,
+        "name": "구룡포 남방파제 AI-04-001",
+        "latitude": "35.985344",
+        "longitude": "129.559608",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam22/index.m3u8",
+        "poleId": 17
+      },
+      {
+        "id": 24,
+        "name": "구룡포 남방파제 AI-03-002",
+        "latitude": "35.984879",
+        "longitude": "129.559033",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam24/index.m3u8",
+        "poleId": 16
+      },
+      {
+        "id": 25,
+        "name": "구룡포 남방파제 AI-02-002",
+        "latitude": "35.984143",
+        "longitude": "129.558226",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam25/index.m3u8",
+        "poleId": 15
+      },
+      {
+        "id": 26,
+        "name": "구룡포 남방파제 AI-02-003",
+        "latitude": "35.984143",
+        "longitude": "129.558226",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "url": "https://hls-cctv.pohang-eum.kr/cam26/index.m3u8",
+        "poleId": 15
+      }
+    ]
+  }
+}

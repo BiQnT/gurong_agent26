@@ -1,0 +1,37 @@
+{
+  "api_id": "INT_S03_002",
+  "service": "선박안전",
+  "name": "선박 기본정보_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/ship/device",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 1,
+      "shipId": "0003005-6491102",
+      "type": null,
+      "name": "제33안성호",
+      "pol": "포항시 구룡포읍",
+      "polAddr": "경상북도 포항시 남구 구룡포읍 ",
+      "hm": "FRP",
+      "pe": "선박용디젤",
+      "ps": 720.0,
+      "kw": 529.2,
+      "engineCnt": 1,
+      "propeller": "나선일체식",
+      "propellerCnt": 1,
+      "length": 25.05,
+      "breath": 5.57,
+      "depth": 2.0,
+      "gt": 43.0,
+      "sign": "0003005-6491102 근해자망어업(43톤)",
+      "regYmd": "2000-03-14",
+      "launchingYmd": "2000-03-01"
+    }
+  }
+}

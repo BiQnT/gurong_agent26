@@ -1,0 +1,23 @@
+{
+  "api_id": "INT_S03_006",
+  "service": "선박안전",
+  "name": "LiDAR 기본정보_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/lidar/device",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 1,
+      "name": "구룡포 북방파제",
+      "latitude": "35.98573",
+      "longitude": "129.557888",
+      "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+      "poleId": 6
+    }
+  }
+}

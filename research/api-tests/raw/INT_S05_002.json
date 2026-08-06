@@ -1,0 +1,12 @@
+{
+  "api_id": "INT_S05_002",
+  "service": "침수예측",
+  "name": "지표면 수위계",
+  "url": "https://genix.pohang-eum.kr/dpg/water/roadDevices",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "2"
+  },
+  "http_status": 400,
+  "response": "지표면 장비 데이터가 없습니다."
+}

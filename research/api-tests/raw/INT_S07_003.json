@@ -1,0 +1,21 @@
+{
+  "api_id": "INT_S07_003",
+  "service": "수산물유통",
+  "name": "수산물 위탁판매장",
+  "url": "https://genix.pohang-eum.kr/dpg/auctionPlace/Info",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "address": "경북 포항시 남구 구룡포읍 호미로 222-1",
+      "latitude": "35.989544",
+      "name": "구룡포수산업협동조합위판장",
+      "id": 1,
+      "longitude": "129.555828"
+    }
+  }
+}

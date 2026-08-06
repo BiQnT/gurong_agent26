@@ -1,0 +1,3461 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.561874,
+          36.077816
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교10",
+        "address": "포항시 남구 호미곶면 대보리 256-4",
+        "device_id": 24,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56189,
+          36.07349
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교8",
+        "address": "포항시 남구 호미곶면 대보리 332-3",
+        "device_id": 23,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.570724,
+          36.064137
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교7",
+        "address": "포항시 남구 호미곶면 대보리 21-1",
+        "device_id": 22,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.577667,
+          36.036598
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교6",
+        "address": "포항시 남구 호미곶면 강사리 202-1",
+        "device_id": 21,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.565887,
+          35.998985
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교5",
+        "address": "포항시 남구 구룡포읍 구룡포리 24-2",
+        "device_id": 20,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.562576,
+          35.98999
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교4",
+        "address": "포항시 남구 구룡포읍 구룡포리 214",
+        "device_id": 19,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.548065,
+          35.985863
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 교2",
+        "address": "포항시 남구 구룡포읍 눌태리 61-4",
+        "device_id": 18,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구14",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 17,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구13",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 16,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559608,
+          35.985344
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구12",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 15,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구10",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 14,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.552333,
+          35.987417
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구8",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-11",
+        "device_id": 13,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557444,
+          35.991111
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구5",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-30",
+        "device_id": 12,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구2",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 11,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구11",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 10,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.551833,
+          35.9855
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구9",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-12",
+        "device_id": 9,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555917,
+          35.990694
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구6",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-34",
+        "device_id": 8,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구3",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 구1",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555812,
+          35.9944638
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외5",
+        "address": "포항시 남구 구룡포읍 구룡포리 494-2",
+        "device_id": 5,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.552637,
+          35.991333
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외4",
+        "address": "포항시 남구 구룡포읍 구룡포리 730-3",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.548842,
+          35.966798
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외3",
+        "address": "포항시 남구 구룡포읍 하정리 242-1",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.534046,
+          35.942012
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외2",
+        "address": "포항시 남구 구룡포읍 구평리 177-3",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.540324,
+          35.980946
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_001",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외1",
+        "address": "포항시 남구 구룡포읍 병포리 469-52",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.540324,
+          35.980946
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S01_002",
+        "service": "대기환경",
+        "name": "유해물질 측정기 외1",
+        "address": "포항시 남구 구룡포읍 병포리 469-52",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.53835,
+          35.933235
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S02_001",
+        "service": "해양환경",
+        "name": "NET-PH-05",
+        "address": null,
+        "device_id": 5,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.5429,
+          35.942303
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S02_001",
+        "service": "해양환경",
+        "name": "NET-PH-04",
+        "address": null,
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.55044,
+          35.946864
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S02_001",
+        "service": "해양환경",
+        "name": "NET-PH-03",
+        "address": null,
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.55684,
+          35.963597
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S02_001",
+        "service": "해양환경",
+        "name": "NET-PH-02",
+        "address": null,
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56334,
+          35.978844
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S02_001",
+        "service": "해양환경",
+        "name": "NET-PH-01",
+        "address": null,
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56334,
+          35.978844
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S02_002",
+        "service": "해양환경",
+        "name": "NET-PH-01",
+        "address": null,
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-02-003",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 26,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-02-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 25,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-03-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 24,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559608,
+          35.985344
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-04-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 22,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-03-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 21,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-02-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 19,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-01-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 17,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 16,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-04-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 10,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-04-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 9,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-03-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-03-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-02-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-02-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559608,
+          35.985344
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 ROTT-04-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 23,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 ROTT-02-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 20,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 남방파제 ROTT-01-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 18,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.551833,
+          35.9855
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포수협냉동공장맞은편 ROTT-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-12",
+        "device_id": 15,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.552333,
+          35.987417
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 공영주차장(신축) ROTT-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-11",
+        "device_id": 14,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555917,
+          35.990694
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포항구어시장맞은편 ROTT-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-34",
+        "device_id": 13,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557444,
+          35.991111
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포수협맞은편 ROTT-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-30",
+        "device_id": 12,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 ROTT-04-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 11,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 ROTT-03-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 8,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 ROTT-02-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 5,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_003",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 ROTT-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_004",
+        "service": "선박안전",
+        "name": "구룡포 북방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_005",
+        "service": "선박안전",
+        "name": "구룡포 북방파제",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_005",
+        "service": "선박안전",
+        "name": "구룡포 남방파제",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_006",
+        "service": "선박안전",
+        "name": "구룡포 북방파제",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64673,
+          35.992775
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65318,
+          35.983875
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66896,
+          35.98843
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6724,
+          35.987892
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65604,
+          35.980522
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63965,
+          35.983612
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65353,
+          35.98197
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63533,
+          35.981144
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.67062,
+          35.972065
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64386,
+          35.985104
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63472,
+          35.98352
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63722,
+          35.956783
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64452,
+          35.975388
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64893,
+          35.973656
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64015,
+          35.991886
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.62633,
+          35.98649
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66039,
+          35.98041
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66591,
+          35.98376
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63875,
+          35.970585
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64386,
+          35.97301
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.659,
+          35.960045
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64415,
+          35.980186
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64679,
+          35.98641
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64177,
+          35.97464
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64954,
+          35.965565
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66074,
+          35.95978
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6577,
+          35.965813
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63977,
+          35.98549
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.62222,
+          35.98212
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63943,
+          35.97022
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63496,
+          35.99342
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65189,
+          35.97638
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6565,
+          35.984097
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6357,
+          35.97836
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65822,
+          35.977535
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65848,
+          35.98559
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6439,
+          35.982224
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.62297,
+          35.975082
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66005,
+          35.97427
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65112,
+          35.969193
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66002,
+          35.966717
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6622,
+          35.981556
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64302,
+          35.967674
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63782,
+          35.989796
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.6423,
+          35.96334
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.64435,
+          35.996056
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65694,
+          35.98401
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.63475,
+          35.986954
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.65884,
+          35.9787
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66937,
+          35.9663
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_007",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.66937,
+          35.9663
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_008",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.5919428571425,
+          36.0044565
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_020",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.585628571428,
+          36.0009095
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_020",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.585628571428,
+          35.9973625
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_020",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.585628571428,
+          35.9938155
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_020",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.579314285714,
+          35.9973625
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_020",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.554057142857,
+          35.97608049999995
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S03_020",
+        "service": "선박안전",
+        "name": null,
+        "address": null,
+        "device_id": null,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557354,
+          35.991109
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 지표면 수위계_25#005",
+        "address": "경북 포항시 남구 구룡포읍 구룡포리 954-30",
+        "device_id": 5,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.556057,
+          35.99069
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 지표면 수위계_25#004",
+        "address": "경북 포항시 남구 구룡포읍 구룡포리 954-31",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.554646,
+          35.98947
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 지표면 수위계_25#003",
+        "address": "경북 포항시 남구 구룡포읍 호미로 216-1",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.553056,
+          35.988698
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 지표면 수위계_25#002",
+        "address": "경북 포항시 남구 구룡포읍 구룡포리 954-6",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549245,
+          35.986115
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 지표면 수위계_25#001",
+        "address": "경북 포항시 남구 병포리 585",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.546115,
+          35.984987
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 이도 강우량계_25#001",
+        "address": "경북 포항시 남구 구룡포읍 호미로 133",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557327,
+          35.991235
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항시 스마트맨홀 #03",
+        "address": "경북 포항시 구룡포읍 구룡포리 954-30",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.551115,
+          35.987373
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항시 스마트맨홀 #02",
+        "address": "경북 포항시 남구 구룡포읍 호미로 174-1",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549278,
+          35.985929
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항시 스마트맨홀 #01",
+        "address": "경북 포항시 남구 구룡포읍 호미로 152",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.550467,
+          35.987244
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_001",
+        "service": "침수예측",
+        "name": "포항 이도 하천수위계_25#002",
+        "address": "경북 포항시 남구 구룡포읍 병포리 157-279",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549278,
+          35.985929
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_003",
+        "service": "침수예측",
+        "name": "포항시 스마트맨홀 #01",
+        "address": "경북 포항시 남구 구룡포읍 호미로 152",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.550467,
+          35.987244
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_004",
+        "service": "침수예측",
+        "name": "포항 이도 하천수위계_25#002",
+        "address": "경북 포항시 남구 구룡포읍 병포리 157-279",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557354,
+          35.991109
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "구룡포수협_지표면 수위계",
+        "address": "경북 포항시 남구 구룡포읍 구룡포리 954-30",
+        "device_id": 11,
+        "sensor_type": "ROAD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.556057,
+          35.99069
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "구룡포환승센터_지표면 수위계",
+        "address": "경북 포항시 남구 구룡포읍 구룡포리 954-31",
+        "device_id": 10,
+        "sensor_type": "ROAD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.554646,
+          35.98947
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "해양경찰서_지표면 수위계",
+        "address": "경북 포항시 남구 구룡포읍 호미로 216-1",
+        "device_id": 9,
+        "sensor_type": "ROAD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.550467,
+          35.987244
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "구룡포교_하천수위계",
+        "address": "경북 포항시 남구 구룡포읍 병포리 157-279",
+        "device_id": 1,
+        "sensor_type": "RIVER"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.553056,
+          35.988698
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "구룡포파출소_지표면 수위계",
+        "address": "경북 포항시 남구 구룡포읍 구룡포리 954-6",
+        "device_id": 8,
+        "sensor_type": "ROAD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.546115,
+          35.984987
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "구룡포읍행정복지센터_강우량계",
+        "address": "경북 포항시 남구 구룡포읍 호미로 133",
+        "device_id": 5,
+        "sensor_type": "RAIN"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549245,
+          35.986115
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "하나과메기_지표면 수위계",
+        "address": "경북 포항시 남구 병포리 585",
+        "device_id": 7,
+        "sensor_type": "ROAD"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557327,
+          35.991235
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "구룡포수협_스마트맨홀",
+        "address": "경북 포항시 구룡포읍 구룡포리 954-30",
+        "device_id": 4,
+        "sensor_type": "HOLE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.551115,
+          35.987373
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "로터리종합건재_스마트맨홀",
+        "address": "경북 포항시 남구 구룡포읍 호미로 174-1",
+        "device_id": 3,
+        "sensor_type": "HOLE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549278,
+          35.985929
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S05_006",
+        "service": "침수예측",
+        "name": "하나과메기_스마트맨홀",
+        "address": "경북 포항시 남구 구룡포읍 호미로 152",
+        "device_id": 2,
+        "sensor_type": "HOLE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.551826,
+          35.98524
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "자외선 측정기",
+        "address": "경북 포항시 병포리 157-294",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559167,
+          35.984917
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 SR-02-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557917,
+          35.985667
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 SR-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560139,
+          35.985583
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 SG-12-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 8,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.55825,
+          35.984056
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 SG-11-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560639,
+          35.989056
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 SG-03-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559556,
+          35.988194
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 SG-02-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558556,
+          35.987417
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 SG-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-02-003",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 26,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-02-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 25,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-03-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 24,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559608,
+          35.985344
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-04-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 22,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-03-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 21,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-02-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 19,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-01-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 17,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 16,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-04-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 10,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-04-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 9,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-03-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-03-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-02-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-02-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_001",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557917,
+          35.985667
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_003",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 SR-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-02-003",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 26,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-02-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 25,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-03-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 24,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559608,
+          35.985344
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-04-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 22,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559033,
+          35.984879
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-03-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 21,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558226,
+          35.984143
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-02-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 19,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-01-002",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 17,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557068,
+          35.98256
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 남방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 병포리 1-5",
+        "device_id": 16,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-04-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 10,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.558444,
+          35.987397
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-04-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 9,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-03-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.559279,
+          35.988078
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-03-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-02-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.560098,
+          35.988738
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-02-002",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.557888,
+          35.98573
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S06_004",
+        "service": "보행자안전",
+        "name": "구룡포 북방파제 AI-01-001",
+        "address": "포항시 남구 구룡포읍 구룡포리 954-3",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56633,
+          36.074493
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서11",
+        "address": "포항시 남구 호미곶면 대보리 293-2",
+        "device_id": 11,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.561874,
+          36.077816
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서10",
+        "address": "포항시 남구 호미곶면 대보리 256-4",
+        "device_id": 10,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56189,
+          36.07349
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서9",
+        "address": "포항시 남구 호미곶면 대보리 332-3",
+        "device_id": 9,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.56189,
+          36.07349
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서8",
+        "address": "포항시 남구 호미곶면 대보리 332-3",
+        "device_id": 8,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.570724,
+          36.064137
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서7",
+        "address": "포항시 남구 호미곶면 대보리 21-1",
+        "device_id": 7,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.577667,
+          36.036598
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서6",
+        "address": "포항시 남구 호미곶면 강사리 202-1",
+        "device_id": 6,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.565887,
+          35.998985
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서5",
+        "address": "포항시 남구 구룡포읍 구룡포리 24-2",
+        "device_id": 5,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.562576,
+          35.98999
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서4",
+        "address": "포항시 남구 구룡포읍 구룡포리 214",
+        "device_id": 4,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555084,
+          35.989895
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서3",
+        "address": "포항시 남구 구룡포읍 구룡포리 984-1",
+        "device_id": 3,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.548065,
+          35.985863
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서2",
+        "address": "포항시 남구 구룡포읍 눌태리 61-4",
+        "device_id": 2,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549484,
+          35.986351
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_001",
+        "service": "수산물유통",
+        "name": "교통센서1",
+        "address": "포항시 남구 구룡포읍 병포리 518-1",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.549484,
+          35.986351
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_002",
+        "service": "수산물유통",
+        "name": "교통센서1",
+        "address": "포항시 남구 구룡포읍 병포리 518-1",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          129.555828,
+          35.989544
+        ]
+      },
+      "properties": {
+        "api_id": "INT_S07_003",
+        "service": "수산물유통",
+        "name": "구룡포수산업협동조합위판장",
+        "address": "경북 포항시 남구 구룡포읍 호미로 222-1",
+        "device_id": 1,
+        "sensor_type": null
+      }
+    }
+  ]
+}

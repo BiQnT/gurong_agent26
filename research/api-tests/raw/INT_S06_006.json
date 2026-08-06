@@ -1,0 +1,160 @@
+{
+  "api_id": "INT_S06_006",
+  "service": "보행자안전",
+  "name": "시간대별 이상행동 발생수",
+  "url": "https://genix.pohang-eum.kr/dpg/aicctv/avghour/datas",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "south": [
+        {
+          "hour": "2026-08-06 03:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 04:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 05:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 06:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 07:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 08:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 09:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 10:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 11:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 12:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        }
+      ],
+      "north": [
+        {
+          "hour": "2026-08-06 03:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 04:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 05:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 06:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 07:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 08:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 09:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 10:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 11:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        },
+        {
+          "hour": "2026-08-06 12:00:00",
+          "warningFallDetectionCount": 0,
+          "warningInsideDetectionCount": 0,
+          "warningApproachCount": 0,
+          "normalFallDetectionCount": 0
+        }
+      ]
+    }
+  }
+}

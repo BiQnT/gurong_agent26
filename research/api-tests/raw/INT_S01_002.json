@@ -1,0 +1,25 @@
+{
+  "api_id": "INT_S01_002",
+  "service": "대기환경",
+  "name": "측정 장비 목록_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/atmosphere/device",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 1,
+      "name": "유해물질 측정기 외1",
+      "latitude": "35.980946",
+      "longitude": "129.540324",
+      "address": "포항시 남구 구룡포읍 병포리 469-52",
+      "firm": "1.0.0",
+      "poleId": 1,
+      "nickname": "구룡포행정복지센터 남서측"
+    }
+  }
+}

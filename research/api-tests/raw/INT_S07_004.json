@@ -1,0 +1,1028 @@
+{
+  "api_id": "INT_S07_004",
+  "service": "수산물유통",
+  "name": "시간대별/차종별 교통량",
+  "url": "https://genix.pohang-eum.kr/dpg/statistics/trafficDatasPerHour",
+  "params": {
+    "serviceKey": "<REDACTED>"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "교통센서1": [
+        {
+          "time": "2026-08-06 03",
+          "car": "20",
+          "van": "0",
+          "truck": "4",
+          "lorry": "0",
+          "bus": "1",
+          "motorcycle": "3",
+          "sumCnt": "28"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "46",
+          "van": "1",
+          "truck": "6",
+          "lorry": "4",
+          "bus": "1",
+          "motorcycle": "3",
+          "sumCnt": "61"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "386",
+          "van": "5",
+          "truck": "24",
+          "lorry": "11",
+          "bus": "7",
+          "motorcycle": "4",
+          "sumCnt": "437"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "462",
+          "van": "3",
+          "truck": "50",
+          "lorry": "10",
+          "bus": "12",
+          "motorcycle": "5",
+          "sumCnt": "542"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "727",
+          "van": "8",
+          "truck": "91",
+          "lorry": "19",
+          "bus": "14",
+          "motorcycle": "8",
+          "sumCnt": "867"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "1152",
+          "van": "8",
+          "truck": "106",
+          "lorry": "23",
+          "bus": "9",
+          "motorcycle": "6",
+          "sumCnt": "1304"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "1314",
+          "van": "13",
+          "truck": "147",
+          "lorry": "20",
+          "bus": "17",
+          "motorcycle": "7",
+          "sumCnt": "1518"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "1614",
+          "van": "11",
+          "truck": "135",
+          "lorry": "13",
+          "bus": "15",
+          "motorcycle": "7",
+          "sumCnt": "1795"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "1769",
+          "van": "11",
+          "truck": "111",
+          "lorry": "15",
+          "bus": "14",
+          "motorcycle": "11",
+          "sumCnt": "1931"
+        }
+      ],
+      "교통센서2": [
+        {
+          "time": "2026-08-06 03",
+          "car": "22",
+          "van": "0",
+          "truck": "15",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "2",
+          "sumCnt": "39"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "61",
+          "van": "2",
+          "truck": "23",
+          "lorry": "4",
+          "bus": "0",
+          "motorcycle": "1",
+          "sumCnt": "91"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "160",
+          "van": "3",
+          "truck": "47",
+          "lorry": "8",
+          "bus": "4",
+          "motorcycle": "10",
+          "sumCnt": "232"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "436",
+          "van": "5",
+          "truck": "75",
+          "lorry": "13",
+          "bus": "16",
+          "motorcycle": "5",
+          "sumCnt": "550"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "660",
+          "van": "7",
+          "truck": "152",
+          "lorry": "29",
+          "bus": "12",
+          "motorcycle": "3",
+          "sumCnt": "863"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "1147",
+          "van": "7",
+          "truck": "133",
+          "lorry": "31",
+          "bus": "12",
+          "motorcycle": "7",
+          "sumCnt": "1337"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "1093",
+          "van": "17",
+          "truck": "340",
+          "lorry": "23",
+          "bus": "16",
+          "motorcycle": "9",
+          "sumCnt": "1498"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "1310",
+          "van": "13",
+          "truck": "308",
+          "lorry": "17",
+          "bus": "16",
+          "motorcycle": "12",
+          "sumCnt": "1676"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "1640",
+          "van": "15",
+          "truck": "316",
+          "lorry": "30",
+          "bus": "17",
+          "motorcycle": "18",
+          "sumCnt": "2036"
+        }
+      ],
+      "교통센서3": [
+        {
+          "time": "2026-08-06 03",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "0",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "0"
+        }
+      ],
+      "교통센서4": [
+        {
+          "time": "2026-08-06 03",
+          "car": "39",
+          "van": "2",
+          "truck": "11",
+          "lorry": "1",
+          "bus": "0",
+          "motorcycle": "2",
+          "sumCnt": "55"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "104",
+          "van": "6",
+          "truck": "39",
+          "lorry": "2",
+          "bus": "0",
+          "motorcycle": "3",
+          "sumCnt": "154"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "438",
+          "van": "9",
+          "truck": "100",
+          "lorry": "11",
+          "bus": "2",
+          "motorcycle": "9",
+          "sumCnt": "569"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "370",
+          "van": "10",
+          "truck": "91",
+          "lorry": "6",
+          "bus": "3",
+          "motorcycle": "6",
+          "sumCnt": "486"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "502",
+          "van": "12",
+          "truck": "67",
+          "lorry": "10",
+          "bus": "7",
+          "motorcycle": "7",
+          "sumCnt": "605"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "752",
+          "van": "6",
+          "truck": "157",
+          "lorry": "13",
+          "bus": "7",
+          "motorcycle": "7",
+          "sumCnt": "942"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "809",
+          "van": "7",
+          "truck": "150",
+          "lorry": "11",
+          "bus": "9",
+          "motorcycle": "11",
+          "sumCnt": "997"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "901",
+          "van": "8",
+          "truck": "306",
+          "lorry": "13",
+          "bus": "14",
+          "motorcycle": "8",
+          "sumCnt": "1250"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "1117",
+          "van": "7",
+          "truck": "189",
+          "lorry": "11",
+          "bus": "7",
+          "motorcycle": "14",
+          "sumCnt": "1345"
+        }
+      ],
+      "교통센서5": [
+        {
+          "time": "2026-08-06 03",
+          "car": "17",
+          "van": "0",
+          "truck": "4",
+          "lorry": "1",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "22"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "60",
+          "van": "1",
+          "truck": "8",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "3",
+          "sumCnt": "72"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "119",
+          "van": "3",
+          "truck": "23",
+          "lorry": "8",
+          "bus": "1",
+          "motorcycle": "7",
+          "sumCnt": "161"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "178",
+          "van": "4",
+          "truck": "36",
+          "lorry": "9",
+          "bus": "4",
+          "motorcycle": "5",
+          "sumCnt": "236"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "277",
+          "van": "7",
+          "truck": "41",
+          "lorry": "24",
+          "bus": "6",
+          "motorcycle": "8",
+          "sumCnt": "363"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "513",
+          "van": "5",
+          "truck": "48",
+          "lorry": "18",
+          "bus": "5",
+          "motorcycle": "5",
+          "sumCnt": "594"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "471",
+          "van": "11",
+          "truck": "85",
+          "lorry": "20",
+          "bus": "9",
+          "motorcycle": "9",
+          "sumCnt": "605"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "828",
+          "van": "15",
+          "truck": "93",
+          "lorry": "16",
+          "bus": "12",
+          "motorcycle": "9",
+          "sumCnt": "973"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "1058",
+          "van": "11",
+          "truck": "86",
+          "lorry": "17",
+          "bus": "8",
+          "motorcycle": "21",
+          "sumCnt": "1201"
+        }
+      ],
+      "교통센서6": [
+        {
+          "time": "2026-08-06 03",
+          "car": "4",
+          "van": "0",
+          "truck": "0",
+          "lorry": "2",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "6"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "12",
+          "van": "1",
+          "truck": "2",
+          "lorry": "3",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "18"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "29",
+          "van": "0",
+          "truck": "23",
+          "lorry": "7",
+          "bus": "2",
+          "motorcycle": "1",
+          "sumCnt": "62"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "38",
+          "van": "2",
+          "truck": "10",
+          "lorry": "10",
+          "bus": "1",
+          "motorcycle": "2",
+          "sumCnt": "63"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "34",
+          "van": "2",
+          "truck": "17",
+          "lorry": "10",
+          "bus": "2",
+          "motorcycle": "3",
+          "sumCnt": "68"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "94",
+          "van": "4",
+          "truck": "19",
+          "lorry": "17",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "134"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "83",
+          "van": "4",
+          "truck": "26",
+          "lorry": "21",
+          "bus": "1",
+          "motorcycle": "4",
+          "sumCnt": "139"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "190",
+          "van": "10",
+          "truck": "18",
+          "lorry": "13",
+          "bus": "6",
+          "motorcycle": "3",
+          "sumCnt": "240"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "286",
+          "van": "10",
+          "truck": "20",
+          "lorry": "6",
+          "bus": "2",
+          "motorcycle": "10",
+          "sumCnt": "334"
+        }
+      ],
+      "교통센서7": [
+        {
+          "time": "2026-08-06 03",
+          "car": "5",
+          "van": "0",
+          "truck": "1",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "6"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "13",
+          "van": "0",
+          "truck": "2",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "1",
+          "sumCnt": "16"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "30",
+          "van": "0",
+          "truck": "14",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "3",
+          "sumCnt": "47"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "65",
+          "van": "1",
+          "truck": "14",
+          "lorry": "11",
+          "bus": "7",
+          "motorcycle": "3",
+          "sumCnt": "101"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "73",
+          "van": "4",
+          "truck": "31",
+          "lorry": "15",
+          "bus": "5",
+          "motorcycle": "3",
+          "sumCnt": "131"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "165",
+          "van": "2",
+          "truck": "30",
+          "lorry": "18",
+          "bus": "4",
+          "motorcycle": "1",
+          "sumCnt": "220"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "148",
+          "van": "4",
+          "truck": "29",
+          "lorry": "15",
+          "bus": "4",
+          "motorcycle": "3",
+          "sumCnt": "203"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "328",
+          "van": "6",
+          "truck": "33",
+          "lorry": "14",
+          "bus": "8",
+          "motorcycle": "3",
+          "sumCnt": "392"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "528",
+          "van": "7",
+          "truck": "27",
+          "lorry": "9",
+          "bus": "4",
+          "motorcycle": "8",
+          "sumCnt": "583"
+        }
+      ],
+      "교통센서8": [
+        {
+          "time": "2026-08-06 03",
+          "car": "4",
+          "van": "0",
+          "truck": "1",
+          "lorry": "1",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "6"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "8",
+          "van": "0",
+          "truck": "4",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "3",
+          "sumCnt": "15"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "10",
+          "van": "0",
+          "truck": "12",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "2",
+          "sumCnt": "24"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "19",
+          "van": "2",
+          "truck": "10",
+          "lorry": "5",
+          "bus": "2",
+          "motorcycle": "1",
+          "sumCnt": "39"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "22",
+          "van": "2",
+          "truck": "11",
+          "lorry": "9",
+          "bus": "1",
+          "motorcycle": "2",
+          "sumCnt": "47"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "42",
+          "van": "1",
+          "truck": "11",
+          "lorry": "5",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "59"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "32",
+          "van": "3",
+          "truck": "9",
+          "lorry": "11",
+          "bus": "2",
+          "motorcycle": "2",
+          "sumCnt": "59"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "85",
+          "van": "6",
+          "truck": "9",
+          "lorry": "10",
+          "bus": "5",
+          "motorcycle": "2",
+          "sumCnt": "117"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "158",
+          "van": "7",
+          "truck": "12",
+          "lorry": "9",
+          "bus": "5",
+          "motorcycle": "2",
+          "sumCnt": "193"
+        }
+      ],
+      "교통센서9": [
+        {
+          "time": "2026-08-06 03",
+          "car": "2",
+          "van": "0",
+          "truck": "1",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "3"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "5",
+          "van": "0",
+          "truck": "2",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "7"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "14",
+          "van": "0",
+          "truck": "11",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "3",
+          "sumCnt": "28"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "17",
+          "van": "1",
+          "truck": "7",
+          "lorry": "1",
+          "bus": "2",
+          "motorcycle": "1",
+          "sumCnt": "29"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "27",
+          "van": "1",
+          "truck": "10",
+          "lorry": "4",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "42"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "39",
+          "van": "1",
+          "truck": "9",
+          "lorry": "5",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "54"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "25",
+          "van": "0",
+          "truck": "18",
+          "lorry": "6",
+          "bus": "2",
+          "motorcycle": "2",
+          "sumCnt": "53"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "80",
+          "van": "2",
+          "truck": "12",
+          "lorry": "6",
+          "bus": "4",
+          "motorcycle": "3",
+          "sumCnt": "107"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "135",
+          "van": "4",
+          "truck": "13",
+          "lorry": "6",
+          "bus": "4",
+          "motorcycle": "2",
+          "sumCnt": "164"
+        }
+      ],
+      "교통센서10": [
+        {
+          "time": "2026-08-06 03",
+          "car": "7",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "7"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "10",
+          "van": "0",
+          "truck": "2",
+          "lorry": "1",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "13"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "28",
+          "van": "0",
+          "truck": "28",
+          "lorry": "2",
+          "bus": "3",
+          "motorcycle": "5",
+          "sumCnt": "66"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "36",
+          "van": "0",
+          "truck": "47",
+          "lorry": "0",
+          "bus": "6",
+          "motorcycle": "4",
+          "sumCnt": "93"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "117",
+          "van": "2",
+          "truck": "45",
+          "lorry": "3",
+          "bus": "9",
+          "motorcycle": "3",
+          "sumCnt": "179"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "136",
+          "van": "2",
+          "truck": "18",
+          "lorry": "4",
+          "bus": "14",
+          "motorcycle": "2",
+          "sumCnt": "176"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "87",
+          "van": "1",
+          "truck": "30",
+          "lorry": "12",
+          "bus": "13",
+          "motorcycle": "3",
+          "sumCnt": "146"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "153",
+          "van": "2",
+          "truck": "35",
+          "lorry": "9",
+          "bus": "12",
+          "motorcycle": "5",
+          "sumCnt": "216"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "197",
+          "van": "4",
+          "truck": "11",
+          "lorry": "6",
+          "bus": "10",
+          "motorcycle": "3",
+          "sumCnt": "231"
+        }
+      ],
+      "교통센서11": [
+        {
+          "time": "2026-08-06 03",
+          "car": "1",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "1"
+        },
+        {
+          "time": "2026-08-06 04",
+          "car": "5",
+          "van": "0",
+          "truck": "0",
+          "lorry": "0",
+          "bus": "0",
+          "motorcycle": "0",
+          "sumCnt": "5"
+        },
+        {
+          "time": "2026-08-06 05",
+          "car": "30",
+          "van": "0",
+          "truck": "4",
+          "lorry": "1",
+          "bus": "0",
+          "motorcycle": "1",
+          "sumCnt": "36"
+        },
+        {
+          "time": "2026-08-06 06",
+          "car": "32",
+          "van": "0",
+          "truck": "4",
+          "lorry": "0",
+          "bus": "5",
+          "motorcycle": "2",
+          "sumCnt": "43"
+        },
+        {
+          "time": "2026-08-06 07",
+          "car": "29",
+          "van": "1",
+          "truck": "8",
+          "lorry": "2",
+          "bus": "7",
+          "motorcycle": "1",
+          "sumCnt": "48"
+        },
+        {
+          "time": "2026-08-06 08",
+          "car": "60",
+          "van": "4",
+          "truck": "5",
+          "lorry": "2",
+          "bus": "5",
+          "motorcycle": "3",
+          "sumCnt": "79"
+        },
+        {
+          "time": "2026-08-06 09",
+          "car": "75",
+          "van": "2",
+          "truck": "7",
+          "lorry": "7",
+          "bus": "9",
+          "motorcycle": "5",
+          "sumCnt": "105"
+        },
+        {
+          "time": "2026-08-06 10",
+          "car": "168",
+          "van": "4",
+          "truck": "9",
+          "lorry": "3",
+          "bus": "4",
+          "motorcycle": "10",
+          "sumCnt": "198"
+        },
+        {
+          "time": "2026-08-06 11",
+          "car": "257",
+          "van": "3",
+          "truck": "9",
+          "lorry": "0",
+          "bus": "6",
+          "motorcycle": "3",
+          "sumCnt": "278"
+        }
+      ]
+    }
+  }
+}

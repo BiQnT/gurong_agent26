@@ -1,0 +1,66 @@
+{
+  "api_id": "INT_S01_011",
+  "service": "대기환경",
+  "name": "유해물질 통계",
+  "url": "https://genix.pohang-eum.kr/dpg/atmosphere/sensor/stats/history",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "startDate": "20260804",
+    "endDate": "20260805"
+  },
+  "http_status": 200,
+  "response": {
+    "diffData": {
+      "diffAvgVal": 1.0,
+      "diffMaxVal": 0.0,
+      "diffMinVal": 0.0
+    },
+    "staticGenixCalBeforeDay": {
+      "startDate": "20260804",
+      "endDate": "20260804",
+      "avgVal": 1885.0,
+      "maxVal": 36000.0,
+      "minVal": 0.0
+    },
+    "staticGenixCal": {
+      "startDate": "20260805",
+      "endDate": "20260805",
+      "avgVal": 1886.0,
+      "maxVal": 36000.0,
+      "minVal": 0.0
+    },
+    "staticGenixLinear": {
+      "hour0": "1824.52",
+      "hour1": "1920.49",
+      "hour2": "2025.32",
+      "hour3": "1919.79",
+      "hour4": "1919.09",
+      "hour5": "1921.60",
+      "hour6": "2023.93",
+      "hour7": "2027.03",
+      "hour8": "1923.15",
+      "hour9": "1738.96",
+      "hour10": "1738.83",
+      "hour11": "1739.39",
+      "hour12": "1739.68",
+      "hour13": "1738.02",
+      "hour14": "1916.58",
+      "hour15": "1736.92",
+      "hour16": "1818.90",
+      "hour17": "1914.82",
+      "hour18": "1916.04",
+      "hour19": "1919.58",
+      "hour20": "1916.83",
+      "hour21": "2022.49",
+      "hour22": "2021.02",
+      "hour23": "2018.65"
+    },
+    "staticGenixPie": {
+      "lv1": 0,
+      "lv2": 14515,
+      "lv3": 5551,
+      "lv4": 169,
+      "lv5": 1492
+    }
+  }
+}

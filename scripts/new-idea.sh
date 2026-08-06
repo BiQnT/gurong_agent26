@@ -32,15 +32,38 @@ if [[ -n "$(git status --porcelain)" ]]; then
 	exit 1
 fi
 
-# 다음 번호 = 기존 ideas/NNN-* 중 최대값 + 1
+# 다음 번호 = 이미 쓰인 번호 중 최대값 + 1
+#
+# 로컬 폴더만 보면 안 된다. 확정 전 아이디어는 main 에 머지되지 않으므로
+# main 에서 브랜치를 파는 사람이 전부 001 을 받아 번호가 겹친다. 실제로 겹쳤다.
+# 그래서 로컬 폴더 + 로컬 브랜치 + **원격 브랜치**를 모두 훑는다.
 next=1
+bump() { # $1 = 세 자리 번호
+	local n="$1"
+	[[ "$n" =~ ^[0-9]{3}$ ]] || return 0
+	# 10진수로 강제 (008 같은 값이 8진수로 해석되지 않도록)
+	(( 10#$n >= next )) && next=$((10#$n + 1))
+}
+
 for d in ideas/[0-9][0-9][0-9]-*/; do
 	[[ -d "$d" ]] || continue
 	n=$(basename "$d")
-	n=${n%%-*}
-	# 10진수로 강제 (008 같은 값이 8진수로 해석되지 않도록)
-	(( 10#$n >= next )) && next=$((10#$n + 1))
+	bump "${n%%-*}"
 done
+
+for b in $(git branch --format='%(refname:short)' | grep -oE '^idea/[0-9]{3}' || true); do
+	bump "${b#idea/}"
+done
+
+# 원격을 못 읽어도(오프라인 등) 진행은 하되, 번호가 겹칠 수 있음을 알린다.
+if remote_branches=$(git ls-remote --heads origin 'refs/heads/idea/*' 2>/dev/null); then
+	for b in $(echo "$remote_branches" | grep -oE 'idea/[0-9]{3}' || true); do
+		bump "${b#idea/}"
+	done
+else
+	echo "경고: 원격 브랜치를 못 읽었다. 번호가 팀원과 겹칠 수 있으니 push 전에 확인할 것." >&2
+fi
+
 num=$(printf "%03d" "$next")
 
 dir="ideas/${num}-${slug}"

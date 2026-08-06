@@ -1,0 +1,22 @@
+{
+  "api_id": "INT_S02_002",
+  "service": "해양환경",
+  "name": "측정 장비 목록_단일",
+  "url": "https://genix.pohang-eum.kr/dpg/marine/device",
+  "params": {
+    "serviceKey": "<REDACTED>",
+    "id": "1"
+  },
+  "http_status": 200,
+  "response": {
+    "id": "1",
+    "status": "success",
+    "data": {
+      "id": 1,
+      "name": "NET-PH-01",
+      "latitude": "35.978844",
+      "longitude": "129.56334",
+      "nickname": "구룡포 항 연안"
+    }
+  }
+}
