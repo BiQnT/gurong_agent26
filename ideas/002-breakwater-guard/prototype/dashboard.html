@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>구룡포 방파제 안전 모니터링</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #131211;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+
+    --good: #0ca30c;
+    --warning: #fab219;
+    --critical: #d03b3b;
+
+    --south: #3987e5;   /* categorical slot 1 */
+    --north: #d95926;   /* categorical slot 2 */
+    --uv: #199e70;       /* categorical slot 3 */
+    --wind: #c98500;     /* categorical slot 4 */
+
+    --accent: #3987e5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: var(--page); color: var(--ink); padding: 24px; font-variant-numeric: proportional-nums;
+  }
+  a { color: inherit; }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
+  h1 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: 12.5px; }
+  .top-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+
+  .banner { display: inline-flex; align-items: center; gap: 6px; background: rgba(12,163,12,0.12); border: 1px solid rgba(12,163,12,0.35); color: var(--good); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .banner.off { background: rgba(250,178,25,0.10); border-color: rgba(250,178,25,0.35); color: var(--warning); }
+
+  .toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); cursor: pointer; user-select: none; }
+  .toggle input { accent-color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 940px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; margin-bottom: 18px;
+  }
+  .card h2 {
+    font-size: 12px; margin: 0 0 14px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .07em; font-weight: 700; display: flex; align-items: center; gap: 8px;
+  }
+  .card .hint { font-size: 12px; color: var(--muted); margin: -8px 0 12px; line-height: 1.5; }
+
+  /* KPI tiles */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .kpi .val { font-size: 26px; font-weight: 700; line-height: 1.15; }
+  .kpi .val small { font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 2px; }
+  .kpi .lbl { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+  /* Zone status */
+  .zone-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--grid); }
+  .zone-row:first-of-type { border-top: none; }
+  .zone-name { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; }
+  .zone-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .zone-dot.south { background: var(--south); }
+  .zone-dot.north { background: var(--north); }
+
+  .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .status-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; }
+  .status-pill.양호 { background: rgba(12,163,12,0.14); color: var(--good); }
+  .status-pill.양호::before { background: var(--good); }
+  .status-pill.주의 { background: rgba(250,178,25,0.14); color: var(--warning); }
+  .status-pill.주의::before { background: var(--warning); }
+  .status-pill.위험 { background: rgba(208,59,59,0.16); color: var(--critical); }
+  .status-pill.위험::before { background: var(--critical); }
+  .status-pill.수동, .status-pill.승인 { background: rgba(255,255,255,0.08); color: var(--ink-2); }
+  .status-pill.수동::before, .status-pill.승인::before { background: var(--ink-2); }
+
+  /* Charts */
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin-bottom: 10px; }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+  canvas { width: 100%; height: 180px; display: block; }
+
+  /* Alerts */
+  .alert-list { display: flex; flex-direction: column; gap: 10px; max-height: 760px; overflow-y: auto; padding-right: 2px; }
+  .alert { border-left: 3px solid var(--axis); padding: 10px 12px; background: var(--surface-2); border-radius: 0 8px 8px 0; }
+  .alert.위험 { border-left-color: var(--critical); }
+  .alert.주의 { border-left-color: var(--warning); }
+  .alert .meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+  .alert .summary { font-size: 13.5px; line-height: 1.5; margin-bottom: 4px; }
+  .alert .status-line { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .alert .script-row { display: flex; gap: 6px; margin-top: 8px; }
+  .alert .played-script { font-size: 12px; color: var(--ink-2); background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px 8px; margin-top: 6px; }
+
+  textarea, input[type=text], select {
+    background: var(--page); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 7px; padding: 7px 9px; font-size: 13px; font-family: inherit;
+  }
+  textarea { width: 100%; resize: vertical; }
+  select { cursor: pointer; }
+
+  button {
+    background: var(--accent); color: white; border: none; border-radius: 7px;
+    padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    transition: background .1s;
+  }
+  button:hover { background: #4f97ea; }
+  button:disabled { background: var(--axis); color: var(--muted); cursor: default; }
+  button.secondary { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border); }
+  button.secondary:hover { background: #23221f; color: var(--ink); }
+
+  .badge { font-size: 10.5px; padding: 2px 7px; border-radius: 5px; background: rgba(255,255,255,0.06); color: var(--ink-2); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+  .badge.llm { background: rgba(57,135,229,0.16); color: var(--south); }
+  .badge.human { background: rgba(217,89,38,0.16); color: var(--north); }
+
+  .empty { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
+  .field-row { display: flex; gap: 8px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌊 구룡포 방파제 안전 모니터링</h1>
+    <div class="sub">E-UM 디지털트윈 실시간 데이터 · 이상행동·자외선·풍속·기온 통합 판정</div>
+  </div>
+</header>
+
+<div class="top-meta">
+  <span class="sub" id="updatedAt">로딩 중…</span>
+  <span class="banner" id="llmBanner" style="display:none"></span>
+  <label class="toggle"><input type="checkbox" id="autoSpeak" checked /> 🔊 "위험" 등급 알림 자동 음성 안내</label>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>실시간 지표</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="val" id="valUv">–</div><div class="lbl">자외선 지수</div></div>
+        <div class="kpi"><div class="val" id="valWind">–<small>m/s</small></div><div class="lbl">풍속</div></div>
+        <div class="kpi"><div class="val" id="valTemp">–<small>℃</small></div><div class="lbl">기온</div></div>
+      </div>
+      <div class="zone-row">
+        <span class="zone-name"><span class="zone-dot south"></span>남방파제</span>
+        <span id="southPill" class="status-pill">–</span>
+      </div>
+      <div class="zone-row">
+        <span class="zone-name"><span class="zone-dot north"></span>북방파제</span>
+        <span id="northPill" class="status-pill">–</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>구역별 위험 점수 추이</h2>
+      <div class="legend">
+        <span class="item"><span class="dot" style="background:var(--south)"></span>남방파제</span>
+        <span class="item"><span class="dot" style="background:var(--north)"></span>북방파제</span>
+      </div>
+      <canvas id="scoreChart" width="600" height="180"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>자외선 · 풍속 추이</h2>
+      <div class="legend">
+        <span class="item"><span class="dot" style="background:var(--uv)"></span>자외선 지수</span>
+        <span class="item"><span class="dot" style="background:var(--wind)"></span>풍속 (m/s)</span>
+      </div>
+      <canvas id="envChart" width="600" height="180"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>📢 수동 방송</h2>
+      <div class="hint">담당자가 직접 문구를 써서 즉시 방송한다. AI 판정을 기다릴 필요 없이 언제든 쓸 수 있다.</div>
+      <div class="field-row">
+        <select id="manualZone">
+          <option value="남방파제">남방파제</option>
+          <option value="북방파제">북방파제</option>
+          <option value="방파제 전체">방파제 전체</option>
+        </select>
+      </div>
+      <textarea id="manualScript" rows="2" placeholder="방송할 문구를 입력하세요"></textarea>
+      <div class="script-row" style="margin-top:8px;">
+        <button onclick="manualBroadcast()">🔊 방송</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧪 테스트 알림 발생 (디버그용)</h2>
+      <div class="hint">실제 센서 이벤트를 기다리지 않고, 판정 → AI(또는 템플릿) 문구 생성 → 승인 대기 → 음성 방송까지 전체 흐름을 강제로 한 번 태워본다.</div>
+      <div class="field-row">
+        <select id="testZone">
+          <option value="북방파제">북방파제</option>
+          <option value="남방파제">남방파제</option>
+          <option value="방파제 전체">방파제 전체</option>
+        </select>
+      </div>
+      <div id="testButtons" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>경보 피드</h2>
+    <div class="hint">⏳ <b>방송 대기</b> = 사람이 문구를 확인/수정한 뒤 "🔊 방송"을 눌러야 소리가 난다 · ✅ <b>방송 완료</b> = 이미 재생/기록됨</div>
+    <div class="alert-list" id="alerts"><div class="empty">아직 경보 없음</div></div>
+  </div>
+</div>
+
+<script>
+const STATUS_META = {
+  "대기승인": { label: "⏳ 방송 대기 (확인 필요)", pillClass: "승인" },
+  "자동방송(로컬 TTS)": { label: "🔊 자동 방송됨 (서버 PC에서 재생)", pillClass: "수동" },
+  "관리자 방송 완료": { label: "✅ 담당자가 방송함", pillClass: "수동" },
+};
+const GENERATED_BY_META = {
+  llm: { label: "AI가 방금 작성", cls: "llm" },
+  template: { label: "사전 정의 문구", cls: "" },
+  human: { label: "사람이 직접 작성", cls: "human" },
+};
+
+function pickKoreanVoice() {
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  return voices.find(v => v.lang && v.lang.startsWith('ko')) || null;
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = pickKoreanVoice();
+  if (voice) utter.voice = voice;
+  utter.lang = 'ko-KR';
+  window.speechSynthesis.speak(utter);
+}
+
+async function manualBroadcast() {
+  const zone = document.getElementById('manualZone').value;
+  const script = document.getElementById('manualScript').value.trim();
+  if (!script) return;
+  speak(script);
+  await fetch('/api/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ zone_label: zone, script, level: '수동' }),
+  });
+  document.getElementById('manualScript').value = '';
+  loadAlerts();
+}
+
+async function approveBroadcast(btn, zoneLabel, textareaId) {
+  const script = document.getElementById(textareaId).value.trim();
+  if (!script) return;
+  speak(script);
+  await fetch('/api/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ zone_label: zoneLabel, script, level: '승인' }),
+  });
+  btn.textContent = '방송 완료 ✓';
+  btn.disabled = true;
+  setTimeout(loadAlerts, 800);
+}
+
+// ---- 차트: 축/눈금/범례가 있는 최소 라인 차트 ----
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const mag = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / mag;
+  const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return step * mag;
+}
+
+function drawChart(canvas, series, colors, timestamps) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 600, cssH = 180;
+  canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const padL = 34, padR = 8, padT = 8, padB = 18;
+  const w = cssW - padL - padR, h = cssH - padT - padB;
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const allVals = series.flat().filter(v => v !== null && v !== undefined);
+  const top = niceMax(Math.max(1, ...allVals));
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
+  const axisColor = getComputedStyle(document.documentElement).getPropertyValue('--axis').trim();
+  const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+
+  // Y gridlines + labels (0, mid, top)
+  ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.font = '10px system-ui';
+  ctx.fillStyle = mutedColor; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  [0, 0.5, 1].forEach(frac => {
+    const y = padT + h - frac * h;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
+    const value = Math.round(frac * top * 10) / 10;
+    ctx.fillText(String(value), padL - 6, y);
+  });
+
+  // baseline (x axis)
+  ctx.strokeStyle = axisColor;
+  ctx.beginPath(); ctx.moveTo(padL, padT + h); ctx.lineTo(padL + w, padT + h); ctx.stroke();
+
+  // series lines
+  series.forEach((points, i) => {
+    const valid = points.map((v, idx) => [idx, v]).filter(([, v]) => v !== null && v !== undefined);
+    if (valid.length < 2) return;
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    valid.forEach(([idx, v], j) => {
+      const x = padL + (idx / (points.length - 1 || 1)) * w;
+      const y = padT + h - (v / top) * h;
+      j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // last point marker
+    const [lastIdx, lastV] = valid[valid.length - 1];
+    const lx = padL + (lastIdx / (points.length - 1 || 1)) * w;
+    const ly = padT + h - (lastV / top) * h;
+    ctx.fillStyle = colors[i];
+    ctx.beginPath(); ctx.arc(lx, ly, 3, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // X axis labels: first / last timestamp (HH:MM)
+  if (timestamps && timestamps.length >= 2) {
+    ctx.fillStyle = mutedColor; ctx.font = '10px system-ui'; ctx.textBaseline = 'alphabetic';
+    const fmt = (ts) => { const d = new Date(ts); return isNaN(d) ? '' : d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }); };
+    ctx.textAlign = 'left'; ctx.fillText(fmt(timestamps[0]), padL, cssH - 4);
+    ctx.textAlign = 'right'; ctx.fillText(fmt(timestamps[timestamps.length - 1]), padL + w, cssH - 4);
+  }
+}
+
+let lastAlertTimestamps = new Set();
+
+function renderAlerts(alerts) {
+  const container = document.getElementById('alerts');
+  if (!alerts.length) { container.innerHTML = '<div class="empty">아직 경보 없음 — 우측 "테스트 알림 발생"으로 미리 확인 가능</div>'; return; }
+
+  container.innerHTML = alerts.map((a, i) => {
+    const genMeta = GENERATED_BY_META[a.generated_by] || { label: a.generated_by, cls: '' };
+    const statusMeta = STATUS_META[a.status] || { label: a.status, pillClass: '수동' };
+    const needsApproval = a.status === '대기승인';
+    const taId = `script-${i}`;
+    return `
+      <div class="alert ${a.level}">
+        <div class="meta">
+          <span>${a.timestamp}</span>
+          <span class="status-pill ${a.level}">${a.level}</span>
+          <span>${a.zone_label}</span>
+          <span>· ${a.kind}</span>
+          <span class="badge ${genMeta.cls}">${genMeta.label}</span>
+        </div>
+        <div class="summary">${a.summary}</div>
+        ${needsApproval ? `
+          <textarea id="${taId}" rows="2">${a.script}</textarea>
+          <div class="script-row">
+            <button onclick="approveBroadcast(this, '${a.zone_label}', '${taId}')">🔊 방송</button>
+          </div>
+        ` : `<div class="played-script">📣 ${a.script}</div>`}
+        <div class="status-line">${statusMeta.label}</div>
+      </div>`;
+  }).join('');
+
+  if (document.getElementById('autoSpeak').checked) {
+    alerts.forEach(a => {
+      if (a.level === '위험' && !lastAlertTimestamps.has(a.timestamp)) {
+        speak(a.script);
+      }
+    });
+  }
+  lastAlertTimestamps = new Set(alerts.map(a => a.timestamp));
+}
+
+async function loadAlerts() {
+  const alertRes = await fetch('/api/alerts?limit=30');
+  const alerts = await alertRes.json();
+  renderAlerts(alerts);
+}
+
+async function loadConfig() {
+  const res = await fetch('/api/config');
+  const cfg = await res.json();
+  const el = document.getElementById('llmBanner');
+  el.style.display = 'inline-flex';
+  if (cfg.llm_enabled) {
+    el.className = 'banner';
+    el.textContent = '🤖 AI 문구 생성: 켜짐 (Claude API 사용 중)';
+  } else {
+    el.className = 'banner off';
+    el.textContent = '📋 AI 문구 생성: 꺼짐 — 사전 정의 문구 사용 중 (.env에 ANTHROPIC_API_KEY 추가 시 활성화)';
+  }
+}
+
+async function loadSnapshot() {
+  const res = await fetch('/api/snapshot?' + Date.now());
+  const data = await res.json();
+  document.getElementById('updatedAt').textContent = data.updated_at ? `마지막 업데이트 ${data.updated_at}` : '아직 데이터 없음 (monitor.py 실행 확인)';
+
+  const history = data.history || [];
+  const last = history[history.length - 1];
+  if (last) {
+    document.getElementById('valUv').textContent = last.uv_index ?? '–';
+    document.getElementById('valWind').innerHTML = (last.wind_speed ?? '–') + '<small>m/s</small>';
+    document.getElementById('valTemp').innerHTML = (last.temperature ?? '–') + '<small>℃</small>';
+    const south = last.zones?.south, north = last.zones?.north;
+    document.getElementById('southPill').className = `status-pill ${south?.level || ''}`;
+    document.getElementById('southPill').textContent = `${south?.level || '–'} · ${south?.score ?? 0}점`;
+    document.getElementById('northPill').className = `status-pill ${north?.level || ''}`;
+    document.getElementById('northPill').textContent = `${north?.level || '–'} · ${north?.score ?? 0}점`;
+  }
+
+  const timestamps = history.map(h => h.timestamp);
+  drawChart(
+    document.getElementById('scoreChart'),
+    [history.map(h => h.zones?.south?.score ?? null), history.map(h => h.zones?.north?.score ?? null)],
+    ['#3987e5', '#d95926'],
+    timestamps,
+  );
+  drawChart(
+    document.getElementById('envChart'),
+    [history.map(h => h.uv_index ?? null), history.map(h => h.wind_speed ?? null)],
+    ['#199e70', '#c98500'],
+    timestamps,
+  );
+}
+
+const TEST_KINDS = ["실족감지", "접근경고", "침입감지", "보행자 이상감지", "위험도 상승", "기상 위험"];
+
+function renderTestButtons() {
+  const container = document.getElementById('testButtons');
+  container.innerHTML = TEST_KINDS.map(kind =>
+    `<button class="secondary" onclick="triggerTest('${kind}')">${kind}</button>`
+  ).join('');
+}
+
+async function triggerTest(kind) {
+  const zone_label = document.getElementById('testZone').value;
+  const res = await fetch('/api/debug/trigger', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind, zone_label }),
+  });
+  if (!res.ok) { console.error(await res.text()); return; }
+  loadAlerts();
+}
+
+function tick() { loadSnapshot(); loadAlerts(); }
+renderTestButtons();
+loadConfig();
+tick();
+setInterval(tick, 2000);
+setInterval(loadConfig, 15000);
+if ('speechSynthesis' in window) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => {}; }
+</script>
+
+</body>
+</html>

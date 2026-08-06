@@ -12,9 +12,13 @@ GET 엔드포인트를 호출하고 공통 응답 껍데기를 벗겨서 돌려�
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 BASE_URL = "https://genix.pohang-eum.kr"
 TIMEOUT_SECONDS = 10

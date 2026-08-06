@@ -1,0 +1,4 @@
+# 이 프로토타입이 실행 중 생성하는 파일 — 코드가 아니라 런타임 산출물이라 커밋하지 않는다
+dashboard_data.json
+alerts.jsonl
+*.log
