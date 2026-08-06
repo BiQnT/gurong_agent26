@@ -129,6 +129,42 @@ def clear_alerts():
     return jsonify({"cleared": True})
 
 
+@app.post("/api/alerts/complete")
+def complete_alert():
+    """대기 중인 알림 하나를 '방송 완료'로 제자리에서 갱신한다 (새 줄 추가 아님).
+
+    사람이 승인 버튼을 눌렀든 자동 음성 안내가 처리했든 여기로 온다. 방송은 알림
+    하나당 정확히 한 번만 일어나야 하므로, 이미 대기승인이 아닌 알림(=이미 처리됨)에는
+    아무 효과가 없다 — 프런트에서 동시에 두 번 호출해도(자동+수동 경쟁) 실제로 완료
+    처리되는 건 한 번뿐이라는 뜻. 이게 "음성이 두 번 난다" 버그의 근본 수정이다.
+    """
+    body = request.get_json(force=True, silent=True) or {}
+    timestamp = body.get("timestamp")
+    edited_script = body.get("script")
+    auto = bool(body.get("auto"))
+    if not timestamp or not ALERTS_PATH.exists():
+        return jsonify({"error": "timestamp가 필요하다"}), 400
+
+    lines = ALERTS_PATH.read_text(encoding="utf-8").splitlines()
+    updated = None
+    new_lines = []
+    for line in lines:
+        entry = json.loads(line)
+        if updated is None and entry.get("timestamp") == timestamp and entry.get("status") == "대기승인":
+            if edited_script:
+                entry["script"] = edited_script
+            entry["status"] = "자동 방송 완료" if auto else "방송 완료 (담당자 확인)"
+            updated = entry
+        new_lines.append(json.dumps(entry, ensure_ascii=False))
+    ALERTS_PATH.write_text("\n".join(new_lines) + ("\n" if new_lines else ""), encoding="utf-8")
+
+    if updated is None:
+        # 이미 다른 요청이 먼저 완료 처리했거나(정상적인 경쟁 상황), 애초에 없는 timestamp.
+        # 에러가 아니라 "할 일 없음"으로 취급 — 프런트가 재생을 또 시도하지 않게 한다.
+        return jsonify({"already_handled": True}), 200
+    return jsonify(updated)
+
+
 @app.post("/api/broadcast")
 def broadcast():
     """사람이 대시보드에서 (AI 초안을 수정했든, 완전 새로 썼든) 방송을 확정했을 때 기록한다.

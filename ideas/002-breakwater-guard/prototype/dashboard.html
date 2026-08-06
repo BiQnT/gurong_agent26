@@ -160,6 +160,9 @@
   <span class="sub" id="updatedAt">로딩 중…</span>
   <span class="banner" id="llmBanner" style="display:none"></span>
   <label class="toggle"><input type="checkbox" id="autoSpeak" checked /> 🔊 "위험" 등급 알림 자동 음성 안내</label>
+  <label class="toggle">🎙 목소리
+    <select id="voiceSelect" onchange="localStorage.setItem('breakwaterVoice', this.value)"></select>
+  </label>
 </div>
 
 <div class="grid">
@@ -276,7 +279,8 @@
 <script>
 const STATUS_META = {
   "대기승인": { label: "⏳ 방송 대기 (확인 필요)", pillClass: "승인" },
-  "자동방송(로컬 TTS)": { label: "🔊 자동 방송됨 (서버 PC에서 재생)", pillClass: "수동" },
+  "자동 방송 완료": { label: "🔊 자동 음성 안내로 재생됨", pillClass: "수동" },
+  "방송 완료 (담당자 확인)": { label: "✅ 담당자가 확인 후 방송함", pillClass: "수동" },
   "관리자 방송 완료": { label: "✅ 담당자가 방송함", pillClass: "수동" },
 };
 const GENERATED_BY_META = {
@@ -285,9 +289,38 @@ const GENERATED_BY_META = {
   human: { label: "사람이 직접 작성", cls: "human" },
 };
 
+// 알림당 음성 재생은 정확히 한 번만 — 자동 안내와 수동 승인이 같은 알림을 동시에
+// 처리하려는 경쟁을 막는 클라이언트 측 잠금. 서버의 /api/alerts/complete도 같은
+// timestamp를 두 번 완료 처리하지 않도록 한 번 더 막아준다 (이중 방어).
+const speakLock = new Set();
+
 function pickKoreanVoice() {
   const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  return voices.find(v => v.lang && v.lang.startsWith('ko')) || null;
+  if (!voices.length) return null;
+  const sel = document.getElementById('voiceSelect');
+  if (sel && sel.value) {
+    const chosen = voices.find(v => v.name === sel.value);
+    if (chosen) return chosen;
+  }
+  // "Yuna"는 macOS의 자연스러운 한국어 여성 음성이다. 이름순으로 그냥 first-match하면
+  // "Eddy" 같은 로봇 음성이 먼저 걸려서 어색했던 게 원래 버그였다 — 이름으로 명시 우선.
+  return voices.find(v => v.name === 'Yuna')
+    || voices.find(v => v.lang && v.lang.startsWith('ko'))
+    || null;
+}
+
+function populateVoiceSelect() {
+  const sel = document.getElementById('voiceSelect');
+  if (!sel) return;
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  const koVoices = voices.filter(v => v.lang && v.lang.startsWith('ko'));
+  const list = koVoices.length ? koVoices : voices;
+  if (!list.length) return;
+  const saved = localStorage.getItem('breakwaterVoice');
+  sel.innerHTML = list.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+  const preferred = (saved && list.some(v => v.name === saved)) ? saved
+    : (list.find(v => v.name === 'Yuna')?.name || list[0].name);
+  sel.value = preferred;
 }
 
 function speak(text) {
@@ -313,18 +346,27 @@ async function manualBroadcast() {
   loadAlerts();
 }
 
-async function approveBroadcast(btn, zoneLabel, textareaId) {
-  const script = document.getElementById(textareaId).value.trim();
-  if (!script) return;
+// timestamp가 있으면 "대기 중인 기존 알림을 완료 처리"(음성 1회만), 없으면 옛 방식(수동 방송 새 기록).
+async function completeAlert(timestamp, script, auto) {
+  if (speakLock.has(timestamp)) return; // 이미 처리 중/처리됨 — 두 번 재생하지 않는다
+  speakLock.add(timestamp);
   speak(script);
-  await fetch('/api/broadcast', {
+  const res = await fetch('/api/alerts/complete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ zone_label: zoneLabel, script, level: '승인' }),
+    body: JSON.stringify({ timestamp, script, auto }),
   });
+  loadAlerts();
+  return res.json();
+}
+
+async function approveBroadcast(btn, zoneLabel, textareaId, timestamp) {
+  const script = document.getElementById(textareaId).value.trim();
+  if (!script) return;
+  btn.disabled = true; // await 전에 바로 비활성화 — 더블클릭으로 인한 중복 방송 방지
+  btn.textContent = '방송 중…';
+  await completeAlert(timestamp, script, false);
   btn.textContent = '방송 완료 ✓';
-  btn.disabled = true;
-  setTimeout(loadAlerts, 800);
 }
 
 // ---- 차트: 축/눈금/임계값 기준선/호버 크로스헤어가 있는 최소 라인 차트 ----
@@ -492,8 +534,6 @@ function attachHover(canvasId, seriesLabels) {
   });
 }
 
-let lastAlertTimestamps = new Set();
-
 function renderAlerts(alerts) {
   const container = document.getElementById('alerts');
   if (!alerts.length) { container.innerHTML = '<div class="empty">아직 경보 없음 — 우측 "테스트 알림 발생"으로 미리 확인 가능</div>'; return; }
@@ -517,21 +557,24 @@ function renderAlerts(alerts) {
         ${needsApproval ? `
           <textarea id="${taId}" rows="2">${a.script}</textarea>
           <div class="script-row">
-            <button onclick="approveBroadcast(this, '${a.zone_label}', '${taId}')">🔊 방송</button>
+            <button onclick="approveBroadcast(this, '${a.zone_label}', '${taId}', '${a.timestamp}')">🔊 방송</button>
           </div>
         ` : `<div class="played-script">📣 ${a.script}</div>`}
         <div class="status-line">${statusMeta.label}</div>
       </div>`;
   }).join('');
 
+  // "위험" 등급이면서 아직 대기승인 상태인 알림만 자동으로 음성 안내 + 완료 처리한다.
+  // status를 조건으로 쓰기 때문에(로컬 변수가 아니라 서버 상태), 이미 완료된 알림은
+  // 다음 폴링에서 다시 여기 걸리지 않는다 — speakLock은 같은 폴링 주기 안에서의
+  // 동시 호출만 막으면 되는 얇은 방어선이다.
   if (document.getElementById('autoSpeak').checked) {
     alerts.forEach(a => {
-      if (a.level === '위험' && !lastAlertTimestamps.has(a.timestamp)) {
-        speak(a.script);
+      if (a.level === '위험' && a.status === '대기승인') {
+        completeAlert(a.timestamp, a.script, true);
       }
     });
   }
-  lastAlertTimestamps = new Set(alerts.map(a => a.timestamp));
 }
 
 async function deleteAlert(timestamp) {
@@ -662,7 +705,11 @@ loadConfig();
 tick();
 setInterval(tick, 2000);
 setInterval(loadConfig, 15000);
-if ('speechSynthesis' in window) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => {}; }
+
+if ('speechSynthesis' in window) {
+  populateVoiceSelect(); // 이미 로드돼 있으면 바로 채워짐
+  window.speechSynthesis.onvoiceschanged = populateVoiceSelect; // 대부분 브라우저는 비동기로 로드됨
+}
 </script>
 
 </body>
