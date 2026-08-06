@@ -9,7 +9,7 @@
 cp .env.example .env      # EUM_SERVICE_KEY 채우기
 
 # 상황 스냅샷 — 장비 목록 + 자외선 + 기상 + 이상행동
-python3 ideas/001-breakwater-broadcast/prototype/eum_client.py
+python3 ideas/002-breakwater-broadcast/prototype/eum_client.py
 ```
 
 의존성 없다. 파이썬 표준 라이브러리만 쓴다.

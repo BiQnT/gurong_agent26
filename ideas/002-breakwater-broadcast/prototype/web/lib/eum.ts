@@ -4,7 +4,7 @@ import { requireEnv } from "./env";
  * E-UM 디지털트윈 포항 Open API 클라이언트 (서버 전용).
  *
  * 실호출로 검증한 API만 쓴다. 판정 근거와 요청·응답 원문은
- * `ideas/001-breakwater-broadcast/data.md`.
+ * `ideas/002-breakwater-broadcast/data.md`.
  *
  * | API ID       | 기능                              | 판정  |
  * | ------------ | --------------------------------- | ----- |
