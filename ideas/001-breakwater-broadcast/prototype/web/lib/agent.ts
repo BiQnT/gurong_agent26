@@ -1,7 +1,13 @@
 import { GoogleGenAI, Type, type Content, type FunctionDeclaration } from "@google/genai";
 import { readEnv } from "./env";
-import { hasCoords, snapshot, zoneOf, type Device, type Snapshot } from "./eum";
-import { assessRisk, LEVEL_LABEL, shouldBroadcast, type Assessment } from "./risk";
+import { hasCoords, snapshot, zoneOf, ZONES, type Device, type Snapshot } from "./eum";
+import {
+  assessRisk,
+  LEVEL_LABEL,
+  shouldBroadcast,
+  zonesNeedingBroadcast,
+  type Assessment,
+} from "./risk";
 import { applyScenario, simulationInfo, type ScenarioName, type SimulationInfo } from "./scenario";
 
 /**
@@ -52,19 +58,25 @@ function speakersFor(snap: Snapshot, zone: string): Device[] {
 /**
  * 방송 대상 구역은 **코드가 정한다. 모델에게 묻지 않는다.**
  *
- * 기상 소스가 INT_S01_004 단일 관측소(devId 1)라 남/북 방파제를 구분할 데이터가
- * 애초에 없다. 그런데 모델에게 zone 을 물으면 근거 없이 "north" 를 골라서
- * 남방파제 4대가 조용히 빠진다 — 풍속 22m/s 에 남방파제 관광객만 방송을 못 받는다.
+ * 모델에게 zone 을 물으면 근거 없이 "north" 를 골라서 남방파제 4대가 조용히
+ * 빠진다 — 풍속 22m/s 에 남방파제 관광객만 방송을 못 받는다.
  *
- * 관측소가 구역별로 생기면 그때 이 함수가 구역을 나누면 된다.
+ * 이제는 근거가 있다. AI CCTV 15대가 전부 대기환경 측정기와 같은 좌표에
+ * 있어서(북 4개소·남 4개소) 구역별 실측 풍속으로 판정한다. 위험한 구역에만
+ * 방송이 나간다. 판정은 `zonesNeedingBroadcast()` 가 한다.
  */
-function broadcastZone(): "north" | "south" | "all" {
-  return "all";
-}
-
-function buildBroadcast(snap: Snapshot, korean: string, english: string): Broadcast {
-  const zone = broadcastZone();
-  const targets = speakersFor(snap, zone);
+function buildBroadcast(
+  snap: Snapshot,
+  assessment: Assessment,
+  korean: string,
+  english: string,
+): Broadcast {
+  const zones = zonesNeedingBroadcast(assessment);
+  const zone: Broadcast["zone"] = zones.length === ZONES.length ? "all" : (zones[0] ?? "all");
+  const targets = (snap.devices.speakers ?? []).filter((s) => {
+    const z = zoneOf(s);
+    return z !== "unknown" && zones.includes(z);
+  });
   return {
     zone,
     korean: korean.trim(),
@@ -212,7 +224,7 @@ function fallbackResult(
   return {
     answer: lines.join("\n"),
     assessment: a,
-    broadcast: need ? buildBroadcast(snap, text.korean, text.english) : null,
+    broadcast: need ? buildBroadcast(snap, a, text.korean, text.english) : null,
     fallback: true,
     fallbackReason: reason,
     toolCalls: [],
@@ -265,13 +277,13 @@ async function generateBroadcast(
     const korean = usableText(parsed.korean);
     const english = usableText(parsed.english);
     if (korean && english) {
-      return buildBroadcast(snap, korean, english);
+      return buildBroadcast(snap, a, korean, english);
     }
   } catch {
     // 구조화 호출이 실패하면 규칙 기반 문안으로 간다.
   }
   const text = fallbackBroadcastText(a);
-  return buildBroadcast(snap, text.korean, text.english);
+  return buildBroadcast(snap, a, text.korean, text.english);
 }
 
 // --- 에이전트 루프 ------------------------------------------------------
@@ -334,6 +346,7 @@ export async function runAgent(
         }
         broadcast = buildBroadcast(
           snap,
+          assessment,
           usableText(args.korean) ?? fallbackBroadcastText(assessment).korean,
           usableText(args.english) ?? fallbackBroadcastText(assessment).english,
         );

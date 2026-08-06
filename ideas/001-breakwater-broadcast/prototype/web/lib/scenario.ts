@@ -58,6 +58,11 @@ export function isScenario(name: string | null | undefined): name is ScenarioNam
   return Boolean(name && name in SCENARIOS);
 }
 
+/** 신선도 검사에 걸리지 않도록 지금 시각을 UTC 로 찍는다. */
+function nowStamp(): string {
+  return new Date().toISOString().slice(0, 19).replace("T", " ");
+}
+
 /** 기상·자외선 수치만 시나리오 값으로 갈아끼운다. 장비 정보는 실측 그대로 둔다. */
 export function applyScenario(snap: Snapshot, name: ScenarioName): Snapshot {
   const s = SCENARIOS[name];
@@ -66,10 +71,23 @@ export function applyScenario(snap: Snapshot, name: ScenarioName): Snapshot {
       ? { logDateTime: snap.fetchedAt, devId: 1, pm10: 0, pm25: 0 }
       : snap.air;
 
+  // ScenarioAir 가 4개 필드를 모두 강제하므로 결손이 생길 수 없다.
+  const air = { ...baseAir, ...s.air } as Exclude<Snapshot["air"], { error: string }>;
+
+  // 구역별 판정도 시연 값을 따라가야 한다. 실측 측정기의 devId·좌표는 그대로
+  // 두고 기상 수치만 덮어써서, 어느 구역에 몇 대가 붙어 있는지는 실측을 유지한다.
+  const airZones =
+    "error" in snap.airZones
+      ? snap.airZones
+      : {
+          north: snap.airZones.north.map((r) => ({ ...r, ...s.air, logDateTime: nowStamp() })),
+          south: snap.airZones.south.map((r) => ({ ...r, ...s.air, logDateTime: nowStamp() })),
+        };
+
   return {
     ...snap,
-    // ScenarioAir 가 4개 필드를 모두 강제하므로 결손이 생길 수 없다.
-    air: { ...baseAir, ...s.air } as Snapshot["air"],
+    air,
+    airZones,
     uv: { dateTime: snap.fetchedAt, uvIndex: s.uv.uvIndex },
   };
 }

@@ -219,6 +219,31 @@ export default function MonitorPage() {
               )
             )}
 
+            {assess && assess.zones.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {assess.zones.map((z) => (
+                  <div
+                    key={z.zone}
+                    className="rounded border border-slate-200 p-2 text-sm dark:border-slate-800"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{z.label}</span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-bold ring-1 ${LEVEL_STYLE[z.level]}`}
+                      >
+                        {LEVEL_LABEL[z.level]}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {z.sensorCount > 0
+                        ? `대기환경 측정기 ${z.sensorCount}대 실측`
+                        : "값을 낸 측정기 없음 — 판정 근거 없음"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button
               onClick={() => void draft()}
               disabled={drafting || loading}

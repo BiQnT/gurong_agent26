@@ -132,6 +132,7 @@ function snapshotWith(air: Partial<{ winsp: number; temp: number }>, uvIndex: nu
       pm10: 10,
       pm25: 10,
     },
+    airZones: { north: [], south: [] },
     uv: { dateTime: freshUtc(), uvIndex },
     abnormal: { south: [], north: [], total: 0, detectorLive: false },
   };

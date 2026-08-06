@@ -132,13 +132,44 @@ export function uvIndex(deviceId: number = 1): Promise<UvReading> {
 }
 
 /**
- * INT_S01_004 — 대기환경 실시간. **기상 소스는 여기다.**
+ * INT_S01_004 — 대기환경 실시간(단일). **기상 소스는 이 계열이다.**
  *
  * 이름은 '대기환경'인데 기온·습도·풍속·풍향이 다 들어 있다.
  * INT_S03_019(기상 이력)를 안 쓰는 이유는 날짜별로 구멍이 많아서다 (data.md).
  */
 export function airRealtime(deviceId: number = 1): Promise<AirReading> {
   return get<AirReading>("/dpg/atmosphere/device/realtime", { id: deviceId });
+}
+
+/**
+ * INT_S01_001 — 대기환경 측정 장비 목록. 위경도가 함께 온다.
+ *
+ * E-UM 자료실에는 등록돼 있지 않고 genix 에서 직접 확인된 API 다
+ * (`research/api-tests/2026-08-04-atmosphere-undocumented-apis.md`).
+ */
+export function airDevices(): Promise<Device[]> {
+  return get<Device[]>("/dpg/atmosphere/devices");
+}
+
+/** INT_S01_003 — 대기환경 실시간 전체. 24대를 한 번에 받는다. */
+export function airRealtimeAll(): Promise<AirReading[]> {
+  return get<AirReading[]>("/dpg/atmosphere/devices/realtime");
+}
+
+/**
+ * 측정값이 살아 있는가.
+ *
+ * 실측에서 두 가지 죽은 패턴이 나왔다.
+ * - `devId 7`: `logDateTime` 이 빈 문자열이고 기온·풍속·습도가 전부 0
+ * - `devId 5`: `logDateTime` 이 빈 문자열 (값은 있지만 언제 것인지 모른다)
+ *
+ * 0 을 진짜 측정값으로 받으면 "풍속 0m/s = 안전"이 되므로 반드시 걸러야 한다.
+ */
+export function isLiveReading(r: AirReading): boolean {
+  if (!String(r.logDateTime ?? "").trim()) return false;
+  // 기온·습도가 동시에 정확히 0 이면 센서가 값을 못 내고 있는 것이다.
+  if (r.temp === 0 && r.humi === 0) return false;
+  return true;
 }
 
 /**
@@ -187,10 +218,62 @@ export function zoneOf(d: Device): "north" | "south" | "unknown" {
   return "unknown";
 }
 
+export type Zone = "north" | "south";
+export const ZONES: Zone[] = ["north", "south"];
+export const ZONE_LABEL: Record<Zone, string> = { north: "북방파제", south: "남방파제" };
+
+/** 좌표 비교용 키. E-UM 이 문자열로 주므로 소수 5자리에서 맞춘다. */
+function coordKey(d: { latitude?: string | number; longitude?: string | number }): string | null {
+  const lat = Number(d.latitude);
+  const lon = Number(d.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return `${lat.toFixed(5)},${lon.toFixed(5)}`;
+}
+
+/**
+ * 대기환경 측정기를 남/북 방파제로 가른다.
+ *
+ * **실측 발견**: AI CCTV 15대가 **전부** 대기환경 측정기와 같은 좌표에 있다.
+ * 북방파제 4개소(장비 id 6·7·11·16), 남방파제 4개소(10·14·15·17).
+ * 즉 방파제 구역별 실측 풍속을 얻을 수 있다 — 초기 설계에서 "관측소가 1대라
+ * 구역을 못 가른다"고 본 것은 `INT_S01_004` 를 id=1 하나로만 부른 탓이었다.
+ *
+ * 좌표 일치로 잇기 때문에 E-UM 이 장비를 옮기면 자동으로 따라간다.
+ */
+export function airByZone(
+  airDevices: Device[],
+  readings: AirReading[],
+  cctvs: Device[],
+): Record<Zone, AirReading[]> {
+  const zoneByCoord = new Map<string, Zone>();
+  for (const c of cctvs) {
+    const k = coordKey(c);
+    const z = zoneOf(c);
+    if (k && (z === "north" || z === "south")) zoneByCoord.set(k, z);
+  }
+
+  const zoneByDevId = new Map<number, Zone>();
+  for (const a of airDevices) {
+    const k = coordKey(a);
+    const z = k ? zoneByCoord.get(k) : undefined;
+    if (z) zoneByDevId.set(a.id, z);
+  }
+
+  const out: Record<Zone, AirReading[]> = { north: [], south: [] };
+  for (const r of readings) {
+    const z = zoneByDevId.get(r.devId);
+    if (z && isLiveReading(r)) out[z].push(r);
+  }
+  return out;
+}
+
 export type Snapshot = {
   fetchedAt: string;
   devices: PedestrianDevices;
+  /** 대표 기상값 (구역 무관). 하위 호환과 요약 표시에 쓴다. */
   air: AirReading | { error: string };
+  /** 구역별 대기환경 실측. 방파제에 붙은 측정기만 담긴다. */
+  airZones: Record<Zone, AirReading[]> | { error: string };
   uv: UvReading | { error: string };
   abnormal: (AbnormalEvents & { total: number; detectorLive: boolean }) | { error: string };
 };
@@ -208,7 +291,10 @@ export type Snapshot = {
 export async function snapshot(): Promise<Snapshot> {
   const devices = await pedestrianDevices();
 
-  const [air, uv, abnormal] = await Promise.all([
+  const [zoneResult, air, uv, abnormal] = await Promise.all([
+    Promise.all([airDevices(), airRealtimeAll()])
+      .then(([list, readings]) => airByZone(list, readings, devices.ai_cctvs ?? []))
+      .catch((e: Error) => ({ error: e.message })),
     airRealtime().catch((e: Error) => ({ error: e.message })),
     uvIndex(devices.uv_devices?.[0]?.id ?? 1).catch((e: Error) => ({ error: e.message })),
     abnormalEvents()
@@ -219,5 +305,5 @@ export async function snapshot(): Promise<Snapshot> {
       .catch((e: Error) => ({ error: e.message })),
   ]);
 
-  return { fetchedAt: new Date().toISOString(), devices, air, uv, abnormal };
+  return { fetchedAt: new Date().toISOString(), devices, air, airZones: zoneResult, uv, abnormal };
 }

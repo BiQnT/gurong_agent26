@@ -1,4 +1,4 @@
-import type { Snapshot } from "./eum";
+import { ZONE_LABEL, ZONES, type AirReading, type Snapshot, type Zone } from "./eum";
 
 /**
  * 규칙 기반 위험도 판정.
@@ -59,6 +59,23 @@ export type Assessment = {
   /** 판정이 무엇을 못 보고 있는지. 화면에 그대로 노출한다. */
   limitations: string[];
   assessedAt: string;
+  /**
+   * 구역별 판정. 방파제에 붙은 대기환경 측정기로 남/북을 따로 본다.
+   *
+   * 이게 있어야 **코드가** 어느 스피커에 방송할지 정할 수 있다. 예전에는
+   * 관측소를 하나만 부르고 있어서 구역을 가를 근거가 없었고, 그 자리를 LLM 이
+   * 근거 없이 메우고 있었다 (`design/agent-loop.md` 1.1).
+   */
+  zones: ZoneAssessment[];
+};
+
+export type ZoneAssessment = {
+  zone: Zone;
+  label: string;
+  level: RiskLevel;
+  reasons: Reason[];
+  /** 이 구역에서 값을 낸 측정기 수. 0 이면 판정 근거가 없다. */
+  sensorCount: number;
 };
 
 // --- 임계값 -------------------------------------------------------------
@@ -238,6 +255,58 @@ export function ageMinutes(timestamp: string | undefined, tz: "utc" | "kst"): nu
   return (Date.now() - t) / 60_000;
 }
 
+/**
+ * 타임존이 안 적힌 E-UM 시각의 경과 시간. **같은 API 안에서도 타임존이 섞인다.**
+ *
+ * `INT_S01_003`(실시간 전체) 한 응답에서 대부분의 장비는 UTC 로 오는데
+ * `devId 14·15·21` 만 KST 로 온다. 실측이다. 어느 쪽인지 필드로는 알 수 없다.
+ *
+ * 그래서 UTC 로 먼저 읽고, 결과가 **미래**로 나오면(=음수 경과) KST 로 다시 읽는다.
+ * 측정 시각이 미래일 수는 없으니 이 판별은 안전하다. 시계 오차를 감안해
+ * 2분까지는 미래를 허용한다.
+ */
+export function ageMinutesAuto(timestamp: string | undefined): number | null {
+  const asUtc = ageMinutes(timestamp, "utc");
+  if (asUtc === null) return null;
+  if (asUtc >= -2) return asUtc;
+  return ageMinutes(timestamp, "kst");
+}
+
+/**
+ * 한 구역의 측정기들을 하나의 판정으로 모은다.
+ *
+ * 여러 대가 있으면 **가장 나쁜 값**을 쓴다. 평균을 내면 한 대가 강풍을 잡아도
+ * 나머지에 희석돼 경보가 안 나간다. 안전 판정은 보수적이어야 한다.
+ */
+export function assessZone(zone: Zone, readings: AirReading[], uvIndex: unknown): ZoneAssessment {
+  const live = readings.filter((r) => ageMinutesAuto(r.logDateTime) !== null);
+  const reasons: Reason[] = [];
+
+  const winds = live.map((r) => r.winsp).filter(isUsable);
+  if (winds.length) {
+    const w = windReason(Math.max(...winds));
+    if (w) reasons.push(w);
+  }
+
+  const temps = live.map((r) => r.temp).filter(isUsable);
+  if (temps.length) {
+    const t = temperatureReason(Math.max(...temps));
+    if (t) reasons.push(t);
+  }
+
+  // 자외선 측정기는 1대뿐이라 구역별 값이 없다. 같은 값을 양쪽에 적용한다.
+  const u = uvReason(uvIndex);
+  if (u) reasons.push(u);
+
+  return {
+    zone,
+    label: ZONE_LABEL[zone],
+    level: maxLevel(reasons.map((r) => r.level)),
+    reasons,
+    sensorCount: live.length,
+  };
+}
+
 /** 스냅샷 하나를 위험도로 환산한다. 순수 함수 — 네트워크도 LLM 도 쓰지 않는다. */
 export function assessRisk(snap: Snapshot): Assessment {
   const reasons: Reason[] = [];
@@ -298,12 +367,43 @@ export function assessRisk(snap: Snapshot): Assessment {
     "폭염 기준은 원래 일 최고 체감온도 기준인데 순간 기온에 준용했다. 엄밀히 같은 값이 아니다.",
   );
 
+  // --- 구역별 판정 -------------------------------------------------------
+  const uvValue = "error" in snap.uv ? undefined : snap.uv.uvIndex;
+  let zones: ZoneAssessment[] = [];
+
+  if ("error" in snap.airZones) {
+    limitations.push(
+      `구역별 대기환경을 못 받았다 (${snap.airZones.error}). 남/북을 나눠 보지 못하고 대표값 하나로 판정했다.`,
+    );
+  } else {
+    const byZone = snap.airZones;
+    zones = ZONES.map((z) => assessZone(z, byZone[z], uvValue));
+    for (const z of zones) {
+      if (z.sensorCount === 0) {
+        limitations.push(`${z.label}에서 값을 낸 측정기가 없다. 이 구역은 판정 근거가 없다.`);
+      }
+    }
+  }
+
+  // 구역 판정이 있으면 그쪽이 더 정확하다 — 더 높은 등급을 최종으로 삼는다.
+  const zoneLevel = maxLevel(zones.map((z) => z.level));
+  const flatLevel = maxLevel(reasons.map((r) => r.level));
+
   return {
-    level: maxLevel(reasons.map((r) => r.level)),
+    level: maxLevel([zoneLevel, flatLevel]),
     reasons,
     limitations,
     assessedAt: new Date().toISOString(),
+    zones,
   };
+}
+
+/** 방송이 필요한 구역만 돌려준다. **코드가 대상을 정하는 지점이다.** */
+export function zonesNeedingBroadcast(a: Assessment): Zone[] {
+  const need = a.zones.filter((z) => z.level === "warning" || z.level === "danger");
+  if (need.length) return need.map((z) => z.zone);
+  // 구역 판정이 없는데 전체 등급이 높으면(대표값만 있는 경우) 전 구역에 보낸다.
+  return shouldBroadcast(a) ? [...ZONES] : [];
 }
 
 /** 방송을 권고할 등급인가. safe/caution 에서는 방송하지 않는다. */
