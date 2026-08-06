@@ -23,7 +23,14 @@ from flask import Flask, jsonify, request, send_from_directory
 
 from eum_client import EumApiError, eum_get
 from narrator import narrate_alert
-from risk_logic import find_speaker_for_zone
+from risk_logic import (
+    HEAT_ALERT_TEMP_C,
+    RISK_CAUTION_THRESHOLD,
+    RISK_DANGER_THRESHOLD,
+    UV_ESCALATION_INDEX,
+    WIND_SPEED_ESCALATION_MS,
+    find_speaker_for_zone,
+)
 
 HERE = Path(__file__).resolve().parent
 SNAPSHOT_PATH = HERE / "dashboard_data.json"
@@ -59,8 +66,24 @@ def index():
 
 @app.get("/api/config")
 def config():
-    """대시보드가 'AI 문구 생성이 켜져 있는지'를 알 수 있게 (키 값 자체는 절대 노출 안 함)."""
-    return jsonify({"llm_enabled": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())})
+    """대시보드가 'AI 문구 생성이 켜져 있는지'와 '경보 기준값이 정확히 얼마인지'를 알 수 있게 한다.
+
+    임계값은 risk_logic.py 하나에만 정의돼 있고 여기서는 그 값을 그대로 읽어서 내려준다 —
+    그래프에 그릴 기준선 숫자가 실제 판정 로직과 항상 같은 값이도록 보장하기 위함
+    (대시보드에 따로 하드코딩하면 나중에 risk_logic.py만 고치고 그래프는 안 고쳐 어긋날 수 있다).
+    """
+    return jsonify(
+        {
+            "llm_enabled": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip()),
+            "thresholds": {
+                "incident_caution": RISK_CAUTION_THRESHOLD,
+                "incident_danger": RISK_DANGER_THRESHOLD,
+                "uv_index": UV_ESCALATION_INDEX,
+                "wind_speed": WIND_SPEED_ESCALATION_MS,
+                "temperature": HEAT_ALERT_TEMP_C,
+            },
+        }
+    )
 
 
 @app.get("/api/snapshot")
@@ -77,6 +100,33 @@ def alerts():
     lines = ALERTS_PATH.read_text(encoding="utf-8").splitlines()
     limit = int(request.args.get("limit", "30"))
     return jsonify([json.loads(line) for line in lines[-limit:]][::-1])
+
+
+@app.post("/api/alerts/delete")
+def delete_alert():
+    """경보 피드에서 알림 하나를 지운다.
+
+    alerts.jsonl은 원래 "기록은 고치지 않는다" 원칙의 감사 로그로 설계했지만, 이건
+    해커톤 데모/디버그용 로컬 도구라 테스트 알림이 쌓여 피드가 지저분해지는 게 더
+    큰 문제였다. 실제 서비스라면 삭제 대신 "숨김" 플래그를 쓰는 게 맞다.
+    """
+    body = request.get_json(force=True, silent=True) or {}
+    timestamp = body.get("timestamp")
+    if not timestamp or not ALERTS_PATH.exists():
+        return jsonify({"error": "timestamp가 필요하다"}), 400
+
+    lines = ALERTS_PATH.read_text(encoding="utf-8").splitlines()
+    kept = [line for line in lines if json.loads(line).get("timestamp") != timestamp]
+    ALERTS_PATH.write_text("\n".join(kept) + ("\n" if kept else ""), encoding="utf-8")
+    return jsonify({"deleted": len(lines) - len(kept)})
+
+
+@app.post("/api/alerts/clear")
+def clear_alerts():
+    """경보 피드를 전부 비운다 (테스트 알림 정리용)."""
+    if ALERTS_PATH.exists():
+        ALERTS_PATH.write_text("", encoding="utf-8")
+    return jsonify({"cleared": True})
 
 
 @app.post("/api/broadcast")

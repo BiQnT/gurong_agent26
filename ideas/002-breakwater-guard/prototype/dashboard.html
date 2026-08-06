@@ -24,6 +24,7 @@
     --north: #d95926;   /* categorical slot 2 */
     --uv: #199e70;       /* categorical slot 3 */
     --wind: #c98500;     /* categorical slot 4 */
+    --temp: #d55181;     /* categorical slot 5 */
 
     --accent: #3987e5;
   }
@@ -85,10 +86,25 @@
   .status-pill.수동::before, .status-pill.승인::before { background: var(--ink-2); }
 
   /* Charts */
-  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin-bottom: 10px; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin-bottom: 10px; flex-wrap: wrap; }
   .legend .item { display: flex; align-items: center; gap: 6px; }
-  .legend .dot { width: 9px; height: 9px; border-radius: 50%; }
-  canvas { width: 100%; height: 180px; display: block; }
+  .legend .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+  .legend .dot.dashed { background: transparent; border: 1.5px dashed var(--muted); }
+  canvas { width: 100%; display: block; cursor: crosshair; }
+  canvas.chart-tall { height: 180px; }
+  canvas.chart-mini { height: 110px; }
+  .chart-wrap { position: relative; }
+  .chart-tooltip {
+    position: absolute; top: 8px; left: 12px; display: none; z-index: 5; pointer-events: none;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 10px; font-size: 11.5px; line-height: 1.6; white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .mini-chart { margin-top: 16px; }
+  .mini-chart:first-of-type { margin-top: 0; }
+  .mini-chart-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--ink-2); margin-bottom: 6px; }
+  .mini-chart-head .item { display: flex; align-items: center; gap: 6px; }
+  .threshold-label { font-size: 11px; color: var(--muted); }
 
   /* Alerts */
   .alert-list { display: flex; flex-direction: column; gap: 10px; max-height: 760px; overflow-y: auto; padding-right: 2px; }
@@ -96,6 +112,11 @@
   .alert.위험 { border-left-color: var(--critical); }
   .alert.주의 { border-left-color: var(--warning); }
   .alert .meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+  .alert-close {
+    margin-left: auto; background: transparent; border: none; color: var(--muted);
+    font-size: 13px; padding: 0 4px; cursor: pointer; line-height: 1;
+  }
+  .alert-close:hover { color: var(--critical); background: transparent; }
   .alert .summary { font-size: 13.5px; line-height: 1.5; margin-bottom: 4px; }
   .alert .status-line { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
   .alert .script-row { display: flex; gap: 6px; margin-top: 8px; }
@@ -165,17 +186,51 @@
       <div class="legend">
         <span class="item"><span class="dot" style="background:var(--south)"></span>남방파제</span>
         <span class="item"><span class="dot" style="background:var(--north)"></span>북방파제</span>
+        <span class="item"><span class="dot dashed" style="border-color:var(--warning)"></span>주의 기준</span>
+        <span class="item"><span class="dot dashed" style="border-color:var(--critical)"></span>위험 기준</span>
       </div>
-      <canvas id="scoreChart" width="600" height="180"></canvas>
+      <div class="chart-wrap">
+        <canvas id="scoreChart" class="chart-tall"></canvas>
+        <div class="chart-tooltip" id="scoreChart-tip"></div>
+      </div>
     </div>
 
     <div class="card">
-      <h2>자외선 · 풍속 추이</h2>
-      <div class="legend">
-        <span class="item"><span class="dot" style="background:var(--uv)"></span>자외선 지수</span>
-        <span class="item"><span class="dot" style="background:var(--wind)"></span>풍속 (m/s)</span>
+      <h2>환경 지표 추이</h2>
+      <div class="hint">점선 = 이 지표가 넘으면 위험도를 한 단계 올리는 실제 경보 기준값 (risk_logic.py와 동일한 값을 서버에서 가져옴). 지표마다 단위가 달라 축을 따로 그린다. 그래프 위에 마우스를 올리면 그 시점의 정확한 수치가 뜬다.</div>
+
+      <div class="mini-chart">
+        <div class="mini-chart-head">
+          <span class="item"><span class="dot" style="background:var(--uv)"></span>자외선 지수</span>
+          <span class="threshold-label" id="uvThresholdLabel"></span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="uvChart" class="chart-mini"></canvas>
+          <div class="chart-tooltip" id="uvChart-tip"></div>
+        </div>
       </div>
-      <canvas id="envChart" width="600" height="180"></canvas>
+
+      <div class="mini-chart">
+        <div class="mini-chart-head">
+          <span class="item"><span class="dot" style="background:var(--wind)"></span>풍속 (m/s)</span>
+          <span class="threshold-label" id="windThresholdLabel"></span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="windChart" class="chart-mini"></canvas>
+          <div class="chart-tooltip" id="windChart-tip"></div>
+        </div>
+      </div>
+
+      <div class="mini-chart">
+        <div class="mini-chart-head">
+          <span class="item"><span class="dot" style="background:var(--temp)"></span>기온 (℃)</span>
+          <span class="threshold-label" id="tempThresholdLabel"></span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="tempChart" class="chart-mini"></canvas>
+          <div class="chart-tooltip" id="tempChart-tip"></div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -209,8 +264,11 @@
   </div>
 
   <div class="card">
-    <h2>경보 피드</h2>
-    <div class="hint">⏳ <b>방송 대기</b> = 사람이 문구를 확인/수정한 뒤 "🔊 방송"을 눌러야 소리가 난다 · ✅ <b>방송 완료</b> = 이미 재생/기록됨</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px;">
+      <h2 style="margin-bottom:0;">경보 피드</h2>
+      <button class="secondary" onclick="clearAllAlerts()">🗑 전체 삭제</button>
+    </div>
+    <div class="hint">⏳ <b>방송 대기</b> = 사람이 문구를 확인/수정한 뒤 "🔊 방송"을 눌러야 소리가 난다 · ✅ <b>방송 완료</b> = 이미 재생/기록됨 · 각 알림 우측 ✕로 개별 삭제</div>
     <div class="alert-list" id="alerts"><div class="empty">아직 경보 없음</div></div>
   </div>
 </div>
@@ -269,7 +327,20 @@ async function approveBroadcast(btn, zoneLabel, textareaId) {
   setTimeout(loadAlerts, 800);
 }
 
-// ---- 차트: 축/눈금/범례가 있는 최소 라인 차트 ----
+// ---- 차트: 축/눈금/임계값 기준선/호버 크로스헤어가 있는 최소 라인 차트 ----
+const CHART_PAD = { l: 34, r: 8, t: 8, b: 18 };
+const chartRegistry = {}; // canvas.id -> 마지막으로 그린 인자 (호버 시 재사용)
+
+function themeColors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    grid: s.getPropertyValue('--grid').trim(),
+    axis: s.getPropertyValue('--axis').trim(),
+    muted: s.getPropertyValue('--muted').trim(),
+    ink: s.getPropertyValue('--ink').trim(),
+  };
+}
+
 function niceMax(v) {
   if (v <= 0) return 1;
   const mag = Math.pow(10, Math.floor(Math.log10(v)));
@@ -278,22 +349,37 @@ function niceMax(v) {
   return step * mag;
 }
 
-function drawChart(canvas, series, colors, timestamps) {
+function fmtTime(ts, withSeconds) {
+  const d = new Date(ts);
+  if (isNaN(d)) return '';
+  return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: withSeconds ? '2-digit' : undefined });
+}
+
+// series/colors/timestamps/options를 받아 그리고, 다음 호버 재호출을 위해 registry에 저장한다.
+// options: { thresholds: [{value,label,color}], hoverIndex }
+function drawChart(canvas, series, colors, timestamps, options = {}) {
+  chartRegistry[canvas.id] = { series, colors, timestamps, options };
+  const { thresholds = [], hoverIndex = null } = options;
+
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const cssW = canvas.clientWidth || 600, cssH = 180;
+  const rect = canvas.getBoundingClientRect();
+  const cssW = rect.width || canvas.clientWidth || 600;
+  const cssH = rect.height || canvas.clientHeight || 160;
   canvas.width = cssW * dpr; canvas.height = cssH * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  const padL = 34, padR = 8, padT = 8, padB = 18;
+  const { l: padL, r: padR, t: padT, b: padB } = CHART_PAD;
   const w = cssW - padL - padR, h = cssH - padT - padB;
   ctx.clearRect(0, 0, cssW, cssH);
 
   const allVals = series.flat().filter(v => v !== null && v !== undefined);
-  const top = niceMax(Math.max(1, ...allVals));
-  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
-  const axisColor = getComputedStyle(document.documentElement).getPropertyValue('--axis').trim();
-  const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+  const thresholdVals = thresholds.map(t => t.value * 1.15); // 기준선이 항상 보이도록 여유를 둔다
+  const top = niceMax(Math.max(1, ...allVals, ...thresholdVals));
+  const { grid: gridColor, axis: axisColor, muted: mutedColor } = themeColors();
+
+  const yOf = (v) => padT + h - (v / top) * h;
+  const xOf = (idx, n) => padL + (idx / (n - 1 || 1)) * w;
 
   // Y gridlines + labels (0, mid, top)
   ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.font = '10px system-ui';
@@ -301,8 +387,19 @@ function drawChart(canvas, series, colors, timestamps) {
   [0, 0.5, 1].forEach(frac => {
     const y = padT + h - frac * h;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
-    const value = Math.round(frac * top * 10) / 10;
-    ctx.fillText(String(value), padL - 6, y);
+    ctx.fillText(String(Math.round(frac * top * 10) / 10), padL - 6, y);
+  });
+
+  // 경보 기준선 (점선) — risk_logic.py의 실제 임계값과 같은 값
+  thresholds.forEach(t => {
+    const y = yOf(t.value);
+    ctx.save();
+    ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = t.color; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = t.color; ctx.font = '10px system-ui'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText(`${t.label} ${t.value}`, padL + w, y - 3);
   });
 
   // baseline (x axis)
@@ -318,26 +415,81 @@ function drawChart(canvas, series, colors, timestamps) {
     ctx.lineJoin = 'round';
     ctx.beginPath();
     valid.forEach(([idx, v], j) => {
-      const x = padL + (idx / (points.length - 1 || 1)) * w;
-      const y = padT + h - (v / top) * h;
+      const x = xOf(idx, points.length), y = yOf(v);
       j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.stroke();
     // last point marker
     const [lastIdx, lastV] = valid[valid.length - 1];
-    const lx = padL + (lastIdx / (points.length - 1 || 1)) * w;
-    const ly = padT + h - (lastV / top) * h;
     ctx.fillStyle = colors[i];
-    ctx.beginPath(); ctx.arc(lx, ly, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(xOf(lastIdx, points.length), yOf(lastV), 3, 0, Math.PI * 2); ctx.fill();
   });
+
+  // 호버 크로스헤어 + 강조 마커
+  if (hoverIndex !== null && timestamps.length) {
+    const n = timestamps.length;
+    const x = xOf(hoverIndex, n);
+    ctx.save();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = mutedColor; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + h); ctx.stroke();
+    ctx.restore();
+    series.forEach((points, i) => {
+      const v = points[hoverIndex];
+      if (v === null || v === undefined) return;
+      const y = yOf(v);
+      ctx.fillStyle = '#0d0d0d';
+      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = colors[i];
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+    });
+  }
 
   // X axis labels: first / last timestamp (HH:MM)
   if (timestamps && timestamps.length >= 2) {
     ctx.fillStyle = mutedColor; ctx.font = '10px system-ui'; ctx.textBaseline = 'alphabetic';
-    const fmt = (ts) => { const d = new Date(ts); return isNaN(d) ? '' : d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }); };
-    ctx.textAlign = 'left'; ctx.fillText(fmt(timestamps[0]), padL, cssH - 4);
-    ctx.textAlign = 'right'; ctx.fillText(fmt(timestamps[timestamps.length - 1]), padL + w, cssH - 4);
+    ctx.textAlign = 'left'; ctx.fillText(fmtTime(timestamps[0]), padL, cssH - 4);
+    ctx.textAlign = 'right'; ctx.fillText(fmtTime(timestamps[timestamps.length - 1]), padL + w, cssH - 4);
   }
+}
+
+// 마우스오버 시 정확한 시점의 수치를 툴팁으로 보여준다 (크로스헤어 + 값)
+function attachHover(canvasId, seriesLabels) {
+  const canvas = document.getElementById(canvasId);
+  const tip = document.getElementById(`${canvasId}-tip`);
+  if (!canvas || !tip) return;
+
+  canvas.addEventListener('mousemove', (e) => {
+    const entry = chartRegistry[canvasId];
+    if (!entry || !entry.timestamps.length) return;
+    const rect = canvas.getBoundingClientRect();
+    const w = rect.width - CHART_PAD.l - CHART_PAD.r;
+    const relX = e.clientX - rect.left - CHART_PAD.l;
+    const n = entry.timestamps.length;
+    let idx = Math.round((relX / w) * (n - 1));
+    idx = Math.max(0, Math.min(n - 1, idx));
+
+    drawChart(canvas, entry.series, entry.colors, entry.timestamps, { ...entry.options, hoverIndex: idx });
+
+    const rows = entry.series.map((points, i) => {
+      const v = points[idx];
+      const color = entry.colors[i];
+      const label = (seriesLabels && seriesLabels[i]) || '';
+      return `<div style="display:flex;align-items:center;gap:6px;"><span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block;flex:none;"></span>${label} <b style="margin-left:auto;padding-left:10px;">${v ?? '–'}</b></div>`;
+    }).join('');
+    tip.innerHTML = `<div style="color:var(--muted);margin-bottom:4px;">${fmtTime(entry.timestamps[idx], true)}</div>${rows}`;
+    tip.style.display = 'block';
+
+    const wrapWidth = canvas.parentElement.getBoundingClientRect().width;
+    const cursorX = e.clientX - rect.left;
+    tip.style.left = (cursorX + 130 > wrapWidth ? Math.max(4, cursorX - 150) : cursorX + 14) + 'px';
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    const entry = chartRegistry[canvasId];
+    if (entry) drawChart(canvas, entry.series, entry.colors, entry.timestamps, { ...entry.options, hoverIndex: null });
+    tip.style.display = 'none';
+  });
 }
 
 let lastAlertTimestamps = new Set();
@@ -359,6 +511,7 @@ function renderAlerts(alerts) {
           <span>${a.zone_label}</span>
           <span>· ${a.kind}</span>
           <span class="badge ${genMeta.cls}">${genMeta.label}</span>
+          <button class="alert-close" title="이 알림 삭제" onclick="deleteAlert('${a.timestamp}')">✕</button>
         </div>
         <div class="summary">${a.summary}</div>
         ${needsApproval ? `
@@ -381,15 +534,34 @@ function renderAlerts(alerts) {
   lastAlertTimestamps = new Set(alerts.map(a => a.timestamp));
 }
 
+async function deleteAlert(timestamp) {
+  await fetch('/api/alerts/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ timestamp }),
+  });
+  loadAlerts();
+}
+
+async function clearAllAlerts() {
+  if (!confirm('경보 피드를 전부 삭제할까? (되돌릴 수 없다)')) return;
+  await fetch('/api/alerts/clear', { method: 'POST' });
+  loadAlerts();
+}
+
 async function loadAlerts() {
   const alertRes = await fetch('/api/alerts?limit=30');
   const alerts = await alertRes.json();
   renderAlerts(alerts);
 }
 
+let THRESHOLDS = null; // /api/config에서 받아온, risk_logic.py와 100% 같은 실제 경보 기준값
+
 async function loadConfig() {
   const res = await fetch('/api/config');
   const cfg = await res.json();
+  THRESHOLDS = cfg.thresholds;
+
   const el = document.getElementById('llmBanner');
   el.style.display = 'inline-flex';
   if (cfg.llm_enabled) {
@@ -399,6 +571,10 @@ async function loadConfig() {
     el.className = 'banner off';
     el.textContent = '📋 AI 문구 생성: 꺼짐 — 사전 정의 문구 사용 중 (.env에 ANTHROPIC_API_KEY 추가 시 활성화)';
   }
+
+  document.getElementById('uvThresholdLabel').textContent = `⚠ 위험 기준 ${THRESHOLDS.uv_index}`;
+  document.getElementById('windThresholdLabel').textContent = `⚠ 위험 기준 ${THRESHOLDS.wind_speed}m/s`;
+  document.getElementById('tempThresholdLabel').textContent = `⚠ 위험 기준 ${THRESHOLDS.temperature}℃`;
 }
 
 async function loadSnapshot() {
@@ -418,19 +594,41 @@ async function loadSnapshot() {
     document.getElementById('northPill').className = `status-pill ${north?.level || ''}`;
     document.getElementById('northPill').textContent = `${north?.level || '–'} · ${north?.score ?? 0}점`;
   }
+  if (!THRESHOLDS) return; // 기준선 없이 그리면 오해를 살 수 있어, config 로드 전엔 잠깐 건너뛴다
 
   const timestamps = history.map(h => h.timestamp);
+  const c = themeColors();
+
   drawChart(
     document.getElementById('scoreChart'),
     [history.map(h => h.zones?.south?.score ?? null), history.map(h => h.zones?.north?.score ?? null)],
     ['#3987e5', '#d95926'],
     timestamps,
+    { thresholds: [
+      { value: THRESHOLDS.incident_caution, label: '주의', color: '#fab219' },
+      { value: THRESHOLDS.incident_danger, label: '위험', color: '#d03b3b' },
+    ] },
   );
   drawChart(
-    document.getElementById('envChart'),
-    [history.map(h => h.uv_index ?? null), history.map(h => h.wind_speed ?? null)],
-    ['#199e70', '#c98500'],
+    document.getElementById('uvChart'),
+    [history.map(h => h.uv_index ?? null)],
+    ['#199e70'],
     timestamps,
+    { thresholds: [{ value: THRESHOLDS.uv_index, label: '위험', color: '#d03b3b' }] },
+  );
+  drawChart(
+    document.getElementById('windChart'),
+    [history.map(h => h.wind_speed ?? null)],
+    ['#c98500'],
+    timestamps,
+    { thresholds: [{ value: THRESHOLDS.wind_speed, label: '위험', color: '#d03b3b' }] },
+  );
+  drawChart(
+    document.getElementById('tempChart'),
+    [history.map(h => h.temperature ?? null)],
+    ['#d55181'],
+    timestamps,
+    { thresholds: [{ value: THRESHOLDS.temperature, label: '위험', color: '#d03b3b' }] },
   );
 }
 
@@ -456,6 +654,10 @@ async function triggerTest(kind) {
 
 function tick() { loadSnapshot(); loadAlerts(); }
 renderTestButtons();
+attachHover('scoreChart', ['남방파제', '북방파제']);
+attachHover('uvChart', ['자외선 지수']);
+attachHover('windChart', ['풍속 (m/s)']);
+attachHover('tempChart', ['기온 (℃)']);
 loadConfig();
 tick();
 setInterval(tick, 2000);
