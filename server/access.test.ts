@@ -300,6 +300,9 @@ test('dev basic auth guards every dev request with UTF-8 credentials, but not pr
   assert.equal((await call(previewPort, '/index.html')).status, 200);
   const open = installed(localApiPlugin(await testConfig(t)).configureServer);
   assert.equal(open.length, 1);
+  // 공개 주소로 띄우는데 암호가 비어 있으면 열린 채로 뜨지 않고 시작이 실패한다.
+  const exposed = await testConfig(t, { publicOrigins: ['https://example.test:440'] });
+  assert.throws(() => installed(localApiPlugin(exposed).configureServer), /DEV_BASIC_AUTH/);
 });
 
 test('the real Vite dev server asks for the password before serving repository files', async (t) => {

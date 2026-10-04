@@ -220,17 +220,25 @@ if ! command -v caddy >/dev/null; then
 fi
 # 80 은 https 로 넘기고, 443 은 prod, 440 은 dev(웹소켓 포함, Caddy 가 알아서 넘긴다).
 # 80 의 넘김을 직접 적는 이유: 443 과 440 이 같은 이름이면 자동 넘김이 어느 포트로 보낼지 정해지지 않는다.
+# 다른 사이트가 화면을 iframe 으로 감싸 덕장 주인의 버튼을 누르게 만드는 것(클릭재킹)을 막는다.
 caddyfile="# bootstrap.sh 가 만든 파일. 직접 고치지 않는다 (infra/gcp/bootstrap.sh).
+(no_framing) {
+	header X-Frame-Options DENY
+	header Content-Security-Policy \"frame-ancestors 'none'\"
+}
+
 http://$DOMAIN {
 	redir https://$DOMAIN{uri} permanent
 }
 
 $DOMAIN {
+	import no_framing
 	encode zstd gzip
 	reverse_proxy 127.0.0.1:3000
 }
 
 $DOMAIN:440 {
+	import no_framing
 	reverse_proxy 127.0.0.1:3001
 }"
 if ! cmp -s <(printf '%s\n' "$caddyfile") /etc/caddy/Caddyfile; then

@@ -157,7 +157,12 @@ if [[ $started != true ]]; then
   journalctl -u haepung-prod -n 40 --no-pager || true
   if [[ -n "$current" && -f "$current/.ok" ]]; then
     echo "직전 release 로 되돌린다: $current"
-    switch_to "$current" || true
+    previous=$(sed -n 's/^GIT_COMMIT=//p' "$current/release.env" 2>/dev/null || true)
+    if switch_to "$current" && [[ -n "$previous" ]] && health "$previous"; then
+      echo "되돌린 prod 가 정상이다 ($previous)"
+    else
+      echo '경고: 되돌린 prod 도 헬스체크를 통과하지 못했다. journalctl -u haepung-prod 를 확인한다' >&2
+    fi
   else
     # 첫 배포 전 release(팀원의 vite preview 등)는 이 서버로 뜨지 않는다. 링크만 원래대로 두고 prod 를 멈춘다.
     echo '되돌릴 정상 release 가 없어 prod 를 멈춘다'

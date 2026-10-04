@@ -35,6 +35,11 @@ const HASH_PATTERN = /^[a-f0-9]{64}$/;
 // 같은 IP·이메일로 10분 안에 5번 실패하면 10분 동안 로그인을 막는다.
 const LOGIN_LIMIT_MS = 10 * 60 * 1000;
 const LOGIN_MAX_FAILURES = 5;
+// 가입은 열어 두되 한 IP 에서 1시간에 10개까지만 만든다. 계정을 대량으로 만들어 AI 사용량을 쓰는 것을 늦춘다.
+const SIGNUP_LIMIT_MS = 60 * 60 * 1000;
+const SIGNUP_MAX = 10;
+// 한 계정의 로그인 세션은 최근 10개만 둔다. 문서 하나에 모두 들어 있어 무한히 쌓이면 모든 쓰기가 느려진다.
+const MAX_SESSIONS_PER_USER = 10;
 const LOOPBACK = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
 // 저장 형식 번호. 문서의 version 칸과 SQLite 행의 schema 칸에 같이 들어간다.
 const WORKSPACE_SCHEMA = 1;
@@ -151,8 +156,11 @@ function validDatabase(value: unknown): value is Database {
     return false;
   const users = value.users as StoredUser[];
   const sites = value.sites as StoredSite[];
-  const hasUser = (id: unknown) => users.some((u) => u.id === id);
-  const hasSite = (id: unknown) => sites.some((s) => s.id === id);
+  // 쓰기마다 잠금을 잡은 채 검사하므로 목록 탐색 대신 Set 으로 찾는다.
+  const userIds = new Set<unknown>(users.map((u) => u.id));
+  const siteIds = new Set<unknown>(sites.map((s) => s.id));
+  const hasUser = (id: unknown) => userIds.has(id);
+  const hasSite = (id: unknown) => siteIds.has(id);
   if (
     !value.memberships.every(
       (m) =>
@@ -376,6 +384,17 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
   // 로그인 실패 기록은 프로세스 메모리에만 둔다. dev·prod 가 따로 세고 재시작하면 지워지지만
   // 막으려는 것은 짧은 시간의 연속 추측이라 이것으로 충분하다.
   const loginAttempts = new Map<string, { failures: number[]; blockedUntil: number }>();
+  const signups = new Map<string, number[]>();
+  function countSignup(address: string) {
+    const now = clock();
+    if (signups.size > 10000)
+      for (const [name, times] of signups)
+        if (times.every((at) => at <= now - SIGNUP_LIMIT_MS)) signups.delete(name);
+    const recent = (signups.get(address) || []).filter((at) => at > now - SIGNUP_LIMIT_MS);
+    if (recent.length >= SIGNUP_MAX)
+      fail(429, 'SIGNUP_RATE_LIMITED', '가입 요청이 너무 많아요. 1시간 뒤 다시 시도해 주세요.');
+    signups.set(address, [...recent, now]);
+  }
   function countLoginAttempt(key: string) {
     const now = clock();
     const stale = (entry: { failures: number[]; blockedUntil: number }) =>
@@ -438,6 +457,15 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
     db.sessions = db.sessions.filter(
       (s) => s.tokenHash !== old && Date.parse(s.expiresAt) > clock(),
     );
+    const mine = db.sessions.filter((s) => s.userId === user.id);
+    if (mine.length >= MAX_SESSIONS_PER_USER) {
+      const oldest = new Set(
+        mine
+          .sort((a, b) => Date.parse(a.expiresAt) - Date.parse(b.expiresAt))
+          .slice(0, mine.length - MAX_SESSIONS_PER_USER + 1),
+      );
+      db.sessions = db.sessions.filter((s) => !oldest.has(s));
+    }
     const token = randomBytes(32).toString('base64url');
     db.sessions.push({
       tokenHash: hash(token),
@@ -483,6 +511,7 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
       dbStore.read((db) => sessionFor(db, userFor(db, request))),
     async signup(request: IncomingMessage, response: ServerResponse, body: unknown) {
       const input = readCredentials(body, true);
+      countSignup(clientAddress(request));
       const salt = randomBytes(16).toString('hex');
       const derived = await passwordHash(input.password, salt);
       const result = await dbStore.write((db) => {

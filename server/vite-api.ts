@@ -280,6 +280,9 @@ export function localApiPlugin(config: BridgeConfig): Plugin {
       // 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주므로 모든 요청에 암호를 먼저 묻는다.
       // preview·prod(main.ts)는 빌드 결과만 주므로 걸지 않는다.
       if (config.devBasicAuth) server.middlewares.use(devBasicAuth(config.devBasicAuth));
+      // 공개 주소로 띄우는데 암호가 비어 있으면 저장소 전체가 열린다. 열지 않고 시작을 멈춘다.
+      else if (config.publicOrigins?.length)
+        throw new Error('PUBLIC_ORIGINS 로 공개한 dev 서버는 DEV_BASIC_AUTH 가 있어야 시작한다.');
       server.middlewares.use(createApiMiddleware(config));
     },
     configurePreviewServer(server) {

@@ -30,6 +30,9 @@ Environment=CLAUDE_CONFIG_DIR=/srv/haepung/claude/home
 UnsetEnvironment=DEV_BASIC_AUTH
 ExecStart=/usr/bin/env node server/main.ts
 Restart=on-failure
+# 스왑이 없다. prod 와 prod 가 띄운 claude 가 폭주해도 VM 전체(SSH 포함)가 멈추지 않게 cgroup 에서 끊는다.
+MemoryHigh=3G
+MemoryMax=4G
 RestartSec=3
 TimeoutStopSec=20
 

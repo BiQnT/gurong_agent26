@@ -172,13 +172,21 @@ test('every claude failure kind falls back with its own Korean notice and no raw
   assert.ok(!JSON.stringify(auth).includes('Please run /login'));
 });
 
-test('a cancelled client gets the abort, not a fallback explanation', async () => {
-  const fake = makeFakeClaude({ sleepMs: 20000 }, { timeoutMs: 30000 });
+test('a cancelled client gets the abort, and the finished run is still counted', async () => {
+  const databasePath = tempDatabase();
+  const usage = usageLog(databasePath);
+  const fake = makeFakeClaude({ stdout: answer('관측값을 확인했어요.'), sleepMs: 500 });
   const controller = new AbortController();
-  const pending = createLiveChat(bridge(fake.config))(request, snapshot, controller.signal);
+  const pending = createLiveChat(bridge(fake.config, { databasePath }))(
+    request,
+    snapshot,
+    controller.signal,
+  );
   await fake.waitForCall();
   controller.abort();
   await assert.rejects(pending, { name: 'AbortError' });
+  // 취소로 비용 기록을 피할 수 없다.
+  assert.equal(usage.spentLast24h(), 0.000978);
 });
 
 test('cost is recorded in the shared usage log and the daily budget switches to the fallback', async () => {
@@ -201,7 +209,7 @@ test('cost is recorded in the shared usage log and the daily budget switches to 
   assert.equal(fake.calls().length, calls);
 });
 
-test('a failed run that reports its cost is counted, and one that does not is not', async () => {
+test('a failed run counts its reported cost, and a timeout counts the per-message cap', async () => {
   const databasePath = tempDatabase();
   const usage = usageLog(databasePath);
   const limited = makeFakeClaude({
@@ -224,7 +232,7 @@ test('a failed run that reports its cost is counted, and one that does not is no
     live(),
   );
   assert.match(timedOut.providerNotice ?? '', /응답이 늦어/);
-  assert.equal(usage.spentLast24h(), 0.003812);
+  assert.equal(usage.spentLast24h(), 0.003812 + 0.5);
 });
 
 test('an unreadable usage log blocks claude with a fallback instead of failing the chat', async () => {

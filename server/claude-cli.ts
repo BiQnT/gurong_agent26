@@ -100,9 +100,12 @@ export function claudeEnv(
   return env;
 }
 
-/** claude -p 는 한 번에 질문 하나만 받으므로 이전 대화를 글로 이어 붙인다. */
+/**
+ * claude -p 는 한 번에 질문 하나만 받으므로 이전 대화를 글로 이어 붙인다.
+ * 첫 질문도 감싼다. '/'로 시작하는 입력은 --disable-slash-commands 를 줘도 CLI 가 명령으로 가로챈다.
+ */
 export function buildPrompt(history: AgentMessage[], message: string): string {
-  if (!history.length) return message;
+  if (!history.length) return `지금 질문:\n${message}`;
   const lines = history.map(
     (entry) => `[${entry.role === 'user' ? '사용자' : '도우미'}] ${entry.content}`,
   );

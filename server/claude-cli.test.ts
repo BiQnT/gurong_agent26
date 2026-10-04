@@ -123,8 +123,9 @@ test('claudeEnv passes only the whitelist and the one auth variable of the mode'
   ]);
 });
 
-test('buildPrompt joins history as text and leaves a lone message untouched', () => {
-  assert.equal(buildPrompt([], '--help 질문'), '--help 질문');
+test('buildPrompt joins history as text and never starts with the raw message', () => {
+  assert.equal(buildPrompt([], '--help 질문'), '지금 질문:\n--help 질문');
+  assert.equal(buildPrompt([], '/cost'), '지금 질문:\n/cost');
   assert.equal(
     buildPrompt(
       [

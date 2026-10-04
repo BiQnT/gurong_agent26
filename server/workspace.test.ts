@@ -748,6 +748,41 @@ test('login is limited per client address and email for ten minutes after five f
   assert.equal((await owner.call('/auth/login', 'POST', credentials('Owner'))).status, 200);
 });
 
+test('signup is limited per client address and an account keeps only its ten newest sessions', async (t) => {
+  const f = await fixture(t);
+  for (let index = 0; index < 10; index += 1) await f.agent().signup(`User${index}`);
+  const limited = await f.agent().call('/auth/signup', 'POST', credentials('User10'));
+  assert.equal(limited.status, 429);
+  assert.equal(limited.body.code, 'SIGNUP_RATE_LIMITED');
+  // 같은 호스트의 프록시(루프백)가 알려 준 다른 접속 주소는 따로 센다.
+  const proxied = await f.agent().call('/auth/signup', 'POST', credentials('User10'), {
+    'X-Forwarded-For': '203.0.113.9',
+  });
+  assert.equal(proxied.status, 200);
+  f.advance(60 * 60 * 1000);
+  assert.equal((await f.agent().call('/auth/signup', 'POST', credentials('User11'))).status, 200);
+
+  // 가입 때 세션 1개 + 로그인 11번: 오래된 2개가 빠지고 최근 10개만 남는다.
+  const devices = [];
+  for (let index = 0; index < 11; index += 1) {
+    f.advance(1);
+    const device = f.agent();
+    assert.equal((await device.call('/auth/login', 'POST', credentials('User0'))).status, 200);
+    devices.push(device);
+  }
+  const session = async (device: ReturnType<typeof f.agent>) =>
+    (await device.call<WorkspaceSession>('/auth/session')).body.user?.email ?? null;
+  assert.equal(await session(devices[0]), null);
+  assert.equal(await session(devices[1]), 'user0@example.test');
+  assert.equal(await session(devices[10]), 'user0@example.test');
+  const stored = JSON.parse(await readFile(f.dataFile, 'utf8')) as {
+    users: { id: string; email: string }[];
+    sessions: { userId: string }[];
+  };
+  const user0 = stored.users.find((user) => user.email === 'user0@example.test')!;
+  assert.equal(stored.sessions.filter((item) => item.userId === user0.id).length, 10);
+});
+
 test('session cookies get Secure behind a TLS proxy only when cookieSecure is set', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'gwamegi-workspace-test-'));
   t.after(() => rm(directory, { recursive: true, force: true }));

@@ -231,7 +231,9 @@ export function createLiveChat(
           system: observationContext(snapshot, action, await readUv(uvIndex)),
           history: request.history,
           message: request.message,
-          signal,
+          // 화면이 요청을 취소해도 claude 는 끝까지 돌려 실제 비용을 기록한다. 취소할 때마다 비용을 모르면
+          // 하루 한도를 피해 갈 수 있다. 실행 시간은 claude 쪽 시간 제한(AGENT_TIMEOUT_MS)이 막는다.
+          signal: new AbortController().signal,
         });
         record(costUsd);
         signal.throwIfAborted();
@@ -242,12 +244,18 @@ export function createLiveChat(
         // Structured observation evidence is never generated or changed by the model.
         return { ...base, content: text, provider: 'claude' };
       } catch (error) {
+        const failure = error instanceof ClaudeCliError ? error : undefined;
+        // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)는 그 값을 센다. 시간 초과는 비용을 알 수 없어
+        // 메시지당 상한을 쓴 것으로 센다 (적게 세면 하루 한도가 뚫린다).
+        record(
+          failure?.costUsd ??
+            (failure?.kind === 'timeout' ? config.claude.maxBudgetUsd : undefined),
+        );
         signal.throwIfAborted();
-        // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)만 센다. 시간 초과 등은 알 수 없어 세지 않는다.
-        record(error instanceof ClaudeCliError ? error.costUsd : undefined);
-        // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다 (메시지 본문은 남기지 않는다).
+        // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다. 사용자 메시지는 남기지 않지만, 원인 글에
+        // 모델 출력이 섞일 수 있어 앞 200자만 남긴다.
         console.error(
-          `[chat] claude ${error instanceof ClaudeCliError ? error.kind : 'failed'}: ${(error as Error).message}`,
+          `[chat] claude ${failure?.kind ?? 'failed'}: ${(error as Error).message.slice(0, 200)}`,
         );
         return fallback(claudeNotice(error));
       }
