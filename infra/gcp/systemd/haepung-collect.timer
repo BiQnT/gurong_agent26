@@ -1,0 +1,9 @@
+[Unit]
+Description=haepung 수집기 (30분마다, 매시 00분·30분)
+
+[Timer]
+OnCalendar=*-*-* *:00,30:00
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target
