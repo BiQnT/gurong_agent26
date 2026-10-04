@@ -39,6 +39,7 @@ SQLite 저장소:
 - 저장 전에 문서를 검증하고 실패하면 저장하지 않는다(`INVALID_DOCUMENT`). 읽을 때 손상된 문서도 빈 문서로 덮지 않고 실패한다.
 - 캐시는 `generation` 으로 확인한다. 쓸 때마다 새로 만드는 난수라서 백업을 복원해도 옛 캐시가 복원본을 덮어쓰지 않는다.
 - `schema` 번호(지금 1)를 문서와 함께 저장한다. 저장된 번호가 코드보다 새로우면 읽기·쓰기 모두 `SCHEMA_TOO_NEW` 로 실패한다. 더 옛 형식이면 `ALLOW_SCHEMA_UPGRADE=1` 일 때만 쓸 수 있다(`SCHEMA_UPGRADE_NOT_ALLOWED`). prod 배포 때만 이 값을 켠다.
+- VM 의 dev 와 prod 는 이 파일 하나를 같이 쓴다. 저장 검증 규칙을 바꿀 때의 순서와 prod 가 멈췄을 때의 복구는 [0006](../decisions/0006-shared-db-validation-order.md).
 - 같은 파일에 `llm_usage` 표(claude 호출 비용 기록)도 둔다. claude 제공자와 `DATABASE_PATH` 가 함께 있을 때만 만든다.
 
 관리 스크립트는 서버와 같은 저장소(잠금·검증·schema 확인)를 거치므로 서버가 켜져 있어도 된다.

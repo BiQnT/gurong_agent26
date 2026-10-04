@@ -83,6 +83,9 @@
 - 검증되지 않은 API를 기획서나 코드에 넣지 않는다. 호출 성공을 확인한 것만 쓴다.
 - 비밀키는 커밋하지 않는다. `.env.example`에 키 이름만 남긴다.
 - 팀원 개인정보(생년월일, 연락처, 서명)는 저장소에 커밋하지 않는다.
+- VM 의 dev·prod 는 DB 하나를 같이 쓴다. 저장 검증 규칙(`validateOperationsData`, `validDatabase`)을
+  바꾸면 [0006](docs/decisions/0006-shared-db-validation-order.md)의 순서(머지 직후 prod 배포)를 따른다.
+  어기면 prod 전체가 멈출 수 있다.
 
 ## 일정 제약
 
