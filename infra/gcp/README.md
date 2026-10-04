@@ -1,9 +1,9 @@
 # GCP VM 운영 (해풍)
 
-- **작성**: 2026-10-04 · 아직 VM 에서 실행해 보지 않았다. 반영을 확인하면 이 줄을 고친다
-- VM: `35.192.216.232` · Debian 12 · 2 vCPU · **메모리 1.9GB, 스왑 없음** · 디스크 296GB · Node v22
+- **작성**: 2026-10-04 · 같은 날 새 VM 에서 bootstrap, prod 배포, 복원 연습까지 실행해 확인했다
+- VM: `35.192.216.232` · Debian 12 · 8 vCPU · 메모리 31GB, 스왑 없음 (2026-10-04 확인. 처음 받았을 때는 2 vCPU·1.9GB) · 디스크 296GB · Node v22
 - 계정: biqnt, kyo74, seong, ytae (모두 sudo). 서비스 계정·그룹 이름은 `haepung`
-- 배경: [0002 GCP 실행 환경](../../docs/decisions/0002-gcp-runtime-layout.md) (옛 VM 기준. 새 VM·통합 변경은 0005 에 쓸 예정)
+- 배경: [0002 GCP 실행 환경](../../docs/decisions/0002-gcp-runtime-layout.md) (옛 VM 기준) → [0005 백엔드를 해풍 앱에 합침](../../docs/decisions/0005-merge-backend-into-haepung-app.md)
 
 | | 주소 | 앱 (내부) | 접속 암호 |
 | --- | --- | --- | --- |
@@ -147,12 +147,12 @@ cd /srv/haepung/work/$USER/<이름> && npm ci && claude
 # 끝나면: git -C /srv/haepung/dev worktree remove /srv/haepung/work/$USER/<이름>
 ```
 
-- **개인 dev 서버는 띄우지 않는다** (`npm run dev`, `vite`). 메모리가 모자라고 포트(3000·3001)와 DB 를 서버와 같이 쓰게 된다. 화면 확인은 머지 후 공용 dev 에서.
+- **개인 dev 서버는 띄우지 않는다** (`npm run dev`, `vite`). 포트(3000·3001)와 DB 를 서버와 같이 쓰게 된다. 화면 확인은 머지 후 공용 dev 에서.
 - worktree 마다 `node_modules`(수백 MB)가 생긴다. 안 쓰는 건 지운다.
 
-## 메모리 주의 (1.9GB, 스왑 없음)
+## 메모리 주의 (31GB, 스왑 없음)
 
-- 상시: Caddy, prod(node), dev(vite, cgroup 600MB 상한), 가끔 수집기(oneshot). 더해서 claude 가 채팅 한 턴마다 뜬다.
+- 상시: Caddy, prod(node), dev(vite 와 dev 가 띄운 claude, cgroup 2GB 상한), 가끔 수집기(oneshot). 더해서 claude 가 채팅 한 턴마다 뜬다.
   `AGENT_MAX_CONCURRENCY=2` 로 claude 를 동시에 2개까지만 띄운다.
 - SSH 의 Claude Code 와 빌드(`npm ci`, `npm run build`)도 수백 MB 를 쓴다. 여럿이 동시에 돌리지 않는다.
   시작 전에 `free -m` 의 `available` 이 600MB 이상인지 본다. 배포는 이 검사를 스스로 한다.
