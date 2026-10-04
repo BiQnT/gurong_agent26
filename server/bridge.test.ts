@@ -54,6 +54,25 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
     );
     assert.deepEqual(actual, {
       eumServiceKey: expected,
+      // 서버 설정 기본값: OpenAI 호환(팀원 로컬 그대로), 공유 DB·원격 출처·추가 키 없음
+      llmProvider: 'openai',
+      claude: {
+        bin: 'claude',
+        workdir: '/test/project/.local-data/agent-workdir',
+        authMode: 'subscription',
+        model: undefined,
+        effort: undefined,
+        maxBudgetUsd: 0.5,
+        timeoutMs: 40000,
+        maxConcurrency: 4,
+        dailyBudgetUsd: 10,
+      },
+      databasePath: undefined,
+      publicOrigins: [],
+      cookieSecure: false,
+      devBasicAuth: undefined,
+      kmaAuthKey: undefined,
+      dataGoKrKey: undefined,
       openaiApiKey: 'sk-test%2B+%3D',
       openaiModel: 'test-model',
       llmBaseUrl: 'https://api.openai.com/v1',
@@ -377,7 +396,12 @@ test('Responses output is read across messages and model failures keep immutable
     input = String(init?.body);
     return Response.json({
       choices: [
-        { message: { role: 'assistant', content: '보관된 과거 실측 자료이며 현재 날씨가 아니에요.' } },
+        {
+          message: {
+            role: 'assistant',
+            content: '보관된 과거 실측 자료이며 현재 날씨가 아니에요.',
+          },
+        },
       ],
     });
   });

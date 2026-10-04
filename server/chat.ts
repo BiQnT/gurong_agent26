@@ -1,11 +1,13 @@
 import type { ChatReply, ChatRequest } from '../src/lib/chat.ts';
 import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
 import { BridgeError, object, type BridgeConfig } from './eum.ts';
+import { ClaudeCliError, createClaudeAgent, type AgentAsk } from './claude-cli.ts';
+import { usageLog } from './usage.ts';
 
 export type LiveChatRequest = ChatRequest & { deviceId?: string };
 export type LiveChatReply = ChatReply & {
   observation?: LiveObservation;
-  provider: 'openai' | 'compatible' | 'local';
+  provider: 'openai' | 'compatible' | 'claude' | 'local';
   providerNotice?: string;
   sourceFetchedAt: string;
 };
@@ -138,7 +140,28 @@ export function hasUnsupportedVerdict(content: string): boolean {
   ].some((pattern) => pattern.test(text));
 }
 
-export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fetch) {
+function observationContext(snapshot: LiveSnapshot, action: ChatReply['action']): string {
+  return `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null })}`;
+}
+
+function claudeNotice(error: unknown): string {
+  const kind = error instanceof ClaudeCliError ? error.kind : 'failed';
+  if (kind === 'auth') return 'AI 인증에 실패해 관측 사실만 안내해요.';
+  if (kind === 'limit') return 'AI 요청 한도에 도달해 관측 사실만 안내해요.';
+  if (kind === 'busy')
+    return '지금 AI 요청이 많아 관측 사실만 안내해요. 잠시 뒤 다시 물어봐 주세요.';
+  if (kind === 'timeout') return 'AI 응답이 늦어 관측 사실만 안내해요.';
+  return 'AI 연결 또는 응답 확인에 실패해 관측 사실만 안내해요.';
+}
+
+export function createLiveChat(
+  config: BridgeConfig,
+  fetcher: typeof fetch = fetch,
+  ask: AgentAsk | undefined = config.llmProvider === 'claude' && config.claude
+    ? createClaudeAgent(config.claude)
+    : undefined,
+) {
+  const usage = config.databasePath ? usageLog(config.databasePath) : undefined;
   return async (
     request: LiveChatRequest,
     snapshot: LiveSnapshot,
@@ -158,8 +181,33 @@ export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fet
       provider: 'local',
       providerNotice: notice,
     });
-    if (!config.openaiApiKey)
-      return fallback('AI 키가 서버에 설정되지 않아 관측 사실만 안내해요.');
+    if (ask && config.claude) {
+      if (usage && usage.spentLast24h() >= config.claude.dailyBudgetUsd)
+        return fallback('최근 24시간 AI 사용 한도에 도달해 관측 사실만 안내해요.');
+      try {
+        const { text, costUsd } = await ask({
+          system: observationContext(snapshot, action),
+          history: request.history,
+          message: request.message,
+          signal,
+        });
+        usage?.record('claude', costUsd ?? 0);
+        signal.throwIfAborted();
+        if (!text || text.length > 4000)
+          return fallback('AI 답변 형식을 확인할 수 없어 관측 사실만 안내해요.');
+        if (hasUnsupportedVerdict(text))
+          return fallback('AI 답변에 확인되지 않은 판정이 포함되어 관측 사실만 안내해요.');
+        // Structured observation evidence is never generated or changed by the model.
+        return { ...base, content: text, provider: 'claude' };
+      } catch (error) {
+        signal.throwIfAborted();
+        // 비용을 알 수 없는 실패(한도 초과, 시간 초과)는 메시지당 상한만큼 쓴 것으로 친다.
+        if (error instanceof ClaudeCliError && (error.kind === 'limit' || error.kind === 'timeout'))
+          usage?.record('claude', config.claude.maxBudgetUsd);
+        return fallback(claudeNotice(error));
+      }
+    }
+    if (!config.openaiApiKey) return fallback('AI 키가 서버에 설정되지 않아 관측 사실만 안내해요.');
     try {
       const response = await fetcher(`${config.llmBaseUrl.replace(/\/+$/, '')}/chat/completions`, {
         method: 'POST',
@@ -174,10 +222,7 @@ export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fet
           stream: false,
           max_tokens: 600,
           messages: [
-            {
-              role: 'system',
-              content: `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null })}`,
-            },
+            { role: 'system', content: observationContext(snapshot, action) },
             ...request.history,
             { role: 'user', content: request.message },
           ],

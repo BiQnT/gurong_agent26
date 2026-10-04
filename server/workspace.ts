@@ -5,6 +5,7 @@ import { isDeepStrictEqual } from 'node:util';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Connect } from 'vite';
 import { BridgeError } from './eum.ts';
+import { sqliteDocumentStore, type DocumentStore } from './sqlite-store.ts';
 import {
   createInitialOperationsData,
   recordWorkerReply,
@@ -76,7 +77,13 @@ type Database = {
   invitations: StoredInvitation[];
   operations: StoredOperations[];
 };
-export type WorkspaceConfig = { projectRoot?: string; dataFile?: string; now?: () => number };
+export type WorkspaceConfig = {
+  projectRoot?: string;
+  dataFile?: string;
+  /** 설정하면 파일 대신 이 SQLite DB 에 저장한다 (VM 에서 dev·prod 가 함께 쓰는 DB). */
+  databasePath?: string;
+  now?: () => number;
+};
 export type WorkspaceMembership = { user: Account; site: StoredSite; membership: SiteMembership };
 const emptyDatabase = (): Database => ({
   version: 1,
@@ -196,7 +203,7 @@ function validDatabase(value: unknown): value is Database {
 }
 
 /** One serialized transaction queue is shared by all service instances for a data file. */
-const stores = new Map<string, ReturnType<typeof diskStore>>();
+const stores = new Map<string, DocumentStore<Database>>();
 function diskStore(dataFile: string) {
   let database: Database | undefined;
   let queue: Promise<unknown> = Promise.resolve();
@@ -300,12 +307,17 @@ function setCookie(response: ServerResponse, token: string, request: IncomingMes
 }
 
 export function createWorkspaceService(config: WorkspaceConfig = {}) {
-  const dataFile = resolve(
-    config.dataFile || join(config.projectRoot || process.cwd(), '.local-data', 'workspace.json'),
-  );
+  const dataFile = config.databasePath
+    ? `sqlite:${resolve(config.databasePath)}`
+    : resolve(
+        config.dataFile ||
+          join(config.projectRoot || process.cwd(), '.local-data', 'workspace.json'),
+      );
   let store = stores.get(dataFile);
   if (!store) {
-    store = diskStore(dataFile);
+    store = config.databasePath
+      ? sqliteDocumentStore(resolve(config.databasePath), 'workspace', emptyDatabase, validDatabase)
+      : diskStore(dataFile);
     stores.set(dataFile, store);
   }
   const dbStore = store;

@@ -1,5 +1,5 @@
 import type { Connect, Plugin } from 'vite';
-import { BridgeError, createObservationService, type BridgeConfig } from './eum.ts';
+import { BridgeError, createObservationService, llmStatus, type BridgeConfig } from './eum.ts';
 import { createLiveChat, readChatRequest } from './chat.ts';
 import {
   createWorkspaceMiddleware,
@@ -8,6 +8,7 @@ import {
   type WorkspaceService,
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
+import { resolve } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
 const API_PATHS = new Set(['/api/health', '/api/observations', '/api/chat']);
@@ -22,13 +23,44 @@ function normalizeEumServiceKey(value: string | undefined): string {
   }
 }
 
+// 빈 값이 0 이 되거나 오타가 NaN 이 되어 상한이 사라지지 않게 한다.
+function positive(env: Record<string, string>, name: string, fallback: number): number {
+  const value = Number(env[name]);
+  return env[name]?.trim() && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
 export function readBridgeConfig(env: Record<string, string>, projectRoot: string): BridgeConfig {
   const offset = env.EUM_TIMEZONE_OFFSET?.trim() || '+09:00';
   const age = Number(env.EUM_STALE_AFTER_MINUTES || 30);
+  // workspace.ts 는 요청마다 process.env 를 읽으므로 .env 파일에서 온 값도 옮겨 둔다 (터널 주소와 같은 방식).
+  for (const name of ['PUBLIC_ORIGINS', 'COOKIE_SECURE'])
+    if (env[name] !== undefined && process.env[name] === undefined) process.env[name] = env[name];
   if (env.PUBLIC_TUNNEL_HOSTS !== undefined && process.env.PUBLIC_TUNNEL_HOSTS === undefined)
     process.env.PUBLIC_TUNNEL_HOSTS = env.PUBLIC_TUNNEL_HOSTS;
   return {
     eumServiceKey: normalizeEumServiceKey(env.EUM_SERVICE_KEY),
+    // 기본은 팀원 로컬 설정(OpenAI 호환)이 그대로 동작하도록 openai. VM 은 LLM_PROVIDER=claude
+    llmProvider: env.LLM_PROVIDER?.trim() === 'claude' ? 'claude' : 'openai',
+    claude: {
+      bin: env.CLAUDE_BIN?.trim() || 'claude',
+      workdir: env.AGENT_WORKDIR?.trim() || resolve(projectRoot, '.local-data', 'agent-workdir'),
+      authMode: env.AGENT_AUTH_MODE?.trim() === 'api_key' ? 'api_key' : 'subscription',
+      model: env.AGENT_MODEL?.trim() || undefined,
+      effort: env.AGENT_EFFORT?.trim() || undefined,
+      maxBudgetUsd: positive(env, 'AGENT_MAX_BUDGET_USD', 0.5),
+      timeoutMs: positive(env, 'AGENT_TIMEOUT_MS', 40000),
+      maxConcurrency: positive(env, 'AGENT_MAX_CONCURRENCY', 4),
+      dailyBudgetUsd: positive(env, 'AGENT_DAILY_BUDGET_USD', 10),
+    },
+    databasePath: env.DATABASE_PATH?.trim() || undefined,
+    publicOrigins: (env.PUBLIC_ORIGINS || '')
+      .split(',')
+      .map((origin) => origin.trim().replace(/\/+$/, ''))
+      .filter(Boolean),
+    cookieSecure: env.COOKIE_SECURE?.trim() === '1',
+    devBasicAuth: env.DEV_BASIC_AUTH?.trim() || undefined,
+    kmaAuthKey: env.KMA_AUTH_KEY?.trim() || undefined,
+    dataGoKrKey: env.DATA_GO_KR_KEY?.trim() || undefined,
     openaiApiKey: (env.LLM_API_KEY ?? env.OPENAI_API_KEY)?.trim() || '',
     openaiModel: (env.LLM_API_MODEL ?? env.OPENAI_MODEL)?.trim() || 'gpt-4.1-mini',
     llmBaseUrl: env.LLM_API_BASE?.trim() || 'https://api.openai.com/v1',
@@ -150,9 +182,11 @@ export function createApiMiddleware(
           if (request.method !== 'GET')
             throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
           send(200, {
-            mode: 'local-bridge',
+            mode: process.env.APP_MODE || 'local-bridge',
             eum: { configured: !!config.eumServiceKey },
-            llm: { configured: !!config.openaiApiKey, model: config.openaiModel },
+            llm: { provider: config.llmProvider ?? 'openai', ...llmStatus(config) },
+            // 배포 스크립트가 새 버전이 떴는지 확인한다 (release.env 의 GIT_COMMIT).
+            commit: process.env.GIT_COMMIT || null,
           });
           return;
         }
