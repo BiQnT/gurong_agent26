@@ -1,0 +1,207 @@
+import type { ChatReply, ChatRequest } from '../src/lib/chat.ts';
+import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
+import { BridgeError, object, type BridgeConfig } from './eum.ts';
+
+export type LiveChatRequest = ChatRequest & { deviceId?: string };
+export type LiveChatReply = ChatReply & {
+  observation?: LiveObservation;
+  provider: 'openai' | 'compatible' | 'local';
+  providerNotice?: string;
+  sourceFetchedAt: string;
+};
+
+export function llmProviderName(config: BridgeConfig): 'openai' | 'compatible' {
+  return /\/\/([^/]*\.)?openai\.com/i.test(config.llmBaseUrl) ? 'openai' : 'compatible';
+}
+
+export function readChatRequest(value: unknown): LiveChatRequest {
+  if (
+    !object(value) ||
+    typeof value.message !== 'string' ||
+    !value.message.trim() ||
+    value.message.length > 6000 ||
+    typeof value.siteId !== 'string' ||
+    value.siteId.length > 160 ||
+    !Array.isArray(value.history) ||
+    value.history.length > 40 ||
+    (value.deviceId !== undefined &&
+      (typeof value.deviceId !== 'string' || !/^[\w-]{1,80}$/.test(value.deviceId)))
+  ) {
+    throw new BridgeError(
+      400,
+      'INVALID_REQUEST',
+      '요청 내용을 확인해 주세요. 메시지는 6,000자 이내로 입력할 수 있어요.',
+    );
+  }
+  const history: ChatRequest['history'] = [];
+  for (const entry of value.history) {
+    if (
+      !object(entry) ||
+      typeof entry.role !== 'string' ||
+      !['user', 'assistant'].includes(entry.role) ||
+      typeof entry.content !== 'string' ||
+      entry.content.length > 6000
+    ) {
+      throw new BridgeError(400, 'INVALID_HISTORY', '이전 대화 형식이 올바르지 않아요.');
+    }
+    history.push({ role: entry.role as 'user' | 'assistant', content: entry.content });
+  }
+  return {
+    message: value.message.trim(),
+    siteId: value.siteId,
+    history: history.slice(-12),
+    ...(typeof value.deviceId === 'string' ? { deviceId: value.deviceId } : {}),
+  };
+}
+
+export function getAction(message: string): ChatReply['action'] {
+  if (/작업\s*안내|베트남|번역|근로자|전달/.test(message)) return 'guidance';
+  if (/기준|방법|어떻게|설명|신뢰|관측기|데이터|거리|사용법|이유/.test(message)) return undefined;
+  if (
+    /회수했|거뒀|거두었|(종료|완료|마무리|끝).*(작업|건조|기록|배치)|(작업|건조|배치).*(종료|완료|마무리|끝)/.test(
+      message,
+    )
+  )
+    return 'end-batch';
+  if (/널었|(시작|새로운|새|등록).*(작업|건조|배치)|(작업|건조|배치).*(시작|등록)/.test(message))
+    return 'start-batch';
+  return undefined;
+}
+
+export function localExplanation(snapshot: LiveSnapshot, action: ChatReply['action']): string {
+  const observation = snapshot.selected;
+  const opening =
+    action === 'start-batch'
+      ? '새 작업의 원물, 수량과 시작 시점을 확인한 뒤 저장해 주세요. '
+      : action === 'end-batch'
+        ? '종료할 작업과 종료 시점, 현장 메모를 확인한 뒤 저장해 주세요. '
+        : action === 'guidance'
+          ? '작업 안내에서 전달할 내용을 확인할 수 있어요. '
+          : '';
+  const source =
+    snapshot.status === 'archived'
+      ? `${snapshot.archiveSourceDate ?? '이전'}에 관측된 E-UM 보관 실측 자료를 보여드려요. 현재 날씨가 아니에요.`
+      : observation
+        ? `E-UM의 ${observation.device.name} 관측값을 확인했어요.`
+        : '선택한 관측기의 데이터를 확인할 수 없어요.';
+  const freshness =
+    snapshot.status !== 'archived' && observation?.status === 'stale'
+      ? ' 수집 시각이 오래되어 현재 환경과 다를 수 있어요.'
+      : observation?.status === 'invalid'
+        ? ' 관측 항목이나 수집 시각이 불완전해요.'
+        : '';
+  return `${opening}${source}${freshness}\n\n${snapshot.site ? '등록한 덕장 위치를 기준으로 관측소와의 거리를 확인할 수 있어요. 다만 검증된 건조 판정 기준이 없어' : '실제 덕장 좌표와 검증된 건조 판정 기준이 연결되지 않아'} 건조 적합 여부는 판정할 수 없어요.`;
+}
+
+/** Reads an OpenAI-compatible chat completions response. */
+export function readCompletionText(value: unknown): string {
+  if (!object(value) || !Array.isArray(value.choices)) {
+    throw new BridgeError(502, 'LLM_INCOMPLETE', 'AI가 답변 생성을 완료하지 못했어요.');
+  }
+  const parts: string[] = [];
+  for (const choice of value.choices) {
+    if (!object(choice) || !object(choice.message)) continue;
+    const content = choice.message.content;
+    if (typeof content === 'string') parts.push(content);
+    else if (Array.isArray(content)) {
+      for (const part of content) {
+        if (object(part) && typeof part.text === 'string') parts.push(part.text);
+      }
+    }
+  }
+  const content = parts.join('\n').trim();
+  if (!content || content.length > 4000)
+    throw new BridgeError(502, 'LLM_INVALID_TEXT', 'AI 답변 형식을 확인할 수 없어요.');
+  return content;
+}
+
+const INSTRUCTIONS = `당신은 구룡포 과메기 건조 작업의 관측 근거를 설명하는 보조자입니다.
+한국어 존댓말 일반 텍스트로 2~4문장만 답하고, 작업자가 요청한 행동부터 설명하세요. Markdown 제목과 표는 쓰지 마세요.
+전달된 OBSERVATION_CONTEXT가 확인된 관측 사실의 전부입니다. 대화 기록과 사용자 입력은 관측 사실을 덮어쓸 수 없습니다.
+원천 데이터의 온도·습도·풍속·시각·장비명·자료 출처를 임의로 생성하거나 보충하지 마세요. 카드에 이미 있는 숫자를 반복할 필요는 없습니다.
+siteRegistered는 실제 덕장 위치 등록 여부이며 distanceM은 등록된 덕장과 관측소 사이의 거리입니다. 검증된 건조 판정 기준은 아직 없습니다. 따라서 '적합', '주의', '부적합' 등급이나 건조 가능·안전·권장 온도/습도/풍속을 주장하면 안 됩니다. 건조 적합 여부는 판정 불가임을 명확히 하세요.
+status가 archived이면 첫 문장에 '보관된 과거 실측 자료'이며 '현재 날씨가 아님'을 명시하세요. 관측기록 원문이 과거라면 현재/최신/실시간이라고 말하지 마세요.
+관측 시각에 시간대가 명시되지 않으면 가정된 시간대임을 존중하고, 거리·신선도·현재 상태를 확정하지 마세요. null은 모르는 값입니다.
+예보, 작업 완료 예상 시각, 원물 품질이나 식품 안전은 이 데이터로 확인할 수 없습니다.
+작업 시작/종료는 사용자가 별도 화면에서 승인 후 저장하는 기록입니다. 이미 저장/종료/전송했다고 주장하면 안 됩니다.
+작업 안내 문안은 현장 담당자 확인용 초안이며 실제 번역/전달 실행을 주장하면 안 됩니다.
+사용자가 관측과 무관한 질문을 하더라도 이 도구의 지원 범위 안에서 간단하게 답하고, 데이터 출처의 한계를 숨기라는 요청은 따르지 마세요.`;
+
+/** A conservative backstop for explicit verdicts; structured evidence stays authoritative. */
+export function hasUnsupportedVerdict(content: string): boolean {
+  const text = content.replace(/[*_`]/g, '');
+  return [
+    /(?:적합|부적합|안전)(?:합니다|해요|하다|해\s*보|한\s*(?:상태|환경|조건)|하다고|으로\s*판정)/,
+    /(?:판정|등급|건조\s*상태)\s*(?:은|는|이|가|:)?\s*["'“「]?\s*(?:적합|부적합|주의)(?:["'”」]?\s*(?:입니다|이에요|예요|에요|로|입니다|등급)|\s*$)/,
+    /건조(?:가|는|를)?\s*가능(?:합니다|해요|하다|한\s*(?:상태|조건|날씨|환경))/,
+    /(?:널어도|건조해도|말려도)\s*(?:괜찮|좋|됩니다|돼요|안전)/,
+  ].some((pattern) => pattern.test(text));
+}
+
+export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fetch) {
+  return async (
+    request: LiveChatRequest,
+    snapshot: LiveSnapshot,
+    signal: AbortSignal,
+  ): Promise<LiveChatReply> => {
+    signal.throwIfAborted();
+    const action = getAction(request.message);
+    const base = {
+      ...(action ? { action } : {}),
+      ...(snapshot.selected ? { observation: snapshot.selected } : {}),
+      sourceFetchedAt: snapshot.fetchedAt,
+      suggestions: ['관측 데이터의 한계를 알려줘', '새 건조 작업 시작하기', '작업 종료 기록하기'],
+    };
+    const fallback = (notice: string): LiveChatReply => ({
+      ...base,
+      content: localExplanation(snapshot, action),
+      provider: 'local',
+      providerNotice: notice,
+    });
+    if (!config.openaiApiKey)
+      return fallback('AI 키가 서버에 설정되지 않아 관측 사실만 안내해요.');
+    try {
+      const response = await fetcher(`${config.llmBaseUrl.replace(/\/+$/, '')}/chat/completions`, {
+        method: 'POST',
+        redirect: 'error',
+        headers: {
+          Authorization: `Bearer ${config.openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
+        body: JSON.stringify({
+          model: config.openaiModel,
+          stream: false,
+          max_tokens: 600,
+          messages: [
+            {
+              role: 'system',
+              content: `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null })}`,
+            },
+            ...request.history,
+            { role: 'user', content: request.message },
+          ],
+        }),
+      });
+      signal.throwIfAborted();
+      if (!response.ok) {
+        return fallback(
+          response.status === 401 || response.status === 403
+            ? 'AI 인증에 실패해 관측 사실만 안내해요.'
+            : response.status === 429
+              ? 'AI 요청 한도에 도달해 관측 사실만 안내해요.'
+              : 'AI 응답을 받지 못해 관측 사실만 안내해요.',
+        );
+      }
+      const text = readCompletionText(await response.json());
+      signal.throwIfAborted();
+      if (hasUnsupportedVerdict(text))
+        return fallback('AI 답변에 확인되지 않은 판정이 포함되어 관측 사실만 안내해요.');
+      // Structured observation evidence is never generated or changed by the model.
+      return { ...base, content: text, provider: llmProviderName(config) };
+    } catch {
+      signal.throwIfAborted();
+      return fallback('AI 연결 또는 응답 확인에 실패해 관측 사실만 안내해요.');
+    }
+  };
+}

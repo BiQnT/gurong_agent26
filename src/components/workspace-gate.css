@@ -1,0 +1,282 @@
+.gate-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 28px;
+  text-align: center;
+  background: #fafafa;
+}
+.gate-screen h1 {
+  font-size: 24px;
+  letter-spacing: -0.8px;
+}
+.gate-screen p {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #666;
+}
+.gate-screen .gate-vietnamese {
+  font-size: 12px;
+  margin-top: -10px;
+  color: #858585;
+}
+.gate-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.gate-account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 13px 28px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  font-size: 12px;
+}
+.gate-account-bar > span,
+.gate-account-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.gate-account-bar > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.gate-account-bar > span svg {
+  color: #858585;
+  flex-shrink: 0;
+}
+.gate-account-bar small {
+  color: #a3a3a3;
+  font-size: 10px;
+}
+.gate-account-bar button {
+  color: #737373;
+  padding: 7px;
+  font-size: 11px;
+}
+.gate-account-bar button:disabled {
+  opacity: 0.5;
+}
+.gate-onboarding {
+  min-height: calc(100dvh - 58px);
+  padding: 55px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gate-entry {
+  width: 100%;
+  max-width: 510px;
+  text-align: center;
+}
+.gate-entry > .brand-mark {
+  width: 64px;
+  height: 64px;
+  border-radius: 21px;
+  margin: 0 0 27px;
+}
+.gate-entry > .brand-mark svg {
+  width: 45px;
+  height: 45px;
+}
+.gate-entry h1 {
+  margin: 13px 0 13px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -1px;
+}
+.gate-entry > p {
+  color: #929292;
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 0;
+}
+.gate-role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin-top: 35px;
+}
+.gate-role-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 23px;
+  text-align: left;
+  border: 1px solid #e5e5e5;
+  border-radius: 13px;
+  background: #fff;
+}
+.gate-role-card:hover {
+  background: #fafafa;
+  border-color: #a3a3a3;
+  box-shadow: 0 4px 14px #00000004;
+}
+.gate-role-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #e8e8e8;
+  background: #f7f7f7;
+  color: #737373;
+  border-radius: 14px;
+}
+.gate-role-card > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+.gate-role-card strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 550;
+  letter-spacing: -0.2px;
+}
+.gate-role-card small {
+  display: block;
+  color: #929292;
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 6px;
+}
+.gate-role-card > span:nth-child(2) > span {
+  display: block;
+  margin-top: 4px;
+  color: #a3a3a3;
+  font-size: 10px;
+}
+.gate-role-card > svg {
+  flex-shrink: 0;
+  color: #a3a3a3;
+}
+.gate-entry-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #a3a3a3;
+  margin-top: 11px;
+  line-height: 1.7;
+}
+.gate-worker-entry {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.gate-worker-entry > .gate-vietnamese {
+  color: #929292;
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 9px 0 28px;
+}
+.gate-worker-entry form {
+  text-align: left;
+}
+.gate-worker-entry .ws-button {
+  margin-top: 18px;
+}
+.gate-entry-hint {
+  margin: 22px 0;
+  font-size: 11px;
+  color: #929292;
+  line-height: 1.9;
+}
+.gate-entry-hint > span {
+  font-size: 10px;
+}
+.gate-worker-entry > .ws-text-button {
+  font-size: 11px;
+  color: #737373;
+}
+.gate-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 32px);
+  background: #262626;
+  color: white;
+  border-radius: 12px;
+  padding: 14px 18px;
+  z-index: 200;
+  font-size: 13px;
+  box-shadow: 0 8px 25px #0002;
+}
+.gate-toast > span {
+  line-height: 1.6;
+}
+.gate-toast > button,
+.gate-toast > svg {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .gate-account-bar {
+    padding: 11px 17px;
+    gap: 6px;
+  }
+  .gate-account-bar small {
+    display: none;
+  }
+  .gate-account-bar button {
+    font-size: 10px;
+  }
+  .gate-onboarding {
+    padding: 42px 22px;
+  }
+  .gate-entry h1 {
+    font-size: 26px;
+  }
+  .gate-entry > p {
+    font-size: 11px;
+  }
+  .gate-role-card {
+    padding: 19px 17px;
+    gap: 13px;
+  }
+  .gate-role-card strong {
+    font-size: 14px;
+  }
+  .gate-role-card small {
+    font-size: 10px;
+  }
+  .gate-role-icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 12px;
+  }
+  .gate-role-card > svg {
+    width: 15px;
+  }
+  .gate-entry-foot {
+    font-size: 9px;
+  }
+  .gate-toast {
+    font-size: 11px;
+    padding: 12px 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gate-onboarding * {
+    transition-duration: 0.01ms !important;
+  }
+  .gate-screen .spin,
+  .gate-account-bar .spin {
+    animation: none;
+  }
+}
