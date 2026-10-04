@@ -19,7 +19,7 @@ CLAUDE_CODE_VERSION=2.1.289
 GITHUB_ED25519_FP='SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU'
 
 step() { printf '\n== %s\n' "$*"; }
-as_app() { sudo -u "$APP_USER" -H bash -c 'umask 002; exec "$@"' _ "$@"; }
+as_app() { sudo -u "$APP_USER" -H bash -c 'umask 007; exec "$@"' _ "$@"; }
 
 [[ $EUID -eq 0 ]] || { echo 'sudo 로 실행해야 한다'; exit 1; }
 MEMBERS=("$@")
@@ -59,8 +59,11 @@ if id -nG 2>/dev/null | grep -qw gwamegi; then umask 002; fi
 EOF
 
 step '폴더'
-install -d -o "$APP_USER" -g "$APP_USER" -m 2775 "$ROOT" "$ROOT/prod" "$ROOT/prod/releases" "$ROOT/data" "$ROOT/data/agent-workdir" "$ROOT/backups"
-install -d -o "$APP_USER" -g "$APP_USER" -m 2770 "$ROOT/env" "$ROOT/data/claude-home"
+# 코드·배포본은 그룹 밖에서도 읽을 수 있게 두고, DB·대화 기록·비밀값·백업은 그룹만 읽는다.
+install -d -o "$APP_USER" -g "$APP_USER" -m 2775 "$ROOT" "$ROOT/prod" "$ROOT/prod/releases"
+install -d -o "$APP_USER" -g "$APP_USER" -m 2770 "$ROOT/data" "$ROOT/data/agent-workdir" "$ROOT/data/claude-home" "$ROOT/backups" "$ROOT/env"
+find "$ROOT/data" -maxdepth 1 -name 'gwamegi.db*' -exec chmod 660 {} +
+find "$ROOT/backups" -type f -exec chmod 640 {} +
 git config --system --get-all safe.directory | grep -qx "$ROOT/dev" || git config --system --add safe.directory "$ROOT/dev"
 
 step 'GitHub 호스트키'
@@ -93,7 +96,7 @@ step '저장소'
 if [[ ! -d "$ROOT/dev/.git" ]]; then
   if ! as_app env GIT_SSH_COMMAND="$SSH_CMD" git ls-remote "$REPO" >/dev/null 2>&1; then
     echo 'GitHub 이 이 키를 모른다. 아래 공개키를 저장소 deploy key(쓰기 허용)로 등록하고 다시 실행:'
-    echo "  gh repo deploy-key add - --repo BiQnT/gurong_agent26 --allow-write --title 'gcp $(hostname)' <<< '$(cat "$KEY.pub")'"
+    echo "  gh repo deploy-key add <(echo '$(cat "$KEY.pub")') --repo BiQnT/gurong_agent26 --allow-write --title 'gcp $(hostname)'"
     exit 2
   fi
   as_app env GIT_SSH_COMMAND="$SSH_CMD" git clone --branch "$BRANCH" "$REPO" "$ROOT/dev"
@@ -108,10 +111,19 @@ if [[ ! -f "$ROOT/env/secrets.env" ]]; then
   install -o "$APP_USER" -g "$APP_USER" -m 0640 "$ROOT/dev/infra/gcp/secrets.env.example" "$ROOT/env/secrets.env"
   echo "$ROOT/env/secrets.env 를 만들었다. 값을 채워야 채팅이 동작한다."
 fi
+# 3000 포트가 열리는 순간 공개되므로 공용 암호를 기본으로 켠다. 값은 secrets.env 에서 확인한다 (화면에 찍지 않는다).
+if ! grep -q '^BASIC_AUTH=.' "$ROOT/env/secrets.env"; then
+  password=$(head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 16)
+  sed -i '/^BASIC_AUTH=/d' "$ROOT/env/secrets.env"
+  echo "BASIC_AUTH=gwamegi:$password" >> "$ROOT/env/secrets.env"
+  echo '공용 접속 암호(BASIC_AUTH)를 만들었다.'
+fi
 
 step 'systemd'
 install -m 644 "$ROOT"/dev/infra/gcp/systemd/*.service "$ROOT"/dev/infra/gcp/systemd/*.timer /etc/systemd/system/
 install -m 755 "$ROOT/dev/infra/gcp/backup.sh" /usr/local/bin/gwamegi-backup
+# root 로 돌리는 배포 스크립트는 root 소유 사본을 쓴다 (서비스 계정이 dev 폴더의 원본을 고칠 수 있으므로).
+install -o root -g root -m 755 "$ROOT/dev/infra/gcp/deploy.sh" /usr/local/sbin/gwamegi-deploy
 systemctl daemon-reload
 systemctl enable --now gwamegi-backup.timer
 systemctl enable gwamegi-dev gwamegi-prod
@@ -124,7 +136,7 @@ apt-get clean
 
 step '다음 할 일'
 cat <<EOF
-- prod 첫 배포:   sudo $ROOT/dev/infra/gcp/deploy.sh          (기본 origin/main)
+- prod 배포:      sudo gwamegi-deploy          (기본 origin/main)
 - 비밀값:         sudo -u $APP_USER -e $ROOT/env/secrets.env  후  sudo systemctl restart gwamegi-dev gwamegi-prod
 - 팀원 그룹 반영:  각자 SSH 재접속
 EOF

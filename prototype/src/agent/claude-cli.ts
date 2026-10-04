@@ -47,7 +47,13 @@ export function buildClaudeArgs(agent: AgentConfig, mcpConfig: string, resumeSes
     '--permission-mode', 'dontAsk',
     // 서버 사용자의 ~/.claude 설정·플러그인·훅·CLAUDE.md 를 읽지 않는다. 개발자가 같은 계정으로 Claude Code 를 써도 섞이지 않는다.
     '--setting-sources', '',
+    // 채팅으로 /model, /config 같은 Claude Code 명령을 보내도 실행되지 않게 한다.
+    '--disable-slash-commands',
     '--system-prompt-file', agent.systemPromptPath,
+    // 프롬프트를 고치면 이어지는 대화에도 다음 메시지부터 반영한다 (기본은 첫 턴의 프롬프트를 고정).
+    '--system-prompt-snapshot', 'off',
+    // 대화 기록(세션 파일)을 30일 뒤 지우는 기본 정리를 끈다. 지워지면 --resume 이 실패한다.
+    '--settings', JSON.stringify({ cleanupPeriodDays: 3650 }),
     '--max-budget-usd', String(agent.maxBudgetUsd),
   ];
   // API 키 모드는 --bare: OAuth·키체인을 아예 읽지 않고 ANTHROPIC_API_KEY 만 쓴다.
@@ -62,7 +68,8 @@ export function buildClaudeArgs(agent: AgentConfig, mcpConfig: string, resumeSes
 const PASS_THROUGH = ['PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL', 'TZ', 'TMPDIR', 'CLAUDE_CONFIG_DIR', 'EUM_SERVICE_KEY'];
 
 export function childEnv(agent: AgentConfig, source: NodeJS.ProcessEnv = process.env): Record<string, string> {
-  const env: Record<string, string> = { DISABLE_AUTOUPDATER: '1' };
+  // 자동 메모리를 끈다. 작업 폴더가 하나라 켜져 있으면 한 사람의 대화 내용이 다른 대화에 섞일 수 있다.
+  const env: Record<string, string> = { DISABLE_AUTOUPDATER: '1', CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1' };
   const names = [...PASS_THROUGH, agent.authMode === 'api_key' ? 'ANTHROPIC_API_KEY' : 'CLAUDE_CODE_OAUTH_TOKEN'];
   for (const name of names) {
     const value = source[name];
@@ -98,14 +105,20 @@ export async function* runClaude(config: Config, options: RunOptions): AsyncGene
   const exited = new Promise<number | null>((resolve) => child.on('close', resolve));
 
   let timedOut = false;
+  let forceKill: NodeJS.Timeout | undefined;
   const kill = () => {
-    if (child.exitCode === null) child.kill('SIGTERM');
+    if (child.exitCode !== null || child.signalCode !== null || forceKill) return;
+    child.kill('SIGTERM');
+    // SIGTERM 을 무시하면 잠금과 동시 실행 자리를 계속 잡고 있으므로 5초 뒤 강제 종료한다.
+    forceKill = setTimeout(() => child.kill('SIGKILL'), 5000);
+    forceKill.unref();
   };
   const timer = setTimeout(() => {
     timedOut = true;
     kill();
   }, agent.timeoutMs);
   options.signal?.addEventListener('abort', kill, { once: true });
+  if (options.signal?.aborted) kill();
 
   // 프롬프트는 stdin 으로 넘긴다. 인자로 넘기면 '-'로 시작하는 메시지가 옵션으로 해석된다.
   child.stdin.on('error', () => {});
@@ -128,6 +141,8 @@ export async function* runClaude(config: Config, options: RunOptions): AsyncGene
   } finally {
     clearTimeout(timer);
     options.signal?.removeEventListener('abort', kill);
+    // 소비가 중간에 끝나면 stdout 을 비워 줘야 claude 가 파이프에 막히지 않고 종료된다.
+    child.stdout.resume();
     kill();
   }
 }

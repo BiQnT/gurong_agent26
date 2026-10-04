@@ -25,6 +25,7 @@ type Line = {
   event?: { type?: string; delta?: { type?: string; text?: string } };
   message?: { content?: ContentBlock[] | string };
   result?: unknown;
+  errors?: unknown;
   is_error?: boolean;
   total_cost_usd?: number;
   duration_ms?: number;
@@ -70,7 +71,13 @@ export function parseStreamJsonLine(raw: string): AgentEvent[] {
         {
           type: 'result',
           sessionId: line.session_id ?? '',
-          text: typeof line.result === 'string' ? line.result : '',
+          // 실행 오류(예: --resume 할 대화가 없음)는 result 대신 errors 배열로 온다.
+          text:
+            typeof line.result === 'string'
+              ? line.result
+              : Array.isArray(line.errors)
+                ? line.errors.filter((e): e is string => typeof e === 'string').join('; ')
+                : '',
           isError: line.is_error === true,
           subtype: line.subtype,
           costUsd: line.total_cost_usd,

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 공유 SQLite DB 를 온라인 백업한다. gwamegi-backup.timer 가 매일 부른다.
-# 복구: sudo systemctl stop gwamegi-dev gwamegi-prod && gunzip -c <백업> > /srv/gwamegi/data/gwamegi.db && 다시 start
+# 복구 절차는 infra/gcp/README.md "상태 확인" 아래 (-wal·-shm 을 먼저 지워야 한다).
 set -euo pipefail
 
 DB=${DATABASE_PATH:-/srv/gwamegi/data/gwamegi.db}

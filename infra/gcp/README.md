@@ -11,7 +11,7 @@
   dev/                 git clone. 팀원이 SSH 로 들어와 고치는 곳 → gwamegi-dev  127.0.0.1:3001 (next dev)
   prod/releases/<시각>-<커밋>/   배포본 (최근 2개)
   prod/current → releases/...    → gwamegi-prod  0.0.0.0:3000 (next start)
-  data/gwamegi.db      dev·prod 공유 SQLite
+  data/gwamegi.db      dev·prod 공유 SQLite (data·backups·env 는 gwamegi 그룹만 읽는다)
   data/agent-workdir/  claude 를 띄우는 빈 폴더
   data/claude-home/    서버용 claude 설정·대화 세션 (CLAUDE_CONFIG_DIR)
   env/secrets.env      비밀값 (gwamegi 그룹만 읽기)
@@ -30,6 +30,9 @@ ssh -i ~/.ssh/my_key <계정>@34.30.209.101
 ssh -i ~/.ssh/my_key -L 3000:localhost:3000 -L 3001:localhost:3001 <계정>@34.30.209.101
 # → http://localhost:3000 (prod), http://localhost:3001 (dev)
 ```
+
+브라우저가 아이디·비밀번호를 물으면 `secrets.env` 의 `BASIC_AUTH`(`아이디:비밀번호`)를 넣는다.
+팀원은 `sudo grep BASIC_AUTH /srv/gwamegi/env/secrets.env` 로 확인한다.
 
 **외부 공개는 주최 측 요청이 필요하다.** VM 에서는 방화벽을 바꿀 권한이 없다. 요청할 내용:
 
@@ -72,6 +75,7 @@ sudo systemctl restart gwamegi-dev gwamegi-prod
 ```
 
 - `EUM_SERVICE_KEY`: 없으면 E-UM 도구가 "키 없음" 실패를 돌려준다.
+- `BASIC_AUTH`: 공용 접속 암호. bootstrap 이 비어 있으면 만들어 넣는다. 지우면 암호 없이 열린다 (권하지 않는다).
 - `AGENT_AUTH_MODE=subscription`: 로컬 맥에서 `claude setup-token` 을 실행해 받은 토큰을 `CLAUDE_CODE_OAUTH_TOKEN` 에 넣는다.
 - 심사·시연처럼 팀 밖 사람이 쓰기 전에 `AGENT_AUTH_MODE=api_key` 와 `ANTHROPIC_API_KEY` 로 바꾼다.
   개인 구독 계정으로 다른 사람에게 서비스하는 것은 Anthropic 약관상 허용되지 않는다.
@@ -79,13 +83,16 @@ sudo systemctl restart gwamegi-dev gwamegi-prod
 ## 배포 (prod)
 
 ```bash
-sudo /srv/gwamegi/dev/infra/gcp/deploy.sh            # origin/main
-sudo /srv/gwamegi/dev/infra/gcp/deploy.sh <브랜치·커밋>  # 확인용으로 다른 ref
-sudo /srv/gwamegi/dev/infra/gcp/deploy.sh --rollback  # 직전 release 로
+sudo gwamegi-deploy                  # origin/main
+sudo gwamegi-deploy <브랜치·커밋>      # 확인용으로 다른 ref
+sudo gwamegi-deploy --rollback       # 직전 정상 release 로
 ```
 
-새 release 폴더에 풀고 빌드한 뒤 `current` 를 바꿔 재시작한다. `/api/health` 의 commit 이
-맞지 않으면 직전 release 로 자동으로 되돌린다. 빌드는 1~2분 걸린다.
+새 release 폴더에 풀고 빌드한 뒤 `current` 를 바꿔 재시작한다. 재시작이 실패하거나 `/api/health` 의
+commit 이 맞지 않으면 직전 release 로 자동으로 되돌리고 실패한 폴더는 지운다. 빌드는 1~2분 걸린다.
+
+`gwamegi-deploy` 는 `infra/gcp/deploy.sh` 의 root 소유 사본이다. `deploy.sh` 를 고쳤으면
+`sudo bash /srv/gwamegi/dev/infra/gcp/bootstrap.sh` 를 다시 돌려야 반영된다 (systemd 유닛도 같다).
 
 ## dev
 
@@ -111,4 +118,11 @@ systemctl list-timers gwamegi-backup.timer
 df -h /                                        # 디스크 10GB. 배포본은 2개만 남긴다
 ```
 
-DB 복구: `sudo systemctl stop gwamegi-dev gwamegi-prod` → `gunzip -c /srv/gwamegi/backups/<파일> | sudo -u gwamegi tee /srv/gwamegi/data/gwamegi.db >/dev/null` → `start`.
+DB 복구 (`-wal`·`-shm` 을 지우지 않으면 남은 기록이 복구본 위에 덧씌워진다):
+
+```bash
+sudo systemctl stop gwamegi-dev gwamegi-prod
+sudo rm -f /srv/gwamegi/data/gwamegi.db-wal /srv/gwamegi/data/gwamegi.db-shm
+gunzip -c /srv/gwamegi/backups/<파일> | sudo -u gwamegi tee /srv/gwamegi/data/gwamegi.db >/dev/null
+sudo systemctl start gwamegi-dev gwamegi-prod
+```

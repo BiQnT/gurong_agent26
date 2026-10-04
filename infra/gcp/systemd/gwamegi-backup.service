@@ -5,4 +5,5 @@ Description=gwamegi SQLite backup
 Type=oneshot
 User=gwamegi
 Group=gwamegi
+UMask=0007
 ExecStart=/usr/local/bin/gwamegi-backup

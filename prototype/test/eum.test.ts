@@ -56,6 +56,18 @@ describe('callEum', () => {
     expect(JSON.stringify(result)).not.toContain('secret-key');
   });
 
+  it('응답 본문에 키가 메아리쳐 와도 에러에서 가린다', async () => {
+    const fetchImpl = vi.fn(async () => new Response('bad key: secret-key', { status: 400 }));
+    const result = await callEum(api, { id: '1' }, { serviceKey: 'secret-key', fetchImpl: fetchImpl as typeof fetch });
+    expect(result).toMatchObject({ ok: false, error: 'HTTP 400: bad key: ***' });
+  });
+
+  it('params 로 serviceKey 를 덮어쓸 수 없다', async () => {
+    const fetchImpl = vi.fn(async (_url: URL | RequestInfo) => jsonResponse(recorded('INT_S01_004')));
+    await callEum(api, { id: '1', serviceKey: 'other' }, { serviceKey: 'mine', fetchImpl: fetchImpl as typeof fetch });
+    expect(new URL(String(fetchImpl.mock.calls[0][0])).searchParams.get('serviceKey')).toBe('mine');
+  });
+
   it('5xx 와 네트워크 오류는 한 번 더 시도한다', async () => {
     const fetchImpl = vi
       .fn()

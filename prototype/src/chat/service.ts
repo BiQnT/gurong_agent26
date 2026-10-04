@@ -45,6 +45,8 @@ export function prepareChat(body: unknown): ChatContext {
   if (typeof message !== 'string' || !message.trim()) throw new ChatError('message 가 비어 있다', 400);
   if (message.length > MAX_MESSAGE_LENGTH) throw new ChatError(`message 는 ${MAX_MESSAGE_LENGTH}자 이하여야 한다`, 400);
   if (sessionId !== undefined && typeof sessionId !== 'string') throw new ChatError('sessionId 는 문자열이어야 한다', 400);
+  // claude 의 슬래시 명령은 --disable-slash-commands 로 막았지만, CLI 버전이 바뀌어도 새지 않게 한 번 더 막는다.
+  if (message.trimStart().startsWith('/')) throw new ChatError("'/' 로 시작하는 메시지는 보낼 수 없다", 400);
 
   let session: SessionRow;
   let isNew = false;
@@ -57,7 +59,12 @@ export function prepareChat(body: unknown): ChatContext {
     isNew = true;
   }
   if (busy.has(session.id)) throw new ChatError('이 대화는 이전 답변을 아직 만드는 중이다', 409);
-  if (busy.size >= getConfig().agent.maxConcurrency) throw new ChatError('지금 답변 중인 요청이 많다. 잠시 후 다시 보내 달라', 503);
+  const { agent } = getConfig();
+  if (busy.size >= agent.maxConcurrency) throw new ChatError('지금 답변 중인 요청이 많다. 잠시 후 다시 보내 달라', 503);
+  // 최근 24시간 비용 합계 (DB 를 공유하므로 dev·prod 합산). 구독 모드에서도 사용량 상한으로 쓴다.
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { usd } = getDb().prepare('SELECT COALESCE(SUM(cost_usd), 0) AS usd FROM chat_message WHERE created_at >= ?').get(since) as { usd: number };
+  if (usd >= agent.dailyBudgetUsd) throw new ChatError('최근 24시간 사용 한도를 넘었다. 관리자에게 알려 달라', 503);
   busy.add(session.id);
   return { session, isNew, message: message.trim() };
 }
@@ -81,57 +88,70 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
     );
     yield { type: 'session', sessionId: session.id };
 
-    for await (const event of runClaude(config, {
-      prompt: message,
-      resumeSessionId: session.agent_session_id ?? undefined,
-      signal,
-    })) {
-      switch (event.type) {
-        case 'init':
-          // 첫 턴이 도중에 실패해도 세션 파일은 생겼을 수 있으니 init 시점에 바로 저장한다.
-          if (!session.agent_session_id) {
-            session.agent_session_id = event.sessionId;
-            db.prepare('UPDATE chat_session SET agent_session_id = ? WHERE id = ?').run(event.sessionId, session.id);
-          }
-          break;
-        case 'text_delta':
-          yield { type: 'delta', text: event.text };
-          break;
-        case 'tool_start': {
-          const name = event.name.replace(/^mcp__eum__/, '');
-          tools.push({ id: event.id, name, input: event.input });
-          yield { type: 'tool', id: event.id, status: 'start', name, label: toolLabel(name) };
-          break;
-        }
-        case 'tool_end': {
-          const tool = tools.find((t) => t.id === event.id);
-          if (tool) tool.isError = event.isError;
-          yield { type: 'tool', id: event.id, status: 'end', isError: event.isError };
-          break;
-        }
-        case 'result': {
-          if (event.isError) {
-            // subtype 은 실패여도 'success' 로 올 때가 있다. 사유는 result 문구에 있다 (예: "Not logged in · Please run /login").
-            const reason = (event.text || event.subtype || 'error').slice(0, 200);
-            outcome = `error: ${reason}`;
-            yield { type: 'error', message: `답변을 만들지 못했다: ${reason}` };
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let retry = false;
+      for await (const event of runClaude(config, {
+        prompt: message,
+        resumeSessionId: session.agent_session_id ?? undefined,
+        signal,
+      })) {
+        switch (event.type) {
+          case 'init':
+            // 첫 턴이 도중에 실패해도 세션 파일은 생겼을 수 있으니 init 시점에 바로 저장한다.
+            if (!session.agent_session_id) {
+              session.agent_session_id = event.sessionId;
+              db.prepare('UPDATE chat_session SET agent_session_id = ? WHERE id = ?').run(event.sessionId, session.id);
+            }
+            break;
+          case 'text_delta':
+            yield { type: 'delta', text: event.text };
+            break;
+          case 'tool_start': {
+            const name = event.name.replace(/^mcp__eum__/, '');
+            tools.push({ id: event.id, name, input: event.input });
+            yield { type: 'tool', id: event.id, status: 'start', name, label: toolLabel(name) };
             break;
           }
-          outcome = 'ok';
-          const info = db
-            .prepare("INSERT INTO chat_message (session_id, role, content, tool_calls, cost_usd, created_at) VALUES (?, 'assistant', ?, ?, ?, ?)")
-            .run(
-              session.id,
-              event.text,
-              tools.length ? JSON.stringify(tools.map(({ name, input, isError }) => ({ name, input, isError }))) : null,
-              event.costUsd ?? null,
-              now(),
-            );
-          db.prepare('UPDATE chat_session SET updated_at = ? WHERE id = ?').run(now(), session.id);
-          yield { type: 'done', messageId: Number(info.lastInsertRowid), text: event.text, costUsd: event.costUsd };
-          break;
+          case 'tool_end': {
+            const tool = tools.find((t) => t.id === event.id);
+            if (tool) tool.isError = event.isError;
+            yield { type: 'tool', id: event.id, status: 'end', isError: event.isError };
+            break;
+          }
+          case 'result': {
+            // claude 쪽 대화 기록이 없어졌으면(정리·삭제) 새 claude 대화로 한 번만 다시 시작한다. 앞선 문맥은 잃는다.
+            if (event.isError && attempt === 0 && session.agent_session_id && /No conversation found/i.test(event.text)) {
+              console.warn(`[chat] ${session.id}: claude 대화 ${session.agent_session_id} 가 없어 새로 시작한다`);
+              session.agent_session_id = null;
+              db.prepare('UPDATE chat_session SET agent_session_id = NULL WHERE id = ?').run(session.id);
+              retry = true;
+              break;
+            }
+            if (event.isError) {
+              // subtype 은 실패여도 'success' 로 올 때가 있다. 사유는 result 문구에 있다 (예: "Not logged in · Please run /login").
+              const reason = (event.text || event.subtype || 'error').slice(0, 200);
+              outcome = `error: ${reason}`;
+              yield { type: 'error', message: `답변을 만들지 못했다: ${reason}` };
+              break;
+            }
+            outcome = 'ok';
+            const info = db
+              .prepare("INSERT INTO chat_message (session_id, role, content, tool_calls, cost_usd, created_at) VALUES (?, 'assistant', ?, ?, ?, ?)")
+              .run(
+                session.id,
+                event.text,
+                tools.length ? JSON.stringify(tools.map(({ name, input, isError }) => ({ name, input, isError }))) : null,
+                event.costUsd ?? null,
+                now(),
+              );
+            db.prepare('UPDATE chat_session SET updated_at = ? WHERE id = ?').run(now(), session.id);
+            yield { type: 'done', messageId: Number(info.lastInsertRowid), text: event.text, costUsd: event.costUsd };
+            break;
+          }
         }
+        if (retry) break;
       }
+      if (!retry) break;
     }
   } catch (error) {
     if (error instanceof ClaudeCliError) {

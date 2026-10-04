@@ -29,6 +29,10 @@ function inputShape(api: CatalogApi, names: string[]): Record<string, z.ZodStrin
   return shape;
 }
 
+// claude 의 인증 정보는 이 서버에 필요 없다. 물려받은 환경에서 지운다.
+delete process.env.CLAUDE_CODE_OAUTH_TOKEN;
+delete process.env.ANTHROPIC_API_KEY;
+
 const catalogPath = process.env.EUM_CATALOG_PATH;
 if (!catalogPath) {
   console.error('[eum-mcp] EUM_CATALOG_PATH 가 설정되지 않았다');

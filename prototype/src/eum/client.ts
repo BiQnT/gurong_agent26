@@ -43,9 +43,12 @@ export async function callEum(
   const now = options.now?.() ?? new Date();
   const base = { apiId: api.apiId, fetchedAt: now.toISOString(), fetchedAtKst: formatKst(now) };
 
+  const serviceKey = normalizeServiceKey(options.serviceKey);
   const url = new URL(api.url);
-  url.searchParams.set('serviceKey', normalizeServiceKey(options.serviceKey));
   for (const [name, value] of Object.entries(params)) url.searchParams.set(name, value);
+  url.searchParams.set('serviceKey', serviceKey); // 마지막에 넣어 params 가 덮어쓰지 못하게 한다
+  // 응답 본문 일부를 에러로 돌려주므로, 혹시 키가 메아리쳐 와도 가린다.
+  const excerpt = (text: string) => text.slice(0, 200).replaceAll(serviceKey, '***').replaceAll(options.serviceKey, '***');
 
   let lastError = '';
   // 네트워크 오류와 5xx 만 한 번 더 시도한다. 4xx 는 다시 불러도 같다.
@@ -64,16 +67,16 @@ export async function callEum(
       continue;
     }
     if (!response.ok) {
-      return { ok: false, ...base, httpStatus: response.status, error: `HTTP ${response.status}: ${text.slice(0, 200)}` };
+      return { ok: false, ...base, httpStatus: response.status, error: `HTTP ${response.status}: ${excerpt(text)}` };
     }
     let body: { status?: unknown; data?: unknown };
     try {
       body = JSON.parse(text);
     } catch {
-      return { ok: false, ...base, httpStatus: response.status, error: `JSON 이 아닌 응답: ${text.slice(0, 200)}` };
+      return { ok: false, ...base, httpStatus: response.status, error: `JSON 이 아닌 응답: ${excerpt(text)}` };
     }
     if (body.status !== 'success') {
-      return { ok: false, ...base, httpStatus: response.status, error: `E-UM status=${String(body.status)}: ${text.slice(0, 200)}` };
+      return { ok: false, ...base, httpStatus: response.status, error: `E-UM status=${String(body.status)}: ${excerpt(text)}` };
     }
     return { ok: true, ...base, data: body.data };
   }

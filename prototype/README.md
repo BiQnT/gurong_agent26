@@ -54,6 +54,8 @@ VM 은 dev·prod 가 DB 를 공유하므로 추가만 한다.
 | `AGENT_MAX_BUDGET_USD` | `0.5` | 메시지 하나당 비용 상한 |
 | `AGENT_TIMEOUT_MS` | `120000` | 메시지 하나당 시간 상한 |
 | `AGENT_MAX_CONCURRENCY` | `4` | 동시에 띄우는 claude 수 |
+| `AGENT_DAILY_BUDGET_USD` | `10` | 최근 24시간 비용 합계 상한 |
+| `BASIC_AUTH` | | `아이디:비밀번호`. 있으면 모든 요청에 HTTP Basic 인증 (`src/proxy.ts`) |
 | `DATABASE_PATH` | `.data/gwamegi.db` | |
 | `AGENT_WORKDIR` | `.data/agent-workdir` | claude 를 띄우는 빈 폴더 |
 | `CLAUDE_BIN` | `claude` | |

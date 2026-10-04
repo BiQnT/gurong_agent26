@@ -34,13 +34,13 @@
 요청 본문: `{ "message": string, "sessionId"?: string }`
 
 - `sessionId` 를 빼면 새 대화. 응답의 `session` 이벤트로 받은 id 를 다음 요청에 넣는다.
-- `message` 는 2,000자 이하.
+- `message` 는 2,000자 이하. `/` 로 시작하면 안 된다 (Claude Code 명령으로 해석되는 것을 막는다).
 
 응답: `text/event-stream`. 각 이벤트의 `data` 는 JSON 이고 `type` 필드가 이벤트 이름과 같다.
 
 | 이벤트 | data | 언제 |
 | --- | --- | --- |
-| `session` | `{ sessionId }` | 항상 첫 번째 |
+| `session` | `{ sessionId }` | 첫 번째 (DB 저장이 실패하면 `error` 만 온다) |
 | `tool` | `{ id, status: "start", name, label }` | E-UM 조회 시작. `name` 은 API ID, `label` 은 화면용 이름 |
 | `tool` | `{ id, status: "end", isError }` | 같은 `id` 의 조회 끝 |
 | `delta` | `{ text }` | 답변 조각. 이어 붙여 보여준다 |
@@ -50,7 +50,10 @@
 - `delta` 없이 `done` 만 올 수 있다. 최종 화면은 `done.text` 로 맞춘다.
 - 답변에 마크다운(굵게, 목록)이 섞인다.
 - 스트림 시작 전 오류는 JSON `{ error }` 와 상태 코드로 온다:
-  `400` 잘못된 요청, `404` 없는 대화, `409` 그 대화가 아직 답변 중, `503` 서버 전체가 바쁨.
+  `400` 잘못된 요청, `404` 없는 대화, `409` 그 대화가 아직 답변 중, `413` 본문이 너무 큼,
+  `503` 동시 실행 상한(기본 4) 또는 최근 24시간 비용 상한(기본 $10)을 넘음.
+- 서버에 `BASIC_AUTH` 가 설정돼 있으면 모든 요청(`/api/health` 제외)에 HTTP Basic 인증이 필요하다.
+  같은 주소의 페이지라면 브라우저가 처음 한 번 묻고 이후 `fetch` 에 자동으로 붙인다.
 - 연결을 끊으면 서버도 그 답변 생성을 멈춘다. 질문은 저장된 채로 남는다.
 
 `EventSource` 는 POST 를 못 하므로 `fetch` 로 읽는다:
@@ -90,6 +93,11 @@ for (;;) {
 ### `GET /api/health`
 
 `{ ok, env, commit, schema, agentAuth }`. 배포 스크립트가 기동 확인에 쓴다.
+
+## 지금 없는 것
+
+- 사용자 구분: 암호를 아는 사람은 모든 대화를 볼 수 있다. 운영자·근로자·지역 역할(기획서 5장)이 생길 때 붙인다.
+- 규칙 함수(건조 등급 등)와 배치·승인 흐름(US-1~3 도메인)
 
 ## 저장소 (SQLite)
 

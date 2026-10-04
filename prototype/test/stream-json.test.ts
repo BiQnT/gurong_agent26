@@ -27,6 +27,13 @@ describe('parseStreamJsonLine', () => {
     expect(result && result.type === 'result' && result.costUsd).toBeGreaterThan(0);
   });
 
+  it('실행 오류는 errors 배열을 사유로 쓴다', () => {
+    const [event] = parseStreamJsonLine(
+      '{"type":"result","subtype":"error_during_execution","is_error":true,"errors":["No conversation found with session ID: x"],"session_id":"x"}',
+    );
+    expect(event).toMatchObject({ type: 'result', isError: true, text: 'No conversation found with session ID: x' });
+  });
+
   it('JSON 이 아니거나 모르는 줄은 버린다', () => {
     expect(parseStreamJsonLine('')).toEqual([]);
     expect(parseStreamJsonLine('not json')).toEqual([]);

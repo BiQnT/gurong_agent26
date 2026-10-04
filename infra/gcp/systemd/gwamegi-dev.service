@@ -6,7 +6,12 @@ Wants=network-online.target
 [Service]
 User=gwamegi
 Group=gwamegi
-UMask=0002
+UMask=0007
+# 공개 주소에서 도는 프로세스라 권한을 좁힌다. /srv·/var 는 쓰기 가능, /usr·/etc 는 읽기 전용, 팀원 홈은 안 보인다.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
 # 팀원이 SSH 로 고치는 작업 폴더를 그대로 next dev 로 띄운다 (저장하면 바로 반영).
 WorkingDirectory=/srv/gwamegi/dev/prototype
 EnvironmentFile=/srv/gwamegi/env/secrets.env
