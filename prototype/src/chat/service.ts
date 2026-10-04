@@ -111,8 +111,10 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
         }
         case 'result': {
           if (event.isError) {
-            outcome = event.subtype ?? 'error';
-            yield { type: 'error', message: `답변을 만들지 못했다 (${outcome})` };
+            // subtype 은 실패여도 'success' 로 올 때가 있다. 사유는 result 문구에 있다 (예: "Not logged in · Please run /login").
+            const reason = (event.text || event.subtype || 'error').slice(0, 200);
+            outcome = `error: ${reason}`;
+            yield { type: 'error', message: `답변을 만들지 못했다: ${reason}` };
             break;
           }
           outcome = 'ok';
