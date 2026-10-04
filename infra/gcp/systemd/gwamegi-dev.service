@@ -1,5 +1,5 @@
 [Unit]
-Description=gwamegi agent (dev, 127.0.0.1:3001)
+Description=gwamegi agent (dev, :3001)
 After=network-online.target
 Wants=network-online.target
 
@@ -16,13 +16,15 @@ ProtectHome=yes
 WorkingDirectory=/srv/gwamegi/dev/prototype
 EnvironmentFile=/srv/gwamegi/env/secrets.env
 Environment=APP_ENV=dev
+# 폰에서 http://<서버 IP>:3001 로 열 때 next dev 가 막지 않도록 (next.config.ts 의 allowedDevOrigins)
+Environment=DEV_ALLOWED_ORIGINS=34.30.209.101
 Environment=NEXT_TELEMETRY_DISABLED=1
 Environment=DATABASE_PATH=/srv/gwamegi/data/gwamegi.db
 Environment=AGENT_WORKDIR=/srv/gwamegi/data/agent-workdir
 Environment=CLAUDE_CONFIG_DIR=/srv/gwamegi/data/claude-home
 ExecStartPre=/usr/bin/npm run db:migrate
-# 외부에 열지 않는다. 보려면 SSH 터널: ssh -L 3001:localhost:3001 ...
-ExecStart=/usr/bin/npm run dev -- -p 3001 -H 127.0.0.1
+# 팀원이 폰으로 UI 를 확인할 수 있게 외부에 연다. 접속 암호(BASIC_AUTH)는 prod 와 같다.
+ExecStart=/usr/bin/npm run dev -- -p 3001 -H 0.0.0.0
 Restart=on-failure
 RestartSec=3
 

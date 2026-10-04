@@ -43,3 +43,4 @@ cp docs/decisions/_template.md docs/decisions/0002-<slug>.md
 | [0001](0001-context-management.md) | 프로젝트 컨텍스트를 노션과 레포로 나눠 관리 | 2026-07-26 | 확정 |
 | [0002](0002-gcp-runtime-layout.md) | GCP VM 하나에 dev·prod 를 나눠 띄우고 SQLite 는 공유 | 2026-10-04 | 제안 |
 | [0003](0003-claude-cli-wrapper.md) | claude CLI 를 메시지마다 띄우고 E-UM 은 MCP 도구로 제공 | 2026-10-04 | 제안 |
+| [0004](0004-dev-port-open-for-phone.md) | dev 포트(3001)도 외부에 열어 폰으로 UI 를 확인 | 2026-10-04 | 제안 |
