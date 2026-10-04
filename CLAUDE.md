@@ -36,6 +36,8 @@
 | E-UM API 스펙 | `docs/api-catalog/` (스크립트 생성물) |
 | 아이디어별 문서·데이터·코드 | `ideas/NNN-<slug>/` |
 | API 호출 테스트 기록 | `research/api-tests/` |
+| 백엔드 구조·API 계약 | `docs/design/backend.md` |
+| GCP VM 운영 (배포, 비밀값, 접속) | `infra/gcp/README.md` |
 
 낡음 방지 규칙 다섯 가지:
 

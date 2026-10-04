@@ -1,0 +1,30 @@
+[Unit]
+Description=gwamegi agent (dev, 127.0.0.1:3001)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=gwamegi
+Group=gwamegi
+UMask=0007
+# 공개 주소에서 도는 프로세스라 권한을 좁힌다. /srv·/var 는 쓰기 가능, /usr·/etc 는 읽기 전용, 팀원 홈은 안 보인다.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+# 팀원이 SSH 로 고치는 작업 폴더를 그대로 next dev 로 띄운다 (저장하면 바로 반영).
+WorkingDirectory=/srv/gwamegi/dev/prototype
+EnvironmentFile=/srv/gwamegi/env/secrets.env
+Environment=APP_ENV=dev
+Environment=NEXT_TELEMETRY_DISABLED=1
+Environment=DATABASE_PATH=/srv/gwamegi/data/gwamegi.db
+Environment=AGENT_WORKDIR=/srv/gwamegi/data/agent-workdir
+Environment=CLAUDE_CONFIG_DIR=/srv/gwamegi/data/claude-home
+ExecStartPre=/usr/bin/npm run db:migrate
+# 외부에 열지 않는다. 보려면 SSH 터널: ssh -L 3001:localhost:3001 ...
+ExecStart=/usr/bin/npm run dev -- -p 3001 -H 127.0.0.1
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

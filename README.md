@@ -38,7 +38,8 @@ research/
   api-tests/   API 호출 테스트 기록 + 카탈로그 수집 스크립트
 scripts/
   new-idea.sh  아이디어 브랜치 + 폴더 생성
-prototype/     확정된 아이디어의 AI Agent 프로토타입 코드
+prototype/     본선 서비스 앱 (Next.js). 실행법은 prototype/README.md
+infra/gcp/     본선 GCP VM 셋업·배포 스크립트와 운영 문서
 ```
 
 ## 아이디어 관리
