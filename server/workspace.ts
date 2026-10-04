@@ -745,16 +745,56 @@ function isPublicTunnelHost(hostname: string): boolean {
   );
 }
 
+/**
+ * PUBLIC_ORIGINS 중 Host(호스트[:포트])까지 같은 출처들. Host 의 호스트 이름이 어느 공개 출처와도
+ * 다르면 null, 이름만 같고 포트가 다르면 빈 배열이다.
+ */
+function publicOriginsForHost(host: string): string[] | null {
+  // 터널 주소처럼 요청마다 읽는다. .env 값은 readBridgeConfig 가 process.env 로 옮겨 둔다.
+  const origins = (process.env.PUBLIC_ORIGINS || '').split(',').flatMap((value) => {
+    try {
+      const url = new URL(value.trim());
+      return url.protocol === 'https:' || url.protocol === 'http:' ? [url] : [];
+    } catch {
+      return [];
+    }
+  });
+  const hostname = new URL(`http://${host}`).hostname;
+  const named = origins.filter((origin) => origin.hostname === hostname);
+  if (!named.length) return null;
+  // URL 파서로 Host 를 다시 해석하지 않고 문자열로 비교한다 (user@host 같은 값이 통과하지 않게).
+  // 기본 포트는 브라우저가 Host 에서 빼므로 둘 다 받는다.
+  const given = host.toLowerCase();
+  return named
+    .filter(
+      (origin) =>
+        given === origin.host ||
+        (!origin.port && given === `${origin.hostname}:${origin.protocol === 'https:' ? 443 : 80}`),
+    )
+    .map((origin) => origin.origin);
+}
+
 export function isLocalWorkspaceRequest(request: IncomingMessage): boolean {
   const host = request.headers.host;
   if (!host) return false;
   try {
     const url = new URL(`http://${host}`);
-    const isTunnel = isPublicTunnelHost(url.hostname);
-    if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) && !isTunnel) return false;
+    const isLoopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    const publicOrigins = isLoopback ? null : publicOriginsForHost(host);
+    // 공개 주소의 호스트 이름이면 터널 규칙(호스트 이름만 비교)으로 넘기지 않는다.
+    const isTunnel = !publicOrigins && isPublicTunnelHost(url.hostname);
+    if (!isLoopback && !isTunnel && !publicOrigins?.length) return false;
     const remote = request.socket.remoteAddress;
     // Tunnel clients forward to localhost, so the direct peer stays local.
     if (remote && !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(remote)) return false;
+    if (publicOrigins) {
+      // Caddy 뒤 공개 주소는 스킴·호스트·포트가 모두 같은 화면만 받는다. dev(:440)와 prod(:443)는
+      // 쿠키와 DB 를 같이 쓰므로, 호스트 이름이 같아도 서로의 화면에서 온 요청은 막는다.
+      const origin = request.headers.origin;
+      if (origin !== undefined && !publicOrigins.includes(origin)) return false;
+      const site = request.headers['sec-fetch-site'];
+      return site === undefined || site === 'same-origin' || site === 'none';
+    }
     if (request.headers.origin) {
       try {
         if (isTunnel) {

@@ -8,6 +8,7 @@ import {
   type WorkspaceService,
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { resolve } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
@@ -132,6 +133,14 @@ export function createApiMiddleware(
   const chat = createLiveChat(config);
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
+    const send = (status: number, payload: unknown) => {
+      if (response.destroyed || response.writableEnded) return;
+      response.statusCode = status;
+      response.setHeader('Content-Type', 'application/json; charset=utf-8');
+      response.setHeader('Cache-Control', 'no-store');
+      response.setHeader('X-Content-Type-Options', 'nosniff');
+      response.end(JSON.stringify(payload));
+    };
     let decodedPath: string;
     try {
       decodedPath = decodeURIComponent(url.pathname).replaceAll('\\', '/');
@@ -152,7 +161,10 @@ export function createApiMiddleware(
       return;
     }
     if (!API_PATHS.has(url.pathname)) {
-      next();
+      // 없는 API 주소가 화면(index.html)으로 넘어가 200 HTML 이 되지 않게 한다.
+      if (/^\/api(?:\/|$)/.test(url.pathname))
+        send(404, { error: '요청한 API를 찾을 수 없어요.', code: 'NOT_FOUND' });
+      else next();
       return;
     }
     const controller = new AbortController();
@@ -162,14 +174,6 @@ export function createApiMiddleware(
     };
     request.once('aborted', disconnect);
     response.once('close', disconnect);
-    const send = (status: number, payload: unknown) => {
-      if (response.destroyed || response.writableEnded) return;
-      response.statusCode = status;
-      response.setHeader('Content-Type', 'application/json; charset=utf-8');
-      response.setHeader('Cache-Control', 'no-store');
-      response.setHeader('X-Content-Type-Options', 'nosniff');
-      response.end(JSON.stringify(payload));
-    };
     void (async () => {
       try {
         if (!isLocalWorkspaceRequest(request))
@@ -234,10 +238,33 @@ export function createApiMiddleware(
   };
 }
 
+/** dev 공용 암호 "아이디:비밀번호" 를 HTTP Basic 으로 확인한다. */
+function devBasicAuth(credentials: string): Connect.NextHandleFunction {
+  // 길이가 달라도 비교 시간이 같도록 고정 길이 해시끼리 비교한다.
+  const digest = (value: Buffer) => createHash('sha256').update(value).digest();
+  // charset="UTF-8" 을 알리면 브라우저가 한글 비밀번호도 UTF-8 로 보내므로 바이트 그대로 비교한다.
+  const expected = digest(Buffer.from(credentials, 'utf8'));
+  return (request, response, next) => {
+    const match = /^Basic +([A-Za-z0-9+/]+={0,2}) *$/i.exec(request.headers.authorization ?? '');
+    if (match && timingSafeEqual(digest(Buffer.from(match[1], 'base64')), expected)) {
+      next();
+      return;
+    }
+    response.statusCode = 401;
+    response.setHeader('WWW-Authenticate', 'Basic realm="haepung-dev", charset="UTF-8"');
+    response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    response.setHeader('Cache-Control', 'no-store');
+    response.end('개발 서버 접속 암호가 필요해요.');
+  };
+}
+
 export function localApiPlugin(config: BridgeConfig): Plugin {
   return {
     name: 'guryongpo-local-api',
     configureServer(server) {
+      // 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주므로 모든 요청에 암호를 먼저 묻는다.
+      // preview·prod(main.ts)는 빌드 결과만 주므로 걸지 않는다.
+      if (config.devBasicAuth) server.middlewares.use(devBasicAuth(config.devBasicAuth));
       server.middlewares.use(createApiMiddleware(config));
     },
     configurePreviewServer(server) {
