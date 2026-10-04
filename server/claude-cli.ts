@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
 // 채팅 설명을 claude CLI(`claude -p`)로 만든다. 메시지 하나 = 프로세스 하나.
@@ -25,16 +25,21 @@ export type ClaudeConfig = {
   dailyBudgetUsd: number;
   timeoutMs: number;
   maxConcurrency: number;
+  /** SIGTERM 뒤 강제 종료(SIGKILL)까지 기다리는 시간. 기본 5000 (테스트에서만 줄인다) */
+  killGraceMs?: number;
 };
 
 export type ClaudeFailure = 'busy' | 'auth' | 'limit' | 'timeout' | 'aborted' | 'failed';
 
 export class ClaudeCliError extends Error {
   kind: ClaudeFailure;
-  constructor(kind: ClaudeFailure, message: string) {
+  /** claude 가 실패 결과에 비용을 실어 보낸 경우 (예: 메시지당 상한 초과) */
+  costUsd?: number;
+  constructor(kind: ClaudeFailure, message: string, costUsd?: number) {
     super(message);
     this.name = 'ClaudeCliError';
     this.kind = kind;
+    this.costUsd = costUsd;
   }
 }
 
@@ -110,32 +115,56 @@ type ResultLine = {
   is_error?: boolean;
   result?: unknown;
   errors?: unknown;
-  total_cost_usd?: number;
+  total_cost_usd?: unknown;
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** 실패 사유 글에서 인증·한도 문제를 가려 낸다. 나머지는 failed. */
+function classifyFailure(reason: string, subtype?: string, costUsd?: number): ClaudeCliError {
+  const text = reason.trim().slice(0, 500);
+  // 로그인 안 됨·잘못된 키는 subtype 이 'success' 로 올 때도 있어 문구로 가른다.
+  if (/not logged in|\/login|invalid api key|authentication|unauthorized|oauth/i.test(text))
+    return new ClaudeCliError('auth', text, costUsd);
+  if (
+    subtype === 'error_max_budget_usd' ||
+    /rate limit|usage limit|quota|credit balance|too many requests/i.test(text)
+  )
+    return new ClaudeCliError('limit', text || 'budget', costUsd);
+  return new ClaudeCliError('failed', text || subtype || 'error', costUsd);
+}
 
 /** `--output-format json` 의 결과 한 덩어리를 해석한다. */
 export function readClaudeResult(stdout: string): { text: string; costUsd?: number } {
-  let parsed: ResultLine;
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(stdout.trim()) as ResultLine;
+    parsed = JSON.parse(stdout.trim());
   } catch {
-    throw new ClaudeCliError('failed', 'claude 출력이 JSON 이 아니다');
+    // 오래된 버전은 인증 오류를 JSON 없이 글로만 내보낸다.
+    const failure = classifyFailure(stdout);
+    throw new ClaudeCliError(failure.kind, `claude 출력이 JSON 이 아니다: ${failure.message}`);
   }
+  // 버전에 따라 결과 하나(객체) 또는 메시지 목록(배열)으로 온다. 마지막 result 를 쓴다.
+  const entries = Array.isArray(parsed) ? parsed : [parsed];
+  const line = [...entries]
+    .reverse()
+    .find((entry) => isRecord(entry) && entry.type === 'result') as ResultLine | undefined;
+  if (!line) throw classifyFailure(`claude 결과 항목이 없다: ${stdout}`);
+  const costUsd =
+    typeof line.total_cost_usd === 'number' && Number.isFinite(line.total_cost_usd)
+      ? line.total_cost_usd
+      : undefined;
   const reason =
-    typeof parsed.result === 'string'
-      ? parsed.result
-      : Array.isArray(parsed.errors)
-        ? parsed.errors.filter((e): e is string => typeof e === 'string').join('; ')
+    typeof line.result === 'string'
+      ? line.result
+      : Array.isArray(line.errors)
+        ? line.errors.filter((e): e is string => typeof e === 'string').join('; ')
         : '';
-  if (parsed.type !== 'result' || parsed.is_error) {
-    // 로그인 안 됨·잘못된 키는 subtype 이 'success' 로 올 때도 있어 문구로 가른다.
-    if (/not logged in|invalid api key|authentication|unauthorized|oauth/i.test(reason))
-      throw new ClaudeCliError('auth', reason);
-    if (parsed.subtype === 'error_max_budget_usd' || /rate limit|usage limit|quota/i.test(reason))
-      throw new ClaudeCliError('limit', reason || 'budget');
-    throw new ClaudeCliError('failed', reason || parsed.subtype || 'error');
-  }
-  return { text: reason.trim(), costUsd: parsed.total_cost_usd };
+  if (line.is_error === true || (line.subtype !== undefined && line.subtype !== 'success'))
+    throw classifyFailure(reason, line.subtype, costUsd);
+  return { text: reason.trim(), costUsd };
 }
 
 let running = 0;
@@ -147,46 +176,67 @@ export function createClaudeAgent(config: ClaudeConfig): AgentAsk {
       throw new ClaudeCliError('busy', `동시에 ${config.maxConcurrency}개까지만 처리한다`);
     running++;
     try {
-      mkdirSync(config.workdir, { recursive: true });
-      // cwd 는 빈 작업 폴더다. 저장소 안에서 띄우면 저장소의 CLAUDE.md 를 읽어 버린다.
-      const child = spawn(config.bin, buildClaudeArgs(config, system), {
-        cwd: config.workdir,
-        env: claudeEnv(config) as NodeJS.ProcessEnv,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
+      let child: ChildProcessWithoutNullStreams;
+      try {
+        mkdirSync(config.workdir, { recursive: true });
+        // cwd 는 빈 작업 폴더다. 저장소 안에서 띄우면 저장소의 CLAUDE.md 를 읽어 버린다.
+        // detached: 자식이 만든 하위 프로세스까지 프로세스 그룹으로 한꺼번에 끝내려는 것이다.
+        child = spawn(config.bin, buildClaudeArgs(config, system), {
+          cwd: config.workdir,
+          env: claudeEnv(config) as NodeJS.ProcessEnv,
+          stdio: ['pipe', 'pipe', 'pipe'],
+          detached: true,
+        });
+      } catch (error) {
+        throw new ClaudeCliError(
+          'failed',
+          `claude 를 실행하지 못했다: ${(error as Error).message}`,
+        );
+      }
       let stdout = '';
       let stderr = '';
+      let timedOut = false;
+      let closed = false;
+      let forceKill: NodeJS.Timeout | undefined;
+      const send = (name: NodeJS.Signals) => {
+        try {
+          if (child.pid) process.kill(-child.pid, name);
+          else child.kill(name);
+        } catch {
+          child.kill(name);
+        }
+      };
+      const terminate = () => {
+        if (closed || forceKill) return;
+        send('SIGTERM');
+        // SIGTERM 을 무시하면 동시 실행 자리를 계속 차지하므로 잠시 뒤 강제 종료한다.
+        forceKill = setTimeout(() => send('SIGKILL'), config.killGraceMs ?? 5000);
+        forceKill.unref();
+      };
       child.stdout.setEncoding('utf8').on('data', (chunk: string) => (stdout += chunk));
       child.stderr.setEncoding('utf8').on('data', (chunk: string) => {
         stderr = (stderr + chunk).slice(-4000);
       });
-      let timedOut = false;
-      let forceKill: NodeJS.Timeout | undefined;
-      const kill = () => {
-        if (child.exitCode !== null || child.signalCode !== null || forceKill) return;
-        child.kill('SIGTERM');
-        // SIGTERM 을 무시하면 동시 실행 자리를 계속 차지하므로 5초 뒤 강제 종료한다.
-        forceKill = setTimeout(() => child.kill('SIGKILL'), 5000);
-        forceKill.unref();
-      };
       const timer = setTimeout(() => {
         timedOut = true;
-        kill();
+        terminate();
       }, config.timeoutMs);
-      signal.addEventListener('abort', kill, { once: true });
-      if (signal.aborted) kill();
+      signal.addEventListener('abort', terminate, { once: true });
       // 프롬프트는 stdin 으로 넘긴다. 인자로 넘기면 '-'로 시작하는 메시지가 옵션으로 해석된다.
       child.stdin.on('error', () => undefined);
       child.stdin.end(buildPrompt(history, message));
       try {
         const code = await new Promise<number | null>((resolve, reject) => {
           child.once('error', reject);
-          child.once('close', resolve);
+          child.once('close', (exitCode) => {
+            closed = true;
+            resolve(exitCode);
+          });
         });
         if (timedOut) throw new ClaudeCliError('timeout', `${config.timeoutMs}ms 시간 초과`);
         if (signal.aborted) throw new ClaudeCliError('aborted', '요청 취소');
         if (!stdout.trim())
-          throw new ClaudeCliError('failed', `claude 가 결과 없이 끝났다 (exit ${code}) ${stderr}`);
+          throw classifyFailure(`claude 가 결과 없이 끝났다 (exit ${code}) ${stderr}`);
         return readClaudeResult(stdout);
       } catch (error) {
         if (error instanceof ClaudeCliError) throw error;
@@ -196,8 +246,10 @@ export function createClaudeAgent(config: ClaudeConfig): AgentAsk {
         );
       } finally {
         clearTimeout(timer);
-        signal.removeEventListener('abort', kill);
-        kill();
+        clearTimeout(forceKill);
+        signal.removeEventListener('abort', terminate);
+        // 정상 종료가 아닌 경로(실행 실패 등)에서 남은 프로세스를 정리한다.
+        if (!closed) send('SIGKILL');
       }
     } finally {
       running--;

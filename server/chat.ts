@@ -161,7 +161,9 @@ export function createLiveChat(
     ? createClaudeAgent(config.claude)
     : undefined,
 ) {
-  const usage = config.databasePath ? usageLog(config.databasePath) : undefined;
+  // 비용 기록은 claude 를 쓸 때만 필요하다. OpenAI 경로에서는 DB 를 열지 않는다.
+  const usage =
+    ask && config.claude && config.databasePath ? usageLog(config.databasePath) : undefined;
   return async (
     request: LiveChatRequest,
     snapshot: LiveSnapshot,
@@ -182,8 +184,22 @@ export function createLiveChat(
       providerNotice: notice,
     });
     if (ask && config.claude) {
-      if (usage && usage.spentLast24h() >= config.claude.dailyBudgetUsd)
+      // 사용량 DB 문제로 답변 전체가 실패하지 않게, 조회 실패는 대체 설명으로, 기록 실패는 무시한다.
+      let spent = 0;
+      try {
+        spent = usage?.spentLast24h() ?? 0;
+      } catch {
+        return fallback('AI 사용량을 확인하지 못해 관측 사실만 안내해요.');
+      }
+      if (spent >= config.claude.dailyBudgetUsd)
         return fallback('최근 24시간 AI 사용 한도에 도달해 관측 사실만 안내해요.');
+      const record = (costUsd: number | undefined) => {
+        try {
+          usage?.record('claude', costUsd ?? 0);
+        } catch {
+          // 기록하지 못해도 이미 받은 답변은 보여 준다.
+        }
+      };
       try {
         const { text, costUsd } = await ask({
           system: observationContext(snapshot, action),
@@ -191,7 +207,7 @@ export function createLiveChat(
           message: request.message,
           signal,
         });
-        usage?.record('claude', costUsd ?? 0);
+        record(costUsd);
         signal.throwIfAborted();
         if (!text || text.length > 4000)
           return fallback('AI 답변 형식을 확인할 수 없어 관측 사실만 안내해요.');
@@ -201,9 +217,8 @@ export function createLiveChat(
         return { ...base, content: text, provider: 'claude' };
       } catch (error) {
         signal.throwIfAborted();
-        // 비용을 알 수 없는 실패(한도 초과, 시간 초과)는 메시지당 상한만큼 쓴 것으로 친다.
-        if (error instanceof ClaudeCliError && (error.kind === 'limit' || error.kind === 'timeout'))
-          usage?.record('claude', config.claude.maxBudgetUsd);
+        // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)만 센다. 시간 초과 등은 알 수 없어 세지 않는다.
+        record(error instanceof ClaudeCliError ? error.costUsd : undefined);
         return fallback(claudeNotice(error));
       }
     }
