@@ -31,6 +31,8 @@
 
 - 유닛은 `infra/gcp/systemd/`. 서비스는 `haepung` 계정으로 돌고, NoNewPrivileges·PrivateTmp·ProtectSystem=full·ProtectHome 으로 좁힌다 (`/srv`·`/var` 는 쓰기 가능).
 - Caddy 가 80·443·440 을 받아 앱(127.0.0.1)으로 넘긴다. 440 은 Vite 의 웹소켓(화면 자동 갱신)도 같이 넘긴다.
+- 443(prod)과 440(dev) 응답에는 `X-Frame-Options: DENY` 와 `Content-Security-Policy: frame-ancestors 'none'` 을 붙인다. 다른 사이트가 화면을 iframe 으로 감싸 덕장 주인의 버튼을 누르게 만드는 것(클릭재킹)을 막는다. 80 은 https 로 넘기기만 한다.
+- 수집기: `haepung-collect.timer` 가 매시 00분·30분에 `haepung-collect.service`(oneshot, prod 와 같은 환경, `Nice=10`, 시간 제한 300초)를 띄운다. current 에 `server/collect.ts` 가 없는 옛 release 면 건너뛴다. 동작은 [수집기](../../docs/design/backend.md#수집기).
 - 인증서는 Caddy 가 자동 발급한다. sslip.io 는 공용 도메인이라 발급 한도에 걸릴 수 있다 (`journalctl -u caddy`, Caddy 가 다른 발급처로 재시도한다).
 - 방화벽(tcp:80,443,440)은 VM 안에서 바꿀 수 없다. 소유 계정에서 규칙을 만들어야 한다:
   `gcloud compute firewall-rules create haepung-web --network=default --allow=tcp:80,tcp:443,tcp:440 --target-tags=haepung-web` 후 VM 에 태그 추가.
@@ -68,7 +70,7 @@ sudo systemctl restart haepung-dev haepung-prod
 ```
 
 - 두 서비스(와 수집기)는 `haepung.env` → `backend.env` 순으로 읽고, 뒤가 앞을 이긴다. `PUBLIC_ORIGINS` 등 주소 설정은 `/etc/haepung/*.env` 가 마지막이다.
-- `DEV_BASIC_AUTH`: dev 접속 암호 `아이디:비밀번호`. 비어 있으면 bootstrap 이 만든다. prod 유닛은 이 값을 지우고 띄운다.
+- `DEV_BASIC_AUTH`: dev 접속 암호 `아이디:비밀번호`. 비어 있으면 bootstrap 이 만든다. prod 유닛은 이 값을 지우고 띄운다. 직접 비우면 dev 가 시작하지 않는다([접근 제어](../../docs/design/backend.md#접근-제어)).
 - `AGENT_AUTH_MODE=subscription`: 로컬에서 `claude setup-token` 으로 받은 토큰을 `CLAUDE_CODE_OAUTH_TOKEN` 에 넣는다.
   심사·시연처럼 팀 밖 사람이 쓰기 전에 `api_key` 와 `ANTHROPIC_API_KEY` 로 바꾼다 (개인 구독으로 남에게 서비스하는 것은 약관상 안 된다).
 - 키·토큰 값은 채팅·로그·커밋에 올리지 않는다.
@@ -84,6 +86,7 @@ sudo haepung-deploy --rollback       # 현재가 아닌 가장 최근 정상 rel
 
 흐름: 저장소 전체를 새 release 폴더에 풀기 → `npm ci && npm run build` → **DB 백업(배포 직전)** → `current` 교체·재시작 →
 `http://127.0.0.1:3000/api/health` 에 새 커밋이 보이면 성공. 재시작이나 헬스체크가 실패하면 직전 정상 release 로 자동으로 되돌린다.
+되돌린 뒤에는 그 release 의 커밋이 헬스체크에 보이는지도 확인한다. 이것도 통과하지 못하면 "되돌린 prod 도 헬스체크를 통과하지 못했다" 경고를 내므로 `journalctl -u haepung-prod` 를 본다. 어느 쪽이든 배포는 실패(종료 코드 1)로 끝난다.
 빌드는 1-2분. 메모리 여유가 600MB 미만이면 시작 전에 멈춘다 (`sudo systemctl stop haepung-dev` 후 다시, 감수하면 `--force-low-mem`).
 
 - `npm prune` 은 하지 않는다. 서버가 쓰는 외부 패키지는 `better-sqlite3` 뿐이지만, release 안에서 admin·collect 스크립트를 돌릴 때
@@ -152,8 +155,14 @@ cd /srv/haepung/work/$USER/<이름> && npm ci && claude
 
 ## 메모리 주의 (31GB, 스왑 없음)
 
-- 상시: Caddy, prod(node), dev(vite 와 dev 가 띄운 claude, cgroup 2GB 상한), 가끔 수집기(oneshot). 더해서 claude 가 채팅 한 턴마다 뜬다.
+- 상시: Caddy, prod(node), dev(vite 와 dev 가 띄운 claude), 가끔 수집기(oneshot). 더해서 claude 가 채팅 한 턴마다 뜬다.
   `AGENT_MAX_CONCURRENCY=2` 로 claude 를 동시에 2개까지만 띄운다.
+- 스왑이 없어서 폭주한 서비스가 VM 전체(SSH 포함)를 멈추지 않게 prod·dev 유닛에 cgroup 상한을 둔다. 띄운 claude 도 이 상한 안에 든다. `MemoryHigh` 를 넘으면 커널이 메모리를 회수하며 느려지고, `MemoryMax` 를 넘으면 그 cgroup 안에서만 프로세스가 죽고 `Restart=on-failure` 로 다시 뜬다.
+
+| 유닛 | `MemoryHigh` | `MemoryMax` |
+| --- | --- | --- |
+| `haepung-prod` | 3G | 4G |
+| `haepung-dev` | 1500M | 2G |
 - SSH 의 Claude Code 와 빌드(`npm ci`, `npm run build`)도 수백 MB 를 쓴다. 여럿이 동시에 돌리지 않는다.
   시작 전에 `free -m` 의 `available` 이 600MB 이상인지 본다. 배포는 이 검사를 스스로 한다.
 - 어디서 쓰는지 보기:
@@ -173,6 +182,7 @@ journalctl -k --since '1 day ago' | grep -i 'out of memory'    # OOM 으로 죽�
 systemctl status haepung-prod haepung-dev caddy
 systemctl list-timers 'haepung-*'
 journalctl -u haepung-prod -f
+journalctl -u haepung-collect -n 20      # 수집 결과 한 줄 (source, recorded, missing, failed)
 journalctl -u caddy -f
 curl -s http://127.0.0.1:3000/api/health
 df -h /

@@ -1,6 +1,6 @@
 # 서버 구조
 
-최종 확인: **2026-10-04** · 정본: [server/main.ts](../../server/main.ts), [server/vite-api.ts](../../server/vite-api.ts), [server/workspace.ts](../../server/workspace.ts), [server/sqlite-store.ts](../../server/sqlite-store.ts), [server/claude-cli.ts](../../server/claude-cli.ts)
+최종 확인: **2026-10-04** · 정본: [server/main.ts](../../server/main.ts), [server/vite-api.ts](../../server/vite-api.ts), [server/workspace.ts](../../server/workspace.ts), [server/sqlite-store.ts](../../server/sqlite-store.ts), [server/claude-cli.ts](../../server/claude-cli.ts), [server/chat.ts](../../server/chat.ts), [server/collect.ts](../../server/collect.ts)
 
 왜 이렇게 정했나: [0005 백엔드 통합](../decisions/0005-merge-backend-into-haepung-app.md). 엔드포인트와 요청·응답은 [관측·채팅 API](chat-api.md), [계정·작업 API](workspace-api.md)에 있고 여기서는 되풀이하지 않는다. VM 배치·배포·백업은 [infra/gcp/README.md](../../infra/gcp/README.md). 변수 이름은 [.env.example](../../.env.example).
 
@@ -57,11 +57,11 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 
 `LLM_PROVIDER` 가 `claude` 이면 claude CLI, 그 밖에는 OpenAI 호환 HTTP API(기본)다. 어느 쪽이든 서버가 관측 근거를 확보해 시스템 프롬프트로 주고 모델은 설명만 쓴다. 모델에는 도구가 없고 판정·등급은 코드가 정한다. 응답이 확인되지 않은 판정 표현을 담았거나 호출이 실패하면 관측 사실만 말하는 로컬 설명으로 바꾸고 `provider: local` 과 `providerNotice` 를 붙인다.
 
-**claude CLI** (`server/claude-cli.ts`): 메시지마다 `claude -p` 프로세스 하나. 프롬프트는 stdin, 결과는 `--output-format json`. 이전 대화는 화면이 보낸 `history` 를 글로 이어 붙인다.
+**claude CLI** (`server/claude-cli.ts`): 메시지마다 `claude -p` 프로세스 하나. 프롬프트는 stdin, 결과는 `--output-format json`. 이전 대화는 화면이 보낸 `history` 를 글로 이어 붙이고, 첫 질문도 `지금 질문:` 으로 감싼다. `/` 로 시작하는 입력은 `--disable-slash-commands` 를 줘도 CLI 가 명령으로 가로채기 때문이다.
 
 - 제한 플래그: `--tools ""`, `--strict-mcp-config`, `--disable-slash-commands`, `--setting-sources ""`, `--no-session-persistence`, `--max-budget-usd`. `api_key` 모드는 `--bare` 를 더한다.
 - 작업 폴더는 빈 폴더(`AGENT_WORKDIR`). 자식 프로세스에는 허용 목록의 환경변수(`PATH`, `HOME`, `CLAUDE_CONFIG_DIR` 등)와 인증 값 하나만 넘기고 `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` 을 건다. E-UM 키 같은 다른 비밀값은 넘기지 않는다.
-- 시간 초과·취소는 프로세스 그룹에 SIGTERM, 5초 뒤 SIGKILL 이다.
+- 시간 초과(`AGENT_TIMEOUT_MS`)는 프로세스 그룹에 SIGTERM, 5초 뒤 SIGKILL 이다. 화면이 요청을 취소해도 claude 는 끝까지 돈다(아래 비용 기록).
 - 인증 값(`CLAUDE_CODE_OAUTH_TOKEN` 또는 `ANTHROPIC_API_KEY`)은 `.env.local` 이 아니라 프로세스 환경변수에서만 읽는다. VM 은 systemd 가 `backend.env` 로 넣는다.
 
 | 변수 | 기본값 | 뜻 |
@@ -71,10 +71,20 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 | `AGENT_WORKDIR` | `.local-data/agent-workdir` | claude 의 작업 폴더 |
 | `AGENT_AUTH_MODE` | `subscription` | `subscription`: 토큰 또는 서버 로그인. `api_key`: `--bare` + `ANTHROPIC_API_KEY` |
 | `AGENT_MODEL`, `AGENT_EFFORT` | CLI 기본 | 모델, 추론 강도 |
-| `AGENT_MAX_BUDGET_USD` | `0.5` | 메시지 하나당 비용 상한 |
+| `AGENT_MAX_BUDGET_USD` | `0.5` | 메시지 하나당 비용 상한. 시간 초과 때 기록하는 비용이기도 하다 |
 | `AGENT_TIMEOUT_MS` | `40000` | 메시지 하나당 시간 제한 |
 | `AGENT_MAX_CONCURRENCY` | `4` | 동시에 띄우는 claude 수. 넘으면 로컬 설명 |
 | `AGENT_DAILY_BUDGET_USD` | `10` | 최근 24시간 비용 합계 상한. `DATABASE_PATH` 가 있을 때만 세고 dev·prod 가 합산 |
+
+**비용 기록.** 메시지 하나가 끝날 때마다 `llm_usage` 에 비용을 쌓고, 최근 24시간 합계가 `AGENT_DAILY_BUDGET_USD` 에 닿으면 이후 질문은 로컬 설명으로 바뀐다. 상한을 피해 가지 못하도록 아래처럼 센다.
+
+| 경우 | 기록하는 비용 |
+| --- | --- |
+| 정상 종료 | claude 가 알려 준 실제 비용 |
+| 비용을 알려 준 실패 (예: 메시지당 상한 초과) | 그 비용 |
+| 시간 초과 | 비용을 알 수 없어 `AGENT_MAX_BUDGET_USD` (메시지당 상한) |
+| 화면이 취소 (연결 끊김, 전체 45초 제한) | claude 를 죽이지 않고 끝까지 돌려 실제 비용. 응답은 버린다. 도는 동안 동시 실행 자리를 차지하고, 길이는 `AGENT_TIMEOUT_MS` 가 막는다 |
+| 그 밖에 비용을 알 수 없는 실패 | 세지 않는다 |
 
 VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env.example). OpenAI 호환 경로의 변수(`OPENAI_API_KEY`, `LLM_API_BASE` 등)와 응답 형식은 [chat-api.md](chat-api.md).
 
@@ -93,22 +103,30 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 
 **쿠키.** `gwamegi_session`: `HttpOnly; SameSite=Lax; Path=/`, 30일. `Secure` 는 소켓이 TLS 이거나 `COOKIE_SECURE=1` 일 때 붙는다. Caddy 뒤의 앱은 평문 연결로 보이므로 VM 은 `COOKIE_SECURE=1` 이 필요하다. 쿠키는 포트별로 나뉘지 않아 같은 호스트의 dev(440)와 prod(443)는 로그인이 공유된다.
 
-**dev 접속 암호.** `DEV_BASIC_AUTH=아이디:비밀번호` 를 설정하면 Vite dev 서버가 정적 파일을 포함한 모든 요청에 HTTP Basic 인증을 요구한다. 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주기 때문이다. `npm run preview` 와 `main.ts` 에는 걸지 않는다. 같이 쓰는 Vite 설정:
+**dev 접속 암호.** `DEV_BASIC_AUTH=아이디:비밀번호` 를 설정하면 Vite dev 서버가 정적 파일을 포함한 모든 요청에 HTTP Basic 인증을 요구한다. 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주기 때문이다. `npm run preview` 와 `main.ts` 에는 걸지 않는다. `PUBLIC_ORIGINS` 가 설정돼 있는데 `DEV_BASIC_AUTH` 가 비어 있으면 dev 서버는 공개된 채 열리지 않도록 오류로 시작을 멈춘다. 같이 쓰는 Vite 설정:
 
 - `DEV_ALLOWED_HOSTS`: 쉼표 목록, Vite `allowedHosts`.
 - `DEV_HMR_CLIENT_PORT`: 화면 자동 갱신 연결을 받는 포트(Caddy 의 440).
 - `.env*`, 키·인증서 파일, `.npmrc`, `.git`, `.local-data` 는 Vite 가 주지 않는다(`server.fs.deny`).
 
-**로그인 제한.** 같은 `클라이언트 주소 + 이메일` 로 10분 안에 로그인이 5번 쌓이면(성공하면 기록을 지운다) 이후 10분 동안 429 `LOGIN_RATE_LIMITED` 를 돌려준다. 차단 중에는 올바른 비밀번호도 거절한다. 가입에는 적용하지 않는다. 기록은 프로세스 메모리에만 있어서 dev·prod 가 따로 세고 재시작하면 사라진다. 클라이언트 주소는 소켓이 루프백(Caddy)일 때만 `X-Forwarded-For` 를 믿는다.
+**로그인·가입 제한.**
+
+- 로그인: 같은 `클라이언트 주소 + 이메일` 로 10분 안에 실패가 5번 쌓이면(성공하면 기록을 지운다) 이후 10분 동안 429 `LOGIN_RATE_LIMITED` 를 돌려준다. 차단 중에는 올바른 비밀번호도 거절한다.
+- 가입: 같은 클라이언트 주소에서 1시간에 10번까지만 받고, 넘으면 429 `SIGNUP_RATE_LIMITED` 를 돌려준다. 입력 형식 검사를 통과한 요청을 모두 세므로 이미 가입한 이메일로 실패한 시도도 센다. 계정을 대량으로 만들어 AI 사용량을 쓰는 것을 늦추려는 장치다.
+- 둘 다 기록은 프로세스 메모리에만 있어서 dev·prod 가 따로 세고 재시작하면 사라진다. 클라이언트 주소는 소켓이 루프백(Caddy)일 때만 `X-Forwarded-For` 를 믿는다.
 
 ## 수집기
 
-`server/collect.ts` (`npm run collect`)는 한 번 돌고 끝나는 프로세스다. systemd 타이머 `haepung-collect.timer` 가 prod 와 같은 환경으로 매시 00분·30분에 띄운다. dev 는 같은 DB 를 쓰므로 수집기를 돌리지 않는다(두 번 쌓인다).
+`server/collect.ts` (`npm run collect`)는 한 번 돌고 끝나는 프로세스다. systemd 타이머 `haepung-collect.timer` 가 prod 와 같은 환경으로 매시 00분·30분에 띄운다([타이머](../../infra/gcp/systemd/haepung-collect.timer), [서비스](../../infra/gcp/systemd/haepung-collect.service)). dev 는 같은 DB 를 쓰므로 수집기를 돌리지 않는다(두 번 쌓인다).
 
-- 진행 중인 배치가 있는 덕장을 찾아 E-UM 일괄 관측(`INT_S01_003`)을 한 번 호출하고, 덕장마다 1km 기준 장비를 골라 신뢰도를 검사한 뒤 `appendLiveObservation`([src/lib/operations.ts](../../src/lib/operations.ts))의 규칙으로 배치 기록에 추가한다. 수집하지 못한 시각은 결측 샘플로 남긴다.
-- 적합 등급은 만들지 않는다.
-- 자외선 조언(E-UM `INT_S06_005`)의 단계는 코드가 계산한다. AI 는 단계를 정하지 않고 설명만 한다.
-- `KMA_AUTH_KEY`(기상청 API허브), `DATA_GO_KR_KEY`(공공데이터포털)는 설정에서 읽지만 아직 이 키로 호출하는 기능은 없다.
+- **대상:** 진행 중인 배치가 있는 덕장만. 하나도 없으면 E-UM 을 부르지 않고 끝난다.
+- **조회:** `createObservationService` 로 한 번만 조회하고(장비 목록 `INT_S01_001`, 일괄 관측 `INT_S01_003`, 빠진 장비는 단건 `INT_S01_004`. [chat-api.md](chat-api.md)) 모든 덕장이 그 결과를 같이 쓴다.
+- **기록:** 덕장마다 화면과 같은 기준(1km 안의 최근 관측 중 가장 가까운 장비)으로 관측을 고른다. 진행 중인 배치마다 `appendLiveObservation`([src/lib/operations.ts](../../src/lib/operations.ts))이 받아 주면 실제 관측으로 기록한다. 수동 기록의 기준(`observationRecordIssue`: 현재 상태, 관측 후 30분 이내, 값·시각 유효, 확인 사항 없음)을 그대로 쓴다.
+- **결측:** 고르지 못했거나 기준에 못 미치면(E-UM 조회 실패, 보관 자료만 있음, 1km 안에 최근 관측 없음, 기록 기준 미달) 결측 샘플을 남긴다. 장비 ID 는 `collector-missing`, 값과 `distanceM` 은 `null`, `alert` 는 `false` 이고 이유는 배치 로그의 `detail` 에 적는다. 보고서에서 결측 샘플은 결측률에만 잡히고 유효 표본·거리 검증에서는 빠진다(`getBatchReport`).
+- **한 구간에 한 번:** 로그 id 를 `collect-<30분 구간 시작 시각(ISO)>` 로 정한다. 같은 id 가 이미 있으면(타이머가 두 번 돌아도) 아무것도 더하지 않는다. 운영자가 같은 장비·같은 관측 시각을 이미 손으로 기록했다면 그 표본이 대신한다.
+- **저장:** `workspace.appendCollected(siteId, update)` 가 잠금 안에서 최신 기록에 적용한다. 운영자 저장처럼 `revision` 을 올리므로 화면의 충돌 재시도가 그대로 동작하고, 저장 전 검증과 근로자 이력 보호도 같다. 사람의 요청이 아니라 쿠키·소속 검사는 없다.
+- **하지 않는 것:** 경보, 쿨다운, 적합 등급. 샘플의 `alert` 는 항상 `false` 다.
+- **끝나는 법:** 한 줄 요약(`[collect] <시각> source=… sites=… batches=… recorded=… missing=… skipped=… failed=…`)을 남기고 끝난다. 덕장 한 곳의 저장이 실패하면 나머지는 계속 수집하되 종료 코드가 1 이고, 저장소를 열지 못해도 1 이다. E-UM 조회 실패는 결측으로 기록하므로 종료 코드 0 이다.
 
 ## 헬스체크
 
@@ -116,6 +134,8 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 
 ## 지금 없는 것
 
-- 가입 제한과 이메일 확인·비밀번호 재설정 메일. 계정 복구는 `scripts/admin.ts` 로 한다.
+- 이메일 확인·비밀번호 재설정 메일. 계정 복구는 `scripts/admin.ts` 로 한다.
+- 경보, 쿨다운, 적합 등급. 수집기는 관측과 결측을 기록만 한다.
+- 기상청 API허브(`KMA_AUTH_KEY`)·공공데이터포털(`DATA_GO_KR_KEY`) 호출. 설정에서 키를 읽기만 하며 `research/api-tests/` 에 호출 성공 기록이 없어 쓰는 기능이 없다.
 - 서버 쪽 대화 저장. 대화는 브라우저 저장소에 있다.
 - 데이터베이스 표 분리. 문서 하나를 한 행에 넣는다.

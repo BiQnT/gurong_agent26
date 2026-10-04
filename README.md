@@ -124,7 +124,7 @@ npm run format:check
 
 - **역할별 화면:** 운영자 홈·건조 기록·안내·팀 관리·AI 도우미, 근로자 한국어/베트남어 할 일·지난 안내·본인 응답.
 - **US-1 관측:** 등록 위치와 관측소 거리 계산, 1km 내 최근 관측소 우선 선택, 직접 선택, 원천 시각·결측·과거 자료 표시. 검증된 건조 기준이 없으므로 적합 등급을 생성하지 않습니다.
-- **US-2 기록:** 배치 시작·종료·취소 승인, 유효한 현재 관측의 수동 기록, 집계·내려받기. 덕장별 서버 저장과 충돌 재시도로 동시 응답을 보존합니다.
+- **US-2 기록:** 배치 시작·종료·취소 승인, 유효한 현재 관측의 수동 기록과 prod 의 30분 자동 수집(경보·쿨다운은 후속), 집계·내려받기. 덕장별 서버 저장과 충돌 재시도로 동시 응답을 보존합니다.
 - **US-3 안내:** 승인된 한국어·준비된 베트남어 문안을 공유하고, 실제 가입 근로자의 확인·질문·완료와 운영자의 질문 답변을 기록합니다. 답변은 작성한 원문으로 전달됩니다. 근로자의 완료 보고가 배치를 종료하지 않습니다.
 - **대기 경험:** 대기 단계를 표시하고 완성된 AI 답변을 한 번에 추가합니다. 중단·재시도, 요청 중 버튼 잠금, 오류·빈 상태, 동작 줄이기 설정을 지원합니다.
 
@@ -135,9 +135,9 @@ npm run format:check
 - **저장:** `DATABASE_PATH`를 주면 공유 SQLite 파일에, 없으면 Git과 정적 제공에서 제외한 `.local-data/workspace.json`(로컬 개발 기본)에 계정·세션·덕장·초대·배치·안내를 저장합니다. 비밀번호는 scrypt 해시, 초대·세션 토큰은 해시로 보관하며 브라우저에는 HttpOnly 세션 쿠키를 사용합니다. 대화는 사용자·덕장별 브라우저 저장소에만 남습니다. 로컬 기록을 유지하려면 `.local-data/`를 보존하세요.
 - **운영 서버:** `npm run build` 뒤 `npm start`(`node server/main.ts`)가 빌드한 화면과 API를 한 포트(기본 `127.0.0.1:3000`)에서 제공합니다. 원격 접속은 TLS 프록시 뒤에서 `PUBLIC_ORIGINS`에 적은 출처만 받습니다.
 - **VM:** prod와 dev가 한 VM에서 Caddy(HTTPS) 뒤에 돌며 같은 DB를 씁니다. 셋업·배포·백업은 [infra/gcp/README.md](infra/gcp/README.md).
-- **수집:** prod 전용 타이머가 30분마다 `server/collect.ts`를 한 번 실행해 진행 중인 배치에 관측을 기록합니다.
+- **수집:** prod 전용 타이머가 매시 00분·30분에 `server/collect.ts`를 한 번 실행해 진행 중인 배치에 관측을 기록하고, 받지 못한 회차는 결측 샘플로 남깁니다. 등급·경보는 만들지 않습니다. 동작은 [수집기](docs/design/backend.md#수집기).
 - **더 보려면:** 서버 구조 [docs/design/backend.md](docs/design/backend.md), 환경변수 이름 [.env.example](.env.example), 결정 이유 [0005 ADR](docs/decisions/0005-merge-backend-into-haepung-app.md), API 계약 [관측·채팅 API](docs/design/chat-api.md)·[계정·작업 API](docs/design/workspace-api.md).
-- **후속 범위:** 이메일 확인·비밀번호 재설정, 메일/SMS 발송, 경보, 자유 문장 번역·역번역.
+- **후속 범위:** 이메일 확인·비밀번호 재설정, 메일/SMS 발송, 경보·쿨다운, 자유 문장 번역·역번역.
 
 ## 코드 구조
 
@@ -151,6 +151,7 @@ npm run format:check
 | `src/hooks/useChat.ts`, `useLiveObservations.ts` | 계정별 대화, 덕장별 관측 조회 |
 | `server/workspace.ts` | 인증·권한·초대·서버 저장 |
 | `server/main.ts`, `vite-api.ts`, `sqlite-store.ts`, `claude-cli.ts` | 운영 서버, API 연결, 공유 SQLite 저장, claude CLI 제공자 |
-| `server/eum.ts`, `site-observations.ts`, `chat.ts` | 원천 관측·거리·AI 설명 |
+| `server/eum.ts`, `site-observations.ts`, `chat.ts`, `sources/eum-uv.ts` | 원천 관측·거리·AI 설명·자외선 근거 |
+| `server/collect.ts` | 30분 배치 수집기 (prod 타이머가 한 번 실행하고 끝난다) |
 
 [프로젝트 범위](PROJECT_SPEC.md) · [프론트엔드 구조](docs/design/frontend.md)
