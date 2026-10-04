@@ -1039,11 +1039,14 @@ export function createWorkspaceMiddleware(service: WorkspaceService): Connect.Ne
       } catch (error) {
         if (error instanceof BridgeError)
           send(error.status, { error: error.message, code: error.code });
-        else
+        else {
+          // 화면에는 일반 문구만 보내고, 원인(저장소 형식 오류 등)은 서버 로그(journalctl)에 남긴다.
+          console.error('[workspace]', error);
           send(500, {
             error: '작업 정보를 저장하거나 읽지 못했어요. 잠시 뒤 다시 시도해 주세요.',
             code: 'WORKSPACE_ERROR',
           });
+        }
       }
     })();
   };

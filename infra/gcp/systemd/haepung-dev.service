@@ -15,8 +15,8 @@ PrivateTmp=yes
 ProtectSystem=full
 ProtectHome=yes
 # 메모리가 1.9GB 이고 스왑이 없다. dev 가 폭주해도 prod 가 같이 죽지 않게 cgroup 에서 끊는다 (Restart 로 다시 뜬다).
-MemoryHigh=450M
-MemoryMax=600M
+MemoryHigh=700M
+MemoryMax=1000M
 # 팀원이 합친 결과를 폰으로 확인하는 공용 폴더를 그대로 vite 로 띄운다 (저장하면 바로 반영).
 WorkingDirectory=/srv/haepung/dev
 EnvironmentFile=/srv/haepung/env/haepung.env

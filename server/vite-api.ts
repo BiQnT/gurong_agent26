@@ -185,12 +185,26 @@ export function createApiMiddleware(
         if (url.pathname === '/api/health') {
           if (request.method !== 'GET')
             throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
+          // 저장소를 실제로 한 번 읽는다. 못 읽으면 503 이라 배포 스크립트가 자동으로 되돌린다.
+          let schema: number;
+          try {
+            ({ schema } = await workspace.health());
+          } catch (error) {
+            const code = (error as { code?: unknown }).code;
+            console.error('[health] 저장소를 읽지 못했다', error);
+            send(503, {
+              error: '저장소를 읽을 수 없어요.',
+              code: typeof code === 'string' ? code : 'STORE_UNAVAILABLE',
+            });
+            return;
+          }
           send(200, {
             mode: process.env.APP_MODE || 'local-bridge',
             eum: { configured: !!config.eumServiceKey },
             llm: { provider: config.llmProvider ?? 'openai', ...llmStatus(config) },
             // 배포 스크립트가 새 버전이 떴는지 확인한다 (release.env 의 GIT_COMMIT).
             commit: process.env.GIT_COMMIT || null,
+            schema,
           });
           return;
         }

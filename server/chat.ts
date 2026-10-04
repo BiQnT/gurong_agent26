@@ -219,6 +219,10 @@ export function createLiveChat(
         signal.throwIfAborted();
         // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)만 센다. 시간 초과 등은 알 수 없어 세지 않는다.
         record(error instanceof ClaudeCliError ? error.costUsd : undefined);
+        // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다 (메시지 본문은 남기지 않는다).
+        console.error(
+          `[chat] claude ${error instanceof ClaudeCliError ? error.kind : 'failed'}: ${(error as Error).message}`,
+        );
         return fallback(claudeNotice(error));
       }
     }
