@@ -77,9 +77,10 @@ test('model receives computed distance and registration status without private s
   let context: Record<string, unknown> = {};
   const fakeFetch: typeof fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body));
-    context = JSON.parse(
-      body.messages[0].content.split('OBSERVATION_CONTEXT\n')[1],
-    ) as Record<string, unknown>;
+    context = JSON.parse(body.messages[0].content.split('OBSERVATION_CONTEXT\n')[1]) as Record<
+      string,
+      unknown
+    >;
     assert.equal(body.stream, false);
     assert.equal(body.max_tokens, 600);
     return Response.json({
@@ -87,7 +88,8 @@ test('model receives computed distance and registration status without private s
         {
           message: {
             role: 'assistant',
-            content: '관측소와의 거리는 확인되지만 검증된 기준이 없어 건조 적합 여부는 판정할 수 없어요.',
+            content:
+              '관측소와의 거리는 확인되지만 검증된 기준이 없어 건조 적합 여부는 판정할 수 없어요.',
           },
         },
       ],
