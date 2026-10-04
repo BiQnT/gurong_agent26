@@ -11,10 +11,12 @@ type AgentConfig = Config['agent'];
 
 export class ClaudeCliError extends Error {
   readonly stderr: string;
-  constructor(message: string, stderr: string) {
+  readonly reason: 'spawn' | 'timeout' | 'aborted' | 'exit';
+  constructor(message: string, stderr: string, reason: ClaudeCliError['reason']) {
     super(message);
     this.name = 'ClaudeCliError';
     this.stderr = stderr;
+    this.reason = reason;
   }
 }
 
@@ -133,10 +135,11 @@ export async function* runClaude(config: Config, options: RunOptions): AsyncGene
       }
     }
     const code = await exited;
-    if (spawnError) throw new ClaudeCliError(`claude CLI 를 실행하지 못했다: ${spawnError.message}`, stderr);
+    if (spawnError) throw new ClaudeCliError(`claude CLI 를 실행하지 못했다: ${spawnError.message}`, stderr, 'spawn');
     if (!sawResult) {
-      const reason = timedOut ? `${agent.timeoutMs}ms 시간 초과` : options.signal?.aborted ? '요청 취소' : `exit ${code}`;
-      throw new ClaudeCliError(`claude CLI 가 결과 없이 끝났다 (${reason})`, stderr);
+      if (timedOut) throw new ClaudeCliError(`claude CLI 가 결과 없이 끝났다 (${agent.timeoutMs}ms 시간 초과)`, stderr, 'timeout');
+      if (options.signal?.aborted) throw new ClaudeCliError('claude CLI 가 결과 없이 끝났다 (요청 취소)', stderr, 'aborted');
+      throw new ClaudeCliError(`claude CLI 가 결과 없이 끝났다 (exit ${code})`, stderr, 'exit');
     }
   } finally {
     clearTimeout(timer);

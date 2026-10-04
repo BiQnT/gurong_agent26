@@ -53,8 +53,10 @@ current=$(readlink -e "$ROOT/prod/current" || true)
 if [[ "${1:-}" == --rollback ]]; then
   previous=$(ok_releases | grep -vxF "$current" | head -1 || true)
   [[ -n "$previous" ]] || { echo '되돌릴 정상 release 가 없다'; exit 1; }
+  # '현재가 아닌 가장 최근 정상 release' 로 간다. 두 번 하면 다시 돌아온다.
   echo "rollback → $previous"
   switch_to "$previous"
+  health "$(sed -n 's/^GIT_COMMIT=//p' "$previous/release.env")" || { echo '헬스체크 실패. journalctl -u gwamegi-prod 를 본다'; exit 1; }
   exit 0
 fi
 
@@ -64,14 +66,17 @@ sha=$(as_app git -C "$ROOT/dev" rev-parse --verify "$ref^{commit}")
 release="$ROOT/prod/releases/$(date +%Y%m%d-%H%M%S)-${sha:0:7}"
 echo "deploy $ref ($sha) → $release"
 
-# 빌드가 실패하면 반쯤 만든 release 를 지운다.
-trap 'echo "실패: $release 삭제"; rm -rf "$release"' ERR
+# 빌드가 끝나기 전에 스크립트가 어떤 이유로든 끝나면 반쯤 만든 release 를 지운다.
+# (ERR trap 은 함수 안의 실패에서 돌지 않아 EXIT + 완료 표시로 한다)
+built=false
+trap '[[ $built == true ]] || { echo "실패: $release 삭제"; rm -rf "$release"; }' EXIT
 as_app mkdir -p "$release"
 # 실행에 필요한 것만 푼다: 앱(prototype)과 E-UM 카탈로그(data)
 as_app bash -c "git -C '$ROOT/dev' archive '$sha' prototype data | tar -x -C '$release'"
 as_app bash -c "echo 'GIT_COMMIT=$sha' > '$release/release.env'"
 as_app bash -c "cd '$release/prototype' && npm ci --no-audit --no-fund && npm run build && npm prune --omit=dev --no-audit --no-fund"
-trap - ERR
+built=true
+trap - EXIT
 
 # restart 자체가 실패해도(예: 마이그레이션 오류) 되돌린다.
 if ! switch_to "$release" || ! health "$sha"; then

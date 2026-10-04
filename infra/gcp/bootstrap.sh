@@ -106,6 +106,13 @@ if [[ ! -d "$ROOT/dev/.git" ]]; then
 fi
 chmod -R g+rwX "$ROOT/dev"
 
+# root 로 복사할 파일(유닛·배포·백업 스크립트)이 커밋된 내용과 같은지 확인한다. 고친 채로 돌리면 그 내용이 root 로 깔린다.
+if [[ -n "$(as_app git -C "$ROOT/dev" status --porcelain -- infra/gcp)" && "${FORCE:-}" != 1 ]]; then
+  echo "dev 의 infra/gcp 에 커밋되지 않은 변경이 있다. 커밋·리뷰 후 다시 실행하거나, 의도한 것이면 FORCE=1 로 실행한다."
+  exit 1
+fi
+echo "dev 커밋: $(as_app git -C "$ROOT/dev" log --oneline -1)"
+
 step '비밀값 파일'
 if [[ ! -f "$ROOT/env/secrets.env" ]]; then
   install -o "$APP_USER" -g "$APP_USER" -m 0640 "$ROOT/dev/infra/gcp/secrets.env.example" "$ROOT/env/secrets.env"

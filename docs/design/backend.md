@@ -45,7 +45,7 @@
 | `tool` | `{ id, status: "end", isError }` | 같은 `id` 의 조회 끝 |
 | `delta` | `{ text }` | 답변 조각. 이어 붙여 보여준다 |
 | `done` | `{ messageId, text, costUsd }` | 끝. `text` 가 저장된 최종 답변이다 |
-| `error` | `{ message }` | `done` 대신 온다 |
+| `error` | `{ message }` | `done` 대신 온다. 사람이 읽는 문구이고 내부 사유(예: claude 로그인 안 됨)가 그대로 들어갈 수 있다 |
 
 - `delta` 없이 `done` 만 올 수 있다. 최종 화면은 `done.text` 로 맞춘다.
 - 답변에 마크다운(굵게, 목록)이 섞인다.

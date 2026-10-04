@@ -4,14 +4,33 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // POST /api/chat  { sessionId?: string, message: string }  →  text/event-stream
-export async function POST(request: Request): Promise<Response> {
-  // 메시지는 2,000자라 본문이 이보다 훨씬 클 이유가 없다. 다 읽기 전에 거른다.
-  if (Number(request.headers.get('content-length') ?? 0) > 32_000) {
-    return Response.json({ error: '본문이 너무 크다' }, { status: 413 });
+// 메시지는 2,000자라 본문이 이보다 훨씬 클 이유가 없다. content-length 가 없는 chunked 요청도 있어 읽으면서 센다.
+const MAX_BODY_BYTES = 32_000;
+
+async function readBody(request: Request): Promise<string | undefined> {
+  if (!request.body) return '';
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      await reader.cancel();
+      return undefined;
+    }
+    chunks.push(value);
   }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const raw = await readBody(request);
+  if (raw === undefined) return Response.json({ error: '본문이 너무 크다' }, { status: 413 });
   let body: unknown;
   try {
-    body = await request.json();
+    body = JSON.parse(raw);
   } catch {
     return Response.json({ error: '본문이 JSON 이 아니다' }, { status: 400 });
   }

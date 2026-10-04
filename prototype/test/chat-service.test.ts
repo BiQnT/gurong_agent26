@@ -138,6 +138,21 @@ describe('streamChat', () => {
   });
 });
 
+describe('실패한 턴의 비용', () => {
+  it('답변이 없어도 claude 가 알려준 비용은 질문 행에 남아 상한에 잡힌다', async () => {
+    installFakeClaude(
+      JSON.stringify({ type: 'result', subtype: 'error_max_budget_usd', is_error: true, total_cost_usd: 0.6, errors: ['budget'], session_id: 's' }),
+    );
+    const context = prepareChat({ message: '비용 기록 확인' });
+    const events = await collect(streamChat(context));
+    expect(events.at(-1)).toMatchObject({ type: 'error' });
+    const row = getDb()
+      .prepare("SELECT cost_usd FROM chat_message WHERE session_id = ? AND role = 'user'")
+      .get(context.session.id) as { cost_usd: number };
+    expect(row.cost_usd).toBeCloseTo(0.6);
+  });
+});
+
 describe('24시간 비용 상한', () => {
   it('넘으면 503', () => {
     const db = getDb();
@@ -152,7 +167,7 @@ describe('24시간 비용 상한', () => {
 describe('listSessions', () => {
   it('환경별로 거르고 첫 질문을 제목으로 쓴다', () => {
     const mine = listSessions('test');
-    expect(mine[0]).toMatchObject({ appEnv: 'test', title: '첫 질문' });
+    expect(mine.find((s) => s.title === '첫 질문')).toMatchObject({ appEnv: 'test' });
     expect(listSessions('prod')).toEqual([]);
     expect(listSessions(undefined).length).toBe(mine.length);
   });

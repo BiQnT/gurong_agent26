@@ -85,14 +85,17 @@ sudo systemctl restart gwamegi-dev gwamegi-prod
 ```bash
 sudo gwamegi-deploy                  # origin/main
 sudo gwamegi-deploy <브랜치·커밋>      # 확인용으로 다른 ref
-sudo gwamegi-deploy --rollback       # 직전 정상 release 로
+sudo gwamegi-deploy --rollback       # 현재가 아닌 가장 최근 정상 release 로 (두 번 하면 다시 돌아온다)
 ```
 
 새 release 폴더에 풀고 빌드한 뒤 `current` 를 바꿔 재시작한다. 재시작이 실패하거나 `/api/health` 의
 commit 이 맞지 않으면 직전 release 로 자동으로 되돌리고 실패한 폴더는 지운다. 빌드는 1~2분 걸린다.
 
-`gwamegi-deploy` 는 `infra/gcp/deploy.sh` 의 root 소유 사본이다. `deploy.sh` 를 고쳤으면
-`sudo bash /srv/gwamegi/dev/infra/gcp/bootstrap.sh` 를 다시 돌려야 반영된다 (systemd 유닛도 같다).
+`gwamegi-deploy` 는 `infra/gcp/deploy.sh` 의 root 소유 사본이다. `deploy.sh` 나 systemd 유닛을 고쳤으면
+main 에 머지한 뒤 dev 를 main 으로 맞추고 `sudo bash /srv/gwamegi/dev/infra/gcp/bootstrap.sh` 를 다시 돌린다.
+bootstrap 은 dev 의 `infra/gcp` 에 커밋되지 않은 변경이 있으면 멈춘다 (고친 내용이 root 로 깔리는 것을 막는다).
+
+3000 포트는 HTTP 라 암호가 평문으로 오간다. 팀 밖에 넓게 공유하기 전에는 도메인과 HTTPS 를 붙인다.
 
 ## dev
 

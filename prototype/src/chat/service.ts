@@ -77,15 +77,20 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
   const startedAt = Date.now();
   const tools: { id: string; name: string; input: unknown; isError?: boolean }[] = [];
   let outcome = 'error';
+  let charge: (usd: number) => void = () => {};
   try {
     if (isNew) {
       db.prepare('INSERT INTO chat_session (id, app_env, created_at, updated_at) VALUES (?, ?, ?, ?)').run(
         session.id, config.appEnv, now(), now(),
       );
     }
-    db.prepare("INSERT INTO chat_message (session_id, role, content, created_at) VALUES (?, 'user', ?, ?)").run(
-      session.id, message, now(),
-    );
+    const userMessageId = db
+      .prepare("INSERT INTO chat_message (session_id, role, content, created_at) VALUES (?, 'user', ?, ?)")
+      .run(session.id, message, now()).lastInsertRowid;
+    // 답변이 저장되지 않은 턴의 비용은 질문 행에 적어 24시간 상한에 잡히게 한다.
+    charge = (usd) => {
+      db.prepare('UPDATE chat_message SET cost_usd = COALESCE(cost_usd, 0) + ? WHERE id = ?').run(usd, userMessageId);
+    };
     yield { type: 'session', sessionId: session.id };
 
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -128,6 +133,7 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
               break;
             }
             if (event.isError) {
+              if (event.costUsd) charge(event.costUsd);
               // subtype 은 실패여도 'success' 로 올 때가 있다. 사유는 result 문구에 있다 (예: "Not logged in · Please run /login").
               const reason = (event.text || event.subtype || 'error').slice(0, 200);
               outcome = `error: ${reason}`;
@@ -155,6 +161,8 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
     }
   } catch (error) {
     if (error instanceof ClaudeCliError) {
+      // 시간 초과는 비용을 알 수 없으니 메시지당 상한만큼 쓴 것으로 친다.
+      if (error.reason === 'timeout') charge(config.agent.maxBudgetUsd);
       console.error(`[chat] ${error.message}\n${error.stderr}`);
       yield { type: 'error', message: error.message };
     } else {

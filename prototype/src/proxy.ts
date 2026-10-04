@@ -6,7 +6,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 export function proxy(request: NextRequest) {
   const expected = process.env.BASIC_AUTH;
   if (!expected || request.nextUrl.pathname === '/api/health') return NextResponse.next();
-  if (request.headers.get('authorization') === `Basic ${btoa(expected)}`) return NextResponse.next();
+  // btoa 는 한글 등 Latin-1 밖 문자에서 예외가 나므로 UTF-8 로 인코딩한다 (WWW-Authenticate 의 charset 과 같다).
+  if (request.headers.get('authorization') === `Basic ${Buffer.from(expected).toString('base64')}`) return NextResponse.next();
   return new NextResponse('인증이 필요하다', {
     status: 401,
     headers: { 'WWW-Authenticate': 'Basic realm="gwamegi", charset="UTF-8"' },
