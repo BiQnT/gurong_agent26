@@ -8,7 +8,7 @@
 
 ```
 /srv/gwamegi/
-  dev/                 git clone. 팀원이 SSH 로 들어와 고치는 곳 → gwamegi-dev  127.0.0.1:3001 (next dev)
+  dev/                 git clone. 팀원이 SSH 로 들어와 고치는 곳 → gwamegi-dev  0.0.0.0:3001 (next dev, 폰으로 UI 확인용)
   prod/releases/<시각>-<커밋>/   배포본 (최근 2개)
   prod/current → releases/...    → gwamegi-prod  0.0.0.0:3000 (next start)
   data/gwamegi.db      dev·prod 공유 SQLite (data·backups·env 는 gwamegi 그룹만 읽는다)
@@ -26,7 +26,8 @@
 
 ```bash
 ssh -i ~/.ssh/my_key <계정>@34.30.209.101
-# 브라우저로 보려면 터널 (지금은 방화벽이 22번만 열려 있다)
+# 방화벽이 열리면 폰·노트북 브라우저로 바로: http://34.30.209.101:3000 (prod), http://34.30.209.101:3001 (dev)
+# 열리기 전까지는 SSH 터널로 본다 (지금은 22번만 열려 있다)
 ssh -i ~/.ssh/my_key -L 3000:localhost:3000 -L 3001:localhost:3001 <계정>@34.30.209.101
 # → http://localhost:3000 (prod), http://localhost:3001 (dev)
 ```
@@ -38,7 +39,7 @@ ssh -i ~/.ssh/my_key -L 3000:localhost:3000 -L 3001:localhost:3001 <계정>@34.3
 
 ```bash
 gcloud compute firewall-rules create bremen-web --project=dt-509509 --network=default \
-  --direction=INGRESS --action=ALLOW --rules=tcp:3000 --source-ranges=0.0.0.0/0 --target-tags=bremen-web
+  --direction=INGRESS --action=ALLOW --rules=tcp:3000,tcp:3001 --source-ranges=0.0.0.0/0 --target-tags=bremen-web
 gcloud compute instances add-tags bremen --project=dt-509509 --zone=us-central1-a --tags=bremen-web
 ```
 
@@ -83,10 +84,13 @@ sudo systemctl restart gwamegi-dev gwamegi-prod
 ## 배포 (prod)
 
 ```bash
+sudo gwamegi-deploy --list           # 고를 수 있는 버전: main 최근 커밋, 태그, 서버에 남은 배포본
 sudo gwamegi-deploy                  # origin/main
-sudo gwamegi-deploy <브랜치·커밋>      # 확인용으로 다른 ref
+sudo gwamegi-deploy v0.1             # 태그·커밋·브랜치 중 고른 버전
 sudo gwamegi-deploy --rollback       # 현재가 아닌 가장 최근 정상 release 로 (두 번 하면 다시 돌아온다)
 ```
+
+시연용처럼 다시 돌아올 버전은 태그로 이름을 붙여 두면 고르기 쉽다: 로컬에서 `git tag v0.1 <커밋> && git push origin v0.1`.
 
 새 release 폴더에 풀고 빌드한 뒤 `current` 를 바꿔 재시작한다. 재시작이 실패하거나 `/api/health` 의
 commit 이 맞지 않으면 직전 release 로 자동으로 되돌리고 실패한 폴더는 지운다. 빌드는 1~2분 걸린다.

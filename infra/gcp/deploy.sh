@@ -2,8 +2,9 @@
 # prod 배포. dev 저장소로 fetch 한 커밋을 새 release 폴더로 풀어 빌드하고, current 링크를 바꿔 재시작한다.
 # 재시작이나 헬스체크가 실패하면 직전의 정상 release 로 되돌린다.
 #
-#   sudo gwamegi-deploy [ref]        (기본 origin/main)
-#   sudo gwamegi-deploy --rollback   (직전 정상 release 로)
+#   sudo gwamegi-deploy --list       배포할 수 있는 버전 보기
+#   sudo gwamegi-deploy [ref]        그 버전 배포 (브랜치·커밋·태그, 기본 origin/main)
+#   sudo gwamegi-deploy --rollback   직전 정상 release 로
 #
 # gwamegi-deploy 는 bootstrap.sh 가 이 파일을 root 소유로 복사해 둔 것이다. 서비스 계정이 고칠 수 있는
 # dev 폴더의 스크립트를 root 로 돌리지 않기 위해서다. 이 파일을 고쳤으면 bootstrap.sh 를 다시 실행한다.
@@ -50,6 +51,19 @@ switch_to() { # <release 경로>
 # -e: 링크가 없거나 깨졌으면 빈 값 (첫 배포)
 current=$(readlink -e "$ROOT/prod/current" || true)
 
+if [[ "${1:-}" == --list ]]; then
+  as_app git -C "$ROOT/dev" fetch --prune --tags -q origin
+  echo '== origin/main 최근 10개'
+  as_app git -C "$ROOT/dev" log origin/main -10 --format='%h  %ad  %s' --date=format:'%m-%d %H:%M'
+  echo '== 태그 (최근 10개)'
+  as_app git -C "$ROOT/dev" tag --sort=-creatordate | head -10
+  echo '== 서버에 있는 정상 배포본 (* 지금 서비스 중)'
+  for dir in $(ok_releases); do
+    [[ "$dir" == "$current" ]] && echo "* ${dir##*/}" || echo "  ${dir##*/}"
+  done
+  exit 0
+fi
+
 if [[ "${1:-}" == --rollback ]]; then
   previous=$(ok_releases | grep -vxF "$current" | head -1 || true)
   [[ -n "$previous" ]] || { echo '되돌릴 정상 release 가 없다'; exit 1; }
@@ -61,7 +75,7 @@ if [[ "${1:-}" == --rollback ]]; then
 fi
 
 ref=${1:-origin/main}
-as_app git -C "$ROOT/dev" fetch --prune origin
+as_app git -C "$ROOT/dev" fetch --prune --tags origin
 sha=$(as_app git -C "$ROOT/dev" rev-parse --verify "$ref^{commit}")
 release="$ROOT/prod/releases/$(date +%Y%m%d-%H%M%S)-${sha:0:7}"
 echo "deploy $ref ($sha) → $release"

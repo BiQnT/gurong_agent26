@@ -15,5 +15,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // _next/webpack-hmr 은 dev 화면 자동 갱신 연결이다. 폰 브라우저가 여기에 암호를 붙이지 않는 경우가 있어 뺀다.
+  matcher: ['/((?!_next/static|_next/image|_next/webpack-hmr|favicon.ico).*)'],
 };
