@@ -61,7 +61,9 @@ EOF
 step '폴더'
 # 코드·배포본은 그룹 밖에서도 읽을 수 있게 두고, DB·대화 기록·비밀값·백업은 그룹만 읽는다.
 install -d -o "$APP_USER" -g "$APP_USER" -m 2775 "$ROOT" "$ROOT/prod" "$ROOT/prod/releases"
-install -d -o "$APP_USER" -g "$APP_USER" -m 2770 "$ROOT/data" "$ROOT/data/agent-workdir" "$ROOT/data/claude-home" "$ROOT/backups" "$ROOT/env"
+install -d -o "$APP_USER" -g "$APP_USER" -m 2770 "$ROOT/data" "$ROOT/data/agent-workdir" "$ROOT/data/claude-home" "$ROOT/backups"
+# env 는 그룹 읽기 전용이다. 그룹이 쓸 수 있으면 sudoedit(sudo -u gwamegi -e)가 "writable directory" 로 거부한다.
+install -d -o "$APP_USER" -g "$APP_USER" -m 2750 "$ROOT/env"
 find "$ROOT/data" -maxdepth 1 -name 'gwamegi.db*' -exec chmod 660 {} +
 find "$ROOT/backups" -type f -exec chmod 640 {} +
 git config --system --get-all safe.directory | grep -qx "$ROOT/dev" || git config --system --add safe.directory "$ROOT/dev"
