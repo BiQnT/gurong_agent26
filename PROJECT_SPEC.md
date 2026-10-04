@@ -34,8 +34,8 @@
 
 ## 연결·저장과 운영 경계
 
-로컬 API는 비밀번호 해시, HttpOnly 세션, 덕장별 역할 검사, 초대 만료·회수·1회 수락, 원자적 파일 저장과 revision 충돌 검사를 구현한다. 비밀키는 서버 전용 `.env.local`, 계정·작업 데이터는 비공개 `.local-data/`에 둔다. API와 UI를 분리해 별도 백엔드로 교체한다.
+서버는 비밀번호 해시, HttpOnly 세션, 덕장별 역할 검사, 초대 만료·회수·1회 수락, 저장 전 검증과 revision 충돌 검사를 구현한다. 계정·작업 데이터는 dev와 prod가 함께 쓰는 SQLite 파일(`DATABASE_PATH`)에 두고, 로컬 개발에서는 비공개 `.local-data/`의 파일에 둔다. 비밀키는 서버 설정에만 있고 화면은 받지 않는다. API와 UI는 [계약 문서](docs/design/chat-api.md)로 분리한다.
 
 2026-10-04 E-UM 목록·일괄·단건 API는 모두 200을 확인했다. [호출 기록](research/api-tests/2026-10-04-eum-key.md). OpenAI 실제 호출 결과는 [이전 기록](research/api-tests/2026-10-03-live-connection.md)에 있다.
 
-현재 서버는 로컬 개발용이다. 외부 기기에서 쓰려면 공유 가능한 서비스 주소·운영용 DB·백업·세션 정책·이메일 확인/비밀번호 재설정 서비스를 연결해야 한다. 정적 빌드만 배포하면 서버가 포함되지 않는다.
+운영 서버(`node server/main.ts`)는 화면과 API를 함께 제공하며, VM에서 Caddy(HTTPS) 뒤에 돌아 폰에서도 쓴다. 허용 출처 전체 일치, Secure 쿠키, 로그인 시도 제한, dev 접속 암호로 접근을 좁힌다. AI 설명은 claude CLI(도구 없음, 비용·시간·동시 실행 상한) 또는 OpenAI 호환 API가 쓰고, 판정은 코드가 한다. prod 전용 30분 수집기가 진행 중인 배치에 관측과 결측을 기록하며 등급은 만들지 않는다. 가입은 제한하지 않고 이메일 확인·비밀번호 재설정 메일은 없다. 정적 빌드만 배포하면 서버가 포함되지 않는다. 구조는 [서버 구조](docs/design/backend.md), 배포·백업은 [infra/gcp/README.md](infra/gcp/README.md).

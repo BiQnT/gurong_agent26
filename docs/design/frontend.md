@@ -1,4 +1,4 @@
-# 프론트엔드와 로컬 서버
+# 프론트엔드와 서버
 
 최종 확인: **2026-10-04** · React·TypeScript·Vite · [관측·채팅 계약](chat-api.md) · [계정·작업 계약](workspace-api.md)
 
@@ -20,15 +20,15 @@
 | `src/hooks/useLiveObservations.ts` | 덕장 관측·장비 선택·재조회 |
 | `src/lib/operations.ts` | 승인 상태·집계·공유 데이터·충돌 재시도 |
 | `src/components/operations/` | 배치·안내·승인 대화상자 |
-| `server/workspace.ts` | 인증·소속·초대·작업 검증·파일 저장 |
+| `server/workspace.ts` | 인증·소속·초대·작업 검증·저장소 연결 |
 | `server/site-observations.ts` | 덕장 거리와 관측 선택 |
-| `server/eum.ts`, `server/chat.ts` | E-UM 정규화, OpenAI 설명 |
+| `server/eum.ts`, `server/chat.ts` | E-UM 정규화, AI 설명(OpenAI 호환 또는 claude) |
 
 화면은 비밀키와 원천 서비스 URL을 다루지 않는다. 계약 변경 시 클라이언트 타입·검증과 서버를 함께 수정한다. `VITE_API_BASE_URL`이 전체 애플리케이션 API의 교체 지점이다.
 
 ## 저장과 동시 작업
 
-계정·소속·초대·작업은 서버 파일에 보관한다. 대화는 `haepung.conversations.v3:{userId}:{siteId}`, 선택한 덕장은 `haepung.site.v1:{userId}`, 관측소 선택은 `haepung.selected-device.v2:{siteId}`에 저장한다. 예전 시연 localStorage를 자동 이관하지 않는다.
+계정·소속·초대·작업은 서버 저장소(공유 SQLite 또는 로컬 파일, [서버 구조](backend.md))에 보관한다. 대화는 `haepung.conversations.v3:{userId}:{siteId}`, 선택한 덕장은 `haepung.site.v1:{userId}`, 관측소 선택은 `haepung.selected-device.v2:{siteId}`에 저장한다. 예전 시연 localStorage를 자동 이관하지 않는다.
 
 작업 읽기는 `{data,revision}`이다. 운영자 변경은 최신 상태를 읽어 변환하고 같은 revision으로 저장한다. 충돌이면 다시 읽고 제한된 횟수 내에서 재적용한다. 근로자 응답은 별도 서버 경로로 사용자와 시각을 부여한다. 저장 성공 전에 창을 닫거나 성공 메시지를 표시하지 않는다. 10초 재조회와 포커스 복귀로 다른 사용자의 응답을 갱신한다.
 
@@ -56,4 +56,4 @@ AI 요청은 요청 전달 → 서버 응답 대기 → 응답 형식 확인을 
 
 Safari 제어가 `Computer Use was not approved to use Safari`로 거절되어 실제 Safari 화면·터치·키보드 검증은 수행하지 못했다. 타입·API 테스트를 브라우저 실증으로 간주하지 않는다.
 
-운영용 DB·배포 주소·이메일 확인/재설정, 자동 수집·경보, 자유 문장 번역과 외부 메시징은 별도 연결이 필요하다. 로컬 초대 링크를 만든 것이 다른 기기에 서비스가 배포됐다는 뜻은 아니다.
+이메일 확인/재설정, 경보, 자유 문장 번역과 외부 메시징은 별도 연결이 필요하다. 서버 배포와 공유 DB, 30분 수집은 [서버 구조](backend.md)에 있다. 초대 링크는 만든 화면의 주소로 만들어지므로 로컬(127.0.0.1)에서 만든 링크는 다른 기기에서 열리지 않는다.

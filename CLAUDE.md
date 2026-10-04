@@ -33,6 +33,8 @@
 | 제출 서류 진행, 팀원 정보 | 노션 제출 서류 준비 |
 | **결정과 그 이유** | `docs/decisions/` (ADR) |
 | 파이프라인·아키텍처 설계 | `docs/design/` |
+| 백엔드 (저장·LLM·접속·수집기)와 API 계약 | `docs/design/backend.md`, `docs/design/chat-api.md`, `docs/design/workspace-api.md` |
+| VM 셋업·배포·백업·운영 | `infra/gcp/README.md` |
 | E-UM API 스펙 | `docs/api-catalog/` (스크립트 생성물) |
 | 아이디어별 문서·데이터·코드 | `ideas/NNN-<slug>/` |
 | API 호출 테스트 기록 | `research/api-tests/` |

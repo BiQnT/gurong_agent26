@@ -38,7 +38,6 @@ research/
   api-tests/   API 호출 테스트 기록 + 카탈로그 수집 스크립트
 scripts/
   new-idea.sh  아이디어 브랜치 + 폴더 생성
-prototype/     본선 서비스 앱 (Next.js). 실행법은 prototype/README.md
 infra/gcp/     본선 GCP VM 셋업·배포 스크립트와 운영 문서
 ```
 
@@ -88,7 +87,7 @@ E-UM 로그인 후 API 자료실에서 신청해 받은 키를 넣는다.
 
 # 해풍 웹앱 (본선 서비스)
 
-덕장 운영자와 근로자를 위한 반응형 웹앱입니다. 관측은 E-UM 실제 자료, AI 설명은 OpenAI-호환 LLM(Groq 등)을 통해 제공합니다.
+덕장 운영자와 근로자를 위한 반응형 웹앱입니다. 관측은 E-UM 실제 자료, AI 설명은 OpenAI 호환 LLM(Groq 등) 또는 claude CLI를 통해 제공합니다.
 
 ## 실행
 
@@ -108,7 +107,7 @@ npm run preview
 npm run format:check
 ```
 
-개발·미리보기 서버 모두 로컬 API를 제공합니다. `dist/`만 정적 배포하면 API는 포함되지 않습니다.
+개발·미리보기 서버와 운영 서버(`npm run build` 뒤 `npm start`)가 같은 API를 제공합니다. `dist/`만 정적 배포하면 API는 포함되지 않습니다.
 
 ## 사용자 흐름
 
@@ -131,13 +130,14 @@ npm run format:check
 
 **2026-10-04 확인:** E-UM 관측소 목록·일괄·단건 API 모두 HTTP 200. 관측소 24개와 관측값 23행을 확인했습니다. [실제 호출 기록](research/api-tests/2026-10-04-eum-key.md). 조회 실패 시에만 보관된 과거 실측을 명시해 보여 주며 현재 값으로 바꾸지 않습니다.
 
-## 저장과 백엔드 연결
+## 서버와 배포
 
-계정·세션·덕장·초대·배치·안내는 Git과 정적 제공에서 제외한 `.local-data/workspace.json`에 저장합니다. 비밀번호는 scrypt 해시, 초대/세션 토큰은 해시로 보관하며 브라우저에는 HttpOnly 세션 쿠키를 사용합니다. 대화는 사용자·덕장별 브라우저 저장소에만 남습니다. 기록을 유지하려면 `.local-data/`를 보존하세요.
-
-현재 서버는 **개발용 루프백·동일 출처**로 제한됩니다. 다른 기기에서 초대에 참여하려면 배포용 백엔드와 공유 가능한 도메인을 연결해야 합니다. 이메일 확인·비밀번호 재설정, 메일/SMS 발송, 운영용 DB·백업·다중 서버, 30분 자동 수집·경보, 자유 문장 번역·역번역은 후속 범위입니다.
-
-`VITE_API_BASE_URL`로 관측·채팅·계정·작업 API 주소를 함께 교체할 수 있습니다. 별도 서버는 쿠키 인증과 브라우저 출처를 허용하거나 같은 출처 프록시로 제공해야 합니다. 계약은 [관측·채팅 API](docs/design/chat-api.md), [계정·작업 API](docs/design/workspace-api.md)에 정리했습니다.
+- **저장:** `DATABASE_PATH`를 주면 공유 SQLite 파일에, 없으면 Git과 정적 제공에서 제외한 `.local-data/workspace.json`(로컬 개발 기본)에 계정·세션·덕장·초대·배치·안내를 저장합니다. 비밀번호는 scrypt 해시, 초대·세션 토큰은 해시로 보관하며 브라우저에는 HttpOnly 세션 쿠키를 사용합니다. 대화는 사용자·덕장별 브라우저 저장소에만 남습니다. 로컬 기록을 유지하려면 `.local-data/`를 보존하세요.
+- **운영 서버:** `npm run build` 뒤 `npm start`(`node server/main.ts`)가 빌드한 화면과 API를 한 포트(기본 `127.0.0.1:3000`)에서 제공합니다. 원격 접속은 TLS 프록시 뒤에서 `PUBLIC_ORIGINS`에 적은 출처만 받습니다.
+- **VM:** prod와 dev가 한 VM에서 Caddy(HTTPS) 뒤에 돌며 같은 DB를 씁니다. 셋업·배포·백업은 [infra/gcp/README.md](infra/gcp/README.md).
+- **수집:** prod 전용 타이머가 30분마다 `server/collect.ts`를 한 번 실행해 진행 중인 배치에 관측을 기록합니다.
+- **더 보려면:** 서버 구조 [docs/design/backend.md](docs/design/backend.md), 환경변수 이름 [.env.example](.env.example), 결정 이유 [0005 ADR](docs/decisions/0005-merge-backend-into-haepung-app.md), API 계약 [관측·채팅 API](docs/design/chat-api.md)·[계정·작업 API](docs/design/workspace-api.md).
+- **후속 범위:** 이메일 확인·비밀번호 재설정, 메일/SMS 발송, 경보, 자유 문장 번역·역번역.
 
 ## 코드 구조
 
@@ -150,6 +150,7 @@ npm run format:check
 | `src/lib/operations.ts`, `src/components/operations/` | 작업 상태·승인·동시 저장·작업 UI |
 | `src/hooks/useChat.ts`, `useLiveObservations.ts` | 계정별 대화, 덕장별 관측 조회 |
 | `server/workspace.ts` | 인증·권한·초대·서버 저장 |
+| `server/main.ts`, `vite-api.ts`, `sqlite-store.ts`, `claude-cli.ts` | 운영 서버, API 연결, 공유 SQLite 저장, claude CLI 제공자 |
 | `server/eum.ts`, `site-observations.ts`, `chat.ts` | 원천 관측·거리·AI 설명 |
 
 [프로젝트 범위](PROJECT_SPEC.md) · [프론트엔드 구조](docs/design/frontend.md)

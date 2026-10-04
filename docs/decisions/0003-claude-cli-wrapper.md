@@ -1,7 +1,7 @@
 # 0003. 생성형 AI 는 claude CLI 를 메시지마다 띄우고, E-UM 은 MCP 도구로 준다
 
 - **날짜**: 2026-10-04
-- **상태**: 제안
+- **상태**: 일부 대체됨 (→ [0005](0005-merge-backend-into-haepung-app.md)) · 폐기: E-UM MCP 도구, SSE 응답. 유지: claude CLI 실행 제한
 - **정한 사람**: 안동현
 - **관련**: [docs/design/backend.md](../design/backend.md), 본선 서비스 기획서 "규칙 함수 및 생성형 AI의 작업 분리"
 
