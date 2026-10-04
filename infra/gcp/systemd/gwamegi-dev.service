@@ -11,6 +11,7 @@ UMask=0002
 WorkingDirectory=/srv/gwamegi/dev/prototype
 EnvironmentFile=/srv/gwamegi/env/secrets.env
 Environment=APP_ENV=dev
+Environment=NEXT_TELEMETRY_DISABLED=1
 Environment=DATABASE_PATH=/srv/gwamegi/data/gwamegi.db
 Environment=AGENT_WORKDIR=/srv/gwamegi/data/agent-workdir
 Environment=CLAUDE_CONFIG_DIR=/srv/gwamegi/data/claude-home

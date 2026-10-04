@@ -13,6 +13,7 @@ EnvironmentFile=/srv/gwamegi/env/secrets.env
 EnvironmentFile=-/srv/gwamegi/prod/current/release.env
 Environment=APP_ENV=prod NODE_ENV=production
 # dev 와 같은 DB·claude 작업 폴더를 쓴다 (공유 DB 결정: docs/decisions/0002)
+Environment=NEXT_TELEMETRY_DISABLED=1
 Environment=DATABASE_PATH=/srv/gwamegi/data/gwamegi.db
 Environment=AGENT_WORKDIR=/srv/gwamegi/data/agent-workdir
 Environment=CLAUDE_CONFIG_DIR=/srv/gwamegi/data/claude-home

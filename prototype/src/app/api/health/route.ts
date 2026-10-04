@@ -4,7 +4,7 @@ import { getDb } from '../../../db/index.ts';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// GET /api/health — 배포 스크립트가 기동 확인에 쓴다. 비밀값은 넣지 않는다.
+// GET /api/health: 배포 스크립트가 기동 확인에 쓴다. 비밀값은 넣지 않는다.
 export async function GET(): Promise<Response> {
   const config = getConfig();
   try {

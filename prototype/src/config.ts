@@ -21,6 +21,7 @@ export type Config = {
     effort?: string;
     maxBudgetUsd: number;
     timeoutMs: number;
+    maxConcurrency: number;
   };
 };
 
@@ -44,7 +45,8 @@ export function getConfig(): Config {
     eumCatalogPath: env.EUM_CATALOG_PATH ?? path.resolve(root, '..', 'data', 'eum-api-catalog.json'),
     gitCommit: env.GIT_COMMIT || undefined,
     agent: {
-      claudeBin: env.CLAUDE_BIN ?? path.join(root, 'node_modules', '.bin', 'claude'),
+      // VM 은 bootstrap.sh 가 버전을 고정해 전역 설치한다. 로컬은 각자 설치한 claude 를 쓴다.
+      claudeBin: env.CLAUDE_BIN ?? 'claude',
       workdir: env.AGENT_WORKDIR ?? path.join(dataDir, 'agent-workdir'),
       systemPromptPath: path.join(root, 'src', 'agent', 'system-prompt.md'),
       mcpServerPath: path.join(root, 'src', 'mcp', 'eum-server.ts'),
@@ -53,6 +55,8 @@ export function getConfig(): Config {
       effort: env.AGENT_EFFORT || undefined,
       maxBudgetUsd: Number(env.AGENT_MAX_BUDGET_USD ?? '0.5'),
       timeoutMs: Number(env.AGENT_TIMEOUT_MS ?? '120000'),
+      // claude 프로세스 하나가 메모리 200~300MB 를 쓴다. 공개 주소라 상한을 둔다.
+      maxConcurrency: Number(env.AGENT_MAX_CONCURRENCY ?? '4'),
     },
   };
   return cached;

@@ -28,7 +28,8 @@ type SessionRow = { id: string; agent_session_id: string | null };
 
 export type ChatContext = { session: SessionRow; isNew: boolean; message: string };
 
-// 한 대화에 두 요청이 동시에 들어오면 claude 세션이 꼬인다. 프로세스 안에서만 막는다.
+// 진행 중인 대화. 한 대화에 두 요청이 겹치면 claude 세션이 꼬이고, 전체 개수는 동시에 뜬 claude 프로세스 수다.
+// 프로세스 안에서만 센다 (dev·prod 는 따로 센다).
 const busy = ((globalThis as { gwamegiBusySessions?: Set<string> }).gwamegiBusySessions ??= new Set());
 
 let catalogCache: Map<string, CatalogApi> | undefined;
@@ -56,6 +57,7 @@ export function prepareChat(body: unknown): ChatContext {
     isNew = true;
   }
   if (busy.has(session.id)) throw new ChatError('이 대화는 이전 답변을 아직 만드는 중이다', 409);
+  if (busy.size >= getConfig().agent.maxConcurrency) throw new ChatError('지금 답변 중인 요청이 많다. 잠시 후 다시 보내 달라', 503);
   busy.add(session.id);
   return { session, isNew, message: message.trim() };
 }
@@ -65,6 +67,9 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
   const config = getConfig();
   const db = getDb();
   const now = () => new Date().toISOString();
+  const startedAt = Date.now();
+  const tools: { id: string; name: string; input: unknown; isError?: boolean }[] = [];
+  let outcome = 'error';
   try {
     if (isNew) {
       db.prepare('INSERT INTO chat_session (id, app_env, created_at, updated_at) VALUES (?, ?, ?, ?)').run(
@@ -76,7 +81,6 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
     );
     yield { type: 'session', sessionId: session.id };
 
-    const tools: { id: string; name: string; input: unknown; isError?: boolean }[] = [];
     for await (const event of runClaude(config, {
       prompt: message,
       resumeSessionId: session.agent_session_id ?? undefined,
@@ -107,9 +111,11 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
         }
         case 'result': {
           if (event.isError) {
-            yield { type: 'error', message: `답변을 만들지 못했다 (${event.subtype ?? 'error'})` };
+            outcome = event.subtype ?? 'error';
+            yield { type: 'error', message: `답변을 만들지 못했다 (${outcome})` };
             break;
           }
+          outcome = 'ok';
           const info = db
             .prepare("INSERT INTO chat_message (session_id, role, content, tool_calls, cost_usd, created_at) VALUES (?, 'assistant', ?, ?, ?, ?)")
             .run(
@@ -135,7 +141,38 @@ export async function* streamChat(context: ChatContext, signal?: AbortSignal): A
     }
   } finally {
     busy.delete(session.id);
+    // journalctl -u gwamegi-prod 에서 턴마다 한 줄. 메시지 본문은 남기지 않는다.
+    console.log(JSON.stringify({
+      event: 'chat_turn',
+      session: session.id,
+      outcome,
+      ms: Date.now() - startedAt,
+      tools: tools.map((t) => (t.isError ? `${t.name}!` : t.name)),
+    }));
   }
+}
+
+export type SessionSummary = { id: string; appEnv: string; title: string; createdAt: string; updatedAt: string };
+
+/** 최근 대화 목록. appEnv 를 주면 그 환경에서 만든 대화만 (DB 를 dev·prod 가 공유하므로). */
+export function listSessions(appEnv: string | undefined, limit = 50): SessionSummary[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT s.id, s.app_env, s.created_at, s.updated_at,
+              (SELECT content FROM chat_message m WHERE m.session_id = s.id AND m.role = 'user' ORDER BY m.id LIMIT 1) AS first_message
+         FROM chat_session s
+        WHERE @env IS NULL OR s.app_env = @env
+        ORDER BY s.updated_at DESC
+        LIMIT @limit`,
+    )
+    .all({ env: appEnv ?? null, limit }) as { id: string; app_env: string; created_at: string; updated_at: string; first_message: string | null }[];
+  return rows.map((row) => ({
+    id: row.id,
+    appEnv: row.app_env,
+    title: (row.first_message ?? '').slice(0, 40),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
 }
 
 export type StoredMessage = {

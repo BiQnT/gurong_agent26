@@ -13,6 +13,8 @@ APP_HOME=/var/lib/gwamegi
 REPO=git@github.com:BiQnT/gurong_agent26.git
 BRANCH=${BRANCH:-main}
 NODE_MAJOR=22
+# 제품이 띄우는 claude 버전. 올릴 때는 dev 에서 채팅을 먼저 확인한다.
+CLAUDE_CODE_VERSION=2.1.289
 # GitHub 공식 ed25519 호스트키 지문 (docs.github.com "GitHub's SSH key fingerprints")
 GITHUB_ED25519_FP='SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU'
 
@@ -36,6 +38,14 @@ fi
 # 22.18 부터 .ts 파일을 node 로 바로 실행할 수 있다 (MCP 서버·마이그레이션 스크립트가 쓴다).
 node -e 'const [a,b]=process.versions.node.split(".").map(Number); if (a===22 && b<18) { console.error("node >= 22.18 필요:", process.version); process.exit(1) }'
 node --version
+
+step "Claude Code CLI $CLAUDE_CODE_VERSION"
+# 앱 의존성이 아니라 전역에 하나만 둔다. npm 설치본은 glibc·musl 바이너리를 둘 다 받아 465MB 라
+# dev 와 release 마다 깔면 10GB 디스크가 금방 찬다. 팀원이 VM 에서 여는 Claude Code 도 이걸 쓴다.
+if [[ "$(claude --version 2>/dev/null | awk '{print $1}')" != "$CLAUDE_CODE_VERSION" ]]; then
+  npm install -g --no-audit --no-fund "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION" >/dev/null
+fi
+claude --version
 
 step '서비스 계정과 그룹'
 getent group "$APP_USER" >/dev/null || groupadd "$APP_USER"
@@ -109,6 +119,8 @@ systemctl enable gwamegi-dev gwamegi-prod
 step 'dev 서버'
 as_app bash -c "cd '$ROOT/dev/prototype' && npm ci --no-audit --no-fund"
 systemctl restart gwamegi-dev
+
+apt-get clean
 
 step '다음 할 일'
 cat <<EOF
