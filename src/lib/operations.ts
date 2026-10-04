@@ -150,6 +150,10 @@ export function getBatchReport(batch: Batch): BatchReport {
     (item) => finite(item.temperature) && finite(item.humidity) && finite(item.wind),
   ).length;
   const distances = observations.map((item) => item.distanceM).filter(finite);
+  // 결측 표본(값이 모두 비어 있음, 예: 자동 수집이 관측값을 못 받은 회차)은 결측률에 잡히므로 거리 검증에서는 뺀다.
+  const measured = observations.filter((item) =>
+    [item.temperature, item.humidity, item.wind].some(finite),
+  );
   return {
     temperature: summarize(nearby.map((item) => item.temperature)),
     humidity: summarize(nearby.map((item) => item.humidity)),
@@ -164,8 +168,8 @@ export function getBatchReport(batch: Batch): BatchReport {
       : null,
     alertCount: observations.filter((item) => item.alert).length,
     distanceValidated:
-      observations.length > 0 &&
-      observations.every((item) => finite(item.distanceM) && inDistanceGate(item)),
+      measured.length > 0 &&
+      measured.every((item) => finite(item.distanceM) && inDistanceGate(item)),
   };
 }
 

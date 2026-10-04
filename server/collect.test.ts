@@ -342,7 +342,7 @@ test('stale, distant, failed or archived data become one missing sample per slot
   );
 });
 
-test('real E-UM rows go through the observation service once; rows without a timezone stay missing', async (t) => {
+test('real E-UM rows go through the observation service once and KST rows are recorded', async (t) => {
   // E-UM 원문 형식: 시간대 없는 "YYYY-MM-DD HH:mm:ss" (KST). 실제 시계 기준 2분 전 관측.
   const kst = new Date(Date.now() - 2 * 60 * 1000 + 9 * 60 * 60 * 1000)
     .toISOString()
@@ -383,12 +383,12 @@ test('real E-UM rows go through the observation service once; rows without a tim
 
   const local = await run(kst);
   assert.deepEqual(local.paths, ['/dpg/atmosphere/devices', '/dpg/atmosphere/devices/realtime']);
+  // 원문 시각은 한국 시간으로 확인됐으므로(eum.ts 의 EUM_SOURCE_OFFSET) 그대로 기록된다.
   assert.deepEqual(
     [local.summary.source, local.summary.recorded, local.summary.missing],
-    ['ok', 0, 1],
+    ['ok', 1, 0],
   );
-  // 팀원 규칙: 시간대를 가정한 관측은 생산 기록 근거로 쓰지 않는다. 결측 사유에 그 이유가 남는다.
-  assert.match(local.batch.logs.at(-1)!.detail, /구룡포 관측기: .*시간대가 없어/);
+  assert.equal(local.batch.observations[0].sourceDeviceId, '1');
 
   const zoned = await run(`${kst.replace(' ', 'T')}+09:00`);
   assert.deepEqual([zoned.summary.recorded, zoned.summary.missing], [1, 0]);

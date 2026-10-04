@@ -8,6 +8,7 @@ import {
   type WorkspaceService,
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
+import { createUvIndexSource } from './sources/eum-uv.ts';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { resolve } from 'node:path';
 
@@ -130,7 +131,7 @@ export function createApiMiddleware(
 ): Connect.NextHandleFunction {
   const workspaceMiddleware = createWorkspaceMiddleware(workspace);
   const observations = createObservationService(config);
-  const chat = createLiveChat(config);
+  const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config));
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
     const send = (status: number, payload: unknown) => {

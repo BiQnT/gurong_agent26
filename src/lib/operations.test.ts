@@ -439,6 +439,28 @@ assert(
   getBatchReport(located).distanceValidated,
   'A known nearby site distance must be represented in reports',
 );
+const withGap: Batch = {
+  ...located,
+  observations: [
+    ...located.observations,
+    {
+      ...located.observations[0],
+      sourceDeviceId: 'collector-missing',
+      temperature: null,
+      humidity: null,
+      wind: null,
+      distanceM: null,
+    },
+  ],
+};
+assert(
+  getBatchReport(withGap).distanceValidated && getBatchReport(withGap).missingRate === 50,
+  'A missing sample counts toward the missing rate, not against distance validation',
+);
+assert(
+  !getBatchReport({ ...withGap, observations: withGap.observations.slice(1) }).distanceValidated,
+  'A batch with only missing samples has no validated distance',
+);
 
 let remote: OperationsEnvelope = { data: shared, revision: 1 };
 let writes = 0;

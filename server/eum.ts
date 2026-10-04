@@ -114,6 +114,11 @@ export function normalizeDevice(value: unknown): LiveDevice | null {
   return { id, name, address: cleanText(value.address) ?? '', latitude, longitude };
 }
 
+// E-UM 원문 시각("2026-10-04 14:00:33")에는 시간대 표기가 없지만 한국 시간이다.
+// 2026-10-04T05:01:00Z(14:01 KST)에 부른 단건 관측이 "14:00:33" 이었다 (research/api-tests/2026-10-04-eum-key.md).
+// UTC 였다면 9시간 뒤 미래 시각이 된다. 이 값으로 읽을 때는 확인된 사실이라 확인 사항으로 남기지 않는다.
+export const EUM_SOURCE_OFFSET = '+09:00';
+
 export function normalizeObservation(
   device: LiveDevice,
   value: unknown,
@@ -133,9 +138,10 @@ export function normalizeObservation(
     let normalized = observedAtRaw.replace(' ', 'T');
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(normalized)) {
       normalized += timezoneOffset;
-      issues.push(
-        `원천 수집 시각에 시간대가 없어 ${timezoneOffset}으로 해석했어요. 시간대 확인이 필요해요.`,
-      );
+      if (timezoneOffset !== EUM_SOURCE_OFFSET)
+        issues.push(
+          `원천 수집 시각에 시간대가 없어 ${timezoneOffset}으로 해석했어요. 시간대 확인이 필요해요.`,
+        );
     }
     const parsed = parseObservationTimestamp(normalized);
     if (Number.isFinite(parsed)) {
