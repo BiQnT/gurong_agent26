@@ -232,7 +232,8 @@ export function BatchesView({
       </button>
       <p className="op-demo-footnote">
         <span className="op-tiny-dot" />
-        승인한 배치와 확인한 관측값을 덕장별로 저장해요. 최신 관측값은 직접 확인해 기록해주세요.
+        승인한 배치와 확인한 관측값을 덕장별로 저장해요. 진행 중인 배치는 30분마다 관측값을 자동으로
+        기록하고, 직접 확인해 추가할 수도 있어요.
       </p>
     </motion.section>
   );

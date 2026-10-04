@@ -224,7 +224,10 @@ function StartDialog({ operations }: ViewProps) {
           <p>
             시작을 승인하면 배치가 기록돼요.
             <br />
-            <span>기록 시작 후 최신 관측값을 직접 확인해 추가할 수 있어요.</span>
+            <span>
+              기록 시작 후 30분마다 관측값이 자동으로 쌓이고, 최신 관측값을 직접 확인해 추가할 수도
+              있어요.
+            </span>
           </p>
         </div>
         <div className="op-modal-actions">

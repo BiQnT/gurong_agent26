@@ -24,7 +24,7 @@ PORT=3000
 DB="$ROOT/db/haepung.db"
 # 디스크(296GB)가 넉넉해서 롤백할 정상 release 를 current 포함 5개 남긴다.
 KEEP=5
-# 빌드(tsc, vite)는 메모리를 쓴다. 1.9GB·스왑 없음이라 여유가 이보다 적으면 다른 서비스가 OOM 으로 죽는다.
+# 빌드(tsc, vite)는 메모리를 쓴다. 스왑이 없어 여유가 이보다 적으면 다른 서비스가 OOM 으로 죽는다.
 MIN_AVAILABLE_KB=600000
 
 as_app() { sudo -u "$APP_USER" -H bash -c 'umask 007; exec "$@"' _ "$@"; }
