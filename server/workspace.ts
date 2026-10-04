@@ -778,6 +778,24 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
         current.revision += 1;
         return envelope(current);
       }),
+    /**
+     * 30분 수집기(server/collect.ts) 전용. 사람의 요청이 아니라 쿠키·소속 검사는 없다.
+     * 운영자 저장처럼 revision 을 올려 화면의 충돌 재시도가 그대로 동작하고, 근로자 이력 보호도 같다.
+     * update 는 동기 함수여야 한다 (저장소가 잠금을 잡은 채 기다리지 않는다). 바꿀 것이 없으면 같은 객체를 돌려준다.
+     */
+    appendCollected: (siteId: string, update: (data: OperationsData) => OperationsData) =>
+      dbStore.write((db): OperationsEnvelope | null => {
+        const current = db.operations.find((entry) => entry.siteId === siteId);
+        if (!current) return null;
+        const next = update(current.data);
+        if (next === current.data) return envelope(current);
+        if (!validateOperationsData(next))
+          fail(400, 'INVALID_OPERATIONS', '작업 기록의 형식이 올바르지 않아요.');
+        protectWorkerHistory(current.data, next);
+        current.data = next;
+        current.revision += 1;
+        return envelope(current);
+      }),
   };
 }
 export type WorkspaceService = ReturnType<typeof createWorkspaceService>;
