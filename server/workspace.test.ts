@@ -1,13 +1,19 @@
 import assert from 'node:assert/strict';
+import Database from 'better-sqlite3';
 import { once } from 'node:events';
 import { createServer, type Server } from 'node:http';
-import { copyFile, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { copyFile, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test, { type TestContext } from 'node:test';
 import type { Connect } from 'vite';
-import { createWorkspaceMiddleware, createWorkspaceService } from './workspace.ts';
+import {
+  createWorkspaceMiddleware,
+  createWorkspaceService,
+  openWorkspaceStore,
+} from './workspace.ts';
 import { createApiMiddleware } from './vite-api.ts';
+import { runScript, scriptPath } from './test-helpers/run-script.ts';
 import { GUIDANCE_FACTS, type OperationsData } from '../src/lib/operations.ts';
 import type {
   Account,
@@ -706,4 +712,161 @@ test('only a site owner can answer real questions; answers survive closed batche
   );
   const reloaded = (await worker.call<OperationsEnvelope>(operationsPath)).body;
   assert.equal(reloaded.data.guidance[0].replies[0].answer?.text, answerText);
+});
+
+test('login is limited per client address and email for ten minutes after five failures', async (t) => {
+  const f = await fixture(t);
+  const owner = f.agent();
+  await owner.signup('Owner');
+  await f.agent().signup('Other');
+  const wrong = { ...credentials('Owner'), password: 'wrong-password-2026' };
+  for (let attempt = 0; attempt < 5; attempt += 1)
+    assert.equal((await owner.call('/auth/login', 'POST', wrong)).status, 401);
+  const limited = await owner.call('/auth/login', 'POST', credentials('Owner'));
+  assert.equal(limited.status, 429);
+  assert.equal(limited.body.code, 'LOGIN_RATE_LIMITED');
+  assert.equal((await f.agent().call('/auth/login', 'POST', credentials('Other'))).status, 200);
+  // 같은 호스트의 프록시(루프백)가 알려 준 다른 접속 주소는 따로 센다.
+  assert.equal(
+    (
+      await f.agent().call('/auth/login', 'POST', credentials('Owner'), {
+        'X-Forwarded-For': '203.0.113.7, 10.0.0.1',
+      })
+    ).status,
+    200,
+  );
+  f.advance(10 * 60 * 1000 - 1);
+  assert.equal((await owner.call('/auth/login', 'POST', credentials('Owner'))).status, 429);
+  f.advance(1);
+  assert.equal((await owner.call('/auth/login', 'POST', credentials('Owner'))).status, 200);
+  // 10분이 지난 실패와 성공 전의 실패는 세지 않는다.
+  for (let attempt = 0; attempt < 4; attempt += 1) await owner.call('/auth/login', 'POST', wrong);
+  f.advance(10 * 60 * 1000);
+  assert.equal((await owner.call('/auth/login', 'POST', wrong)).status, 401);
+  assert.equal((await owner.call('/auth/login', 'POST', credentials('Owner'))).status, 200);
+  for (let attempt = 0; attempt < 4; attempt += 1) await owner.call('/auth/login', 'POST', wrong);
+  assert.equal((await owner.call('/auth/login', 'POST', credentials('Owner'))).status, 200);
+});
+
+test('session cookies get Secure behind a TLS proxy only when cookieSecure is set', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'gwamegi-workspace-test-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  for (const cookieSecure of [true, false]) {
+    // BridgeConfig 의 cookieSecure 가 계정 서비스까지 이어지는지 본다.
+    const middleware = createApiMiddleware({
+      projectRoot: join(directory, String(cookieSecure)),
+      eumServiceKey: '',
+      openaiApiKey: '',
+      openaiModel: 'test-model',
+      llmBaseUrl: 'https://api.openai.com/v1',
+      staleAfterMinutes: 30,
+      timezoneOffset: '+09:00',
+      cookieSecure,
+    });
+    const { server, base } = await startServer(middleware);
+    t.after(() => closeServer(server));
+    const client = agent(base);
+    for (const [path, body] of [
+      ['/auth/signup', credentials('Owner')],
+      ['/auth/login', credentials('Owner')],
+      ['/auth/logout', {}],
+    ] as const) {
+      const cookie = (await client.call(path, 'POST', body)).headers.get('set-cookie')!;
+      assert.match(cookie, /HttpOnly; SameSite=Lax/, path);
+      assert.equal(/; Secure$/.test(cookie), cookieSecure, path);
+    }
+  }
+});
+
+test('health reads the database, and a newer stored schema makes it fail', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'gwamegi-workspace-test-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const fileService = createWorkspaceService({ dataFile: join(directory, 'workspace.json') });
+  assert.deepEqual(await fileService.health(), { schema: 1 });
+  const databasePath = join(directory, 'shared.db');
+  const service = createWorkspaceService({ databasePath });
+  assert.deepEqual(await service.health(), { schema: 1 });
+  await openWorkspaceStore({ databasePath }).write(() => undefined);
+  const db = new Database(databasePath);
+  db.exec(`UPDATE documents SET schema = 2 WHERE key = 'workspace'`);
+  db.close();
+  await assert.rejects(service.health(), { code: 'SCHEMA_TOO_NEW' });
+});
+
+test('the file store refuses to save an invalid workspace document and keeps the previous file', async (t) => {
+  const f = await fixture(t);
+  const owner = f.agent();
+  await owner.signup('Owner');
+  const site = await owner.site();
+  const before = await readFile(f.dataFile, 'utf8');
+  await assert.rejects(
+    openWorkspaceStore({ dataFile: f.dataFile }).write((db) => {
+      db.memberships = [];
+    }),
+    { code: 'INVALID_DOCUMENT' },
+  );
+  assert.equal(await readFile(f.dataFile, 'utf8'), before);
+  assert.equal((await owner.call<Team>(`/sites/${site.id}/team`)).status, 200);
+});
+
+test('admin imports a teammate workspace.json, exports it unchanged, lists users and resets passwords', async (t) => {
+  const f = await fixture(t);
+  const owner = f.agent();
+  const worker = f.agent();
+  await owner.signup('Owner');
+  await worker.signup('Worker');
+  const site = await owner.site();
+  await worker.accept((await owner.invite(site.id)).token);
+  await owner.call(`/sites/${site.id}/operations`, 'PUT', { revision: 0, data: workData() });
+  const original: unknown = JSON.parse(await readFile(f.dataFile, 'utf8'));
+  const admin = scriptPath('admin.ts');
+  const env = { DATABASE_PATH: join(f.directory, 'db', 'haepung.db') };
+
+  assert.notEqual((await runScript(admin, ['users'], { DATABASE_PATH: '' })).code, 0);
+  const broken = join(f.directory, 'broken.json');
+  await writeFile(broken, JSON.stringify({ version: 1, users: [{}] }));
+  assert.notEqual((await runScript(admin, ['import-json', broken], env)).code, 0);
+  const imported = await runScript(admin, ['import-json', f.dataFile], env);
+  assert.equal(imported.code, 0, imported.stderr);
+  const again = await runScript(admin, ['import-json', f.dataFile], env);
+  assert.notEqual(again.code, 0);
+  assert.match(again.stderr, /--force/);
+  assert.equal((await runScript(admin, ['import-json', f.dataFile, '--force'], env)).code, 0);
+
+  const exported = join(f.directory, 'exported.json');
+  assert.equal((await runScript(admin, ['export-json', exported], env)).code, 0);
+  assert.deepEqual(JSON.parse(await readFile(exported, 'utf8')), original);
+  assert.equal((await stat(exported)).mode & 0o777, 0o600);
+  assert.notEqual((await runScript(admin, ['export-json', exported], env)).code, 0);
+
+  const users = (await runScript(admin, ['users'], env)).stdout;
+  assert.ok(users.includes(`owner@example.test\t${site.name}(${site.id}):owner`), users);
+  assert.ok(users.includes(`worker@example.test\t${site.name}(${site.id}):worker`), users);
+
+  const reset = await runScript(admin, ['reset-password', ' Owner@Example.test '], env);
+  assert.equal(reset.code, 0, reset.stderr);
+  const temporary = reset.stdout.trim().split(': ').pop()!;
+  assert.notEqual((await runScript(admin, ['reset-password', 'nobody@example.test'], env)).code, 0);
+  const service = createWorkspaceService({
+    databasePath: env.DATABASE_PATH,
+    now: () => Date.parse('2026-10-04T09:00:00.000Z'),
+  });
+  const server = await startServer(createWorkspaceMiddleware(service));
+  t.after(() => closeServer(server.server));
+  const reader = agent(server.base);
+  const sessionOf = async (cookie: string) =>
+    (await reader.call<WorkspaceSession>('/auth/session', 'GET', undefined, { Cookie: cookie }))
+      .body.user;
+  assert.equal(await sessionOf(owner.cookie), null);
+  assert.equal((await sessionOf(worker.cookie))?.email, 'worker@example.test');
+  assert.equal((await reader.call('/auth/login', 'POST', credentials('Owner'))).status, 401);
+  assert.equal(
+    (
+      await reader.call('/auth/login', 'POST', {
+        email: 'owner@example.test',
+        password: temporary,
+      })
+    ).status,
+    200,
+  );
 });

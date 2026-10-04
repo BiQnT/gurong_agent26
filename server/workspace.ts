@@ -5,7 +5,7 @@ import { isDeepStrictEqual } from 'node:util';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Connect } from 'vite';
 import { BridgeError } from './eum.ts';
-import { sqliteDocumentStore, type DocumentStore } from './sqlite-store.ts';
+import { sqliteDocumentStore, StoreError, type DocumentStore } from './sqlite-store.ts';
 import {
   createInitialOperationsData,
   recordWorkerReply,
@@ -32,6 +32,12 @@ const INVITATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_BODY_BYTES = 1024 * 1024;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 const HASH_PATTERN = /^[a-f0-9]{64}$/;
+// 같은 IP·이메일로 10분 안에 5번 실패하면 10분 동안 로그인을 막는다.
+const LOGIN_LIMIT_MS = 10 * 60 * 1000;
+const LOGIN_MAX_FAILURES = 5;
+const LOOPBACK = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
+// 저장 형식 번호. 문서의 version 칸과 SQLite 행의 schema 칸에 같이 들어간다.
+const WORKSPACE_SCHEMA = 1;
 const object = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (value: unknown, max = 200): value is string =>
@@ -69,7 +75,7 @@ type StoredInvitation = Omit<Invitation, 'status'> & {
 };
 type StoredOperations = OperationsEnvelope & { siteId: string };
 type Database = {
-  version: 1;
+  version: typeof WORKSPACE_SCHEMA;
   users: StoredUser[];
   sites: StoredSite[];
   memberships: SiteMembership[];
@@ -82,11 +88,15 @@ export type WorkspaceConfig = {
   dataFile?: string;
   /** 설정하면 파일 대신 이 SQLite DB 에 저장한다 (VM 에서 dev·prod 가 함께 쓰는 DB). */
   databasePath?: string;
+  /** TLS 프록시(Caddy) 뒤에서 세션 쿠키에 Secure 를 붙인다 (COOKIE_SECURE=1). */
+  cookieSecure?: boolean;
+  /** 옛 형식으로 저장된 문서를 이 코드의 형식으로 덮어써도 되는가. 없으면 ALLOW_SCHEMA_UPGRADE=1 을 본다. */
+  allowSchemaUpgrade?: boolean;
   now?: () => number;
 };
 export type WorkspaceMembership = { user: Account; site: StoredSite; membership: SiteMembership };
 const emptyDatabase = (): Database => ({
-  version: 1,
+  version: WORKSPACE_SCHEMA,
   users: [],
   sites: [],
   memberships: [],
@@ -114,7 +124,7 @@ function validSiteInput(value: unknown): value is SiteInput {
 function validDatabase(value: unknown): value is Database {
   if (
     !object(value) ||
-    value.version !== 1 ||
+    value.version !== WORKSPACE_SCHEMA ||
     !Array.isArray(value.users) ||
     !Array.isArray(value.sites) ||
     !Array.isArray(value.memberships) ||
@@ -204,7 +214,7 @@ function validDatabase(value: unknown): value is Database {
 
 /** One serialized transaction queue is shared by all service instances for a data file. */
 const stores = new Map<string, DocumentStore<Database>>();
-function diskStore(dataFile: string) {
+function diskStore(dataFile: string): DocumentStore<Database> {
   let database: Database | undefined;
   let queue: Promise<unknown> = Promise.resolve();
   async function load() {
@@ -242,18 +252,51 @@ function diskStore(dataFile: string) {
       const current = await load();
       const candidate = write ? structuredClone(current) : current;
       const output = await action(candidate);
-      if (write) await save(candidate);
+      if (write) {
+        // SQLite 저장소와 같이 검증에 실패한 문서는 저장하지 않는다.
+        if (!validDatabase(candidate))
+          throw new StoreError('INVALID_DOCUMENT', 'Refusing to save invalid workspace data');
+        await save(candidate);
+      }
       return structuredClone(output);
     });
     queue = result.catch(() => undefined);
     return result;
   }
   return {
-    read: <T>(action: (db: Database) => T | Promise<T>) => run(false, action),
-    write: <T>(action: (db: Database) => T | Promise<T>) => run(true, action),
+    read: (action) => run(false, action),
+    write: (action) => run(true, action),
   };
 }
-function passwordHash(password: string, salt: string): Promise<string> {
+/** 서비스와 관리 스크립트가 같은 저장소(같은 잠금·검증)를 쓰도록 여기서만 연다. */
+export function openWorkspaceStore(config: WorkspaceConfig = {}): DocumentStore<Database> {
+  const dataFile = config.databasePath
+    ? `sqlite:${resolve(config.databasePath)}`
+    : resolve(
+        config.dataFile ||
+          join(config.projectRoot || process.cwd(), '.local-data', 'workspace.json'),
+      );
+  let store = stores.get(dataFile);
+  if (!store) {
+    store = config.databasePath
+      ? sqliteDocumentStore(
+          resolve(config.databasePath),
+          'workspace',
+          emptyDatabase,
+          validDatabase,
+          {
+            schemaVersion: WORKSPACE_SCHEMA,
+            // 형식 올리기는 prod 배포에서만 켠다. 새 코드의 dev 가 prod 가 못 읽는 문서를 쓰지 않게 한다.
+            allowSchemaUpgrade:
+              config.allowSchemaUpgrade ?? process.env.ALLOW_SCHEMA_UPGRADE?.trim() === '1',
+          },
+        )
+      : diskStore(dataFile);
+    stores.set(dataFile, store);
+  }
+  return store;
+}
+export function passwordHash(password: string, salt: string): Promise<string> {
   return new Promise((resolve, reject) => {
     scrypt(password, salt, 64, (error, derived) =>
       error ? reject(error) : resolve(derived.toString('hex')),
@@ -298,31 +341,58 @@ function readCookie(request: IncomingMessage) {
   const token = entries[0].slice(COOKIE_NAME.length + 1);
   return TOKEN_PATTERN.test(token) ? hash(token) : null;
 }
-function setCookie(response: ServerResponse, token: string, request: IncomingMessage) {
-  const secure = 'encrypted' in request.socket && request.socket.encrypted ? '; Secure' : '';
+function setCookie(
+  response: ServerResponse,
+  token: string,
+  request: IncomingMessage,
+  cookieSecure: boolean,
+) {
+  // TLS 프록시 뒤에서는 소켓이 암호화돼 보이지 않으므로 설정으로도 켠다.
+  const encrypted = 'encrypted' in request.socket && request.socket.encrypted;
+  const secure = encrypted || cookieSecure ? '; Secure' : '';
   response.setHeader(
     'Set-Cookie',
     `${COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${token ? SESSION_MS / 1000 : 0}${secure}`,
   );
 }
 
+/** 실제 접속한 쪽의 주소. 같은 호스트의 Caddy 를 거쳐 온 요청만 X-Forwarded-For 를 믿는다. */
+function clientAddress(request: IncomingMessage): string {
+  const remote = request.socket.remoteAddress || '';
+  // Caddy 는 trusted_proxies 가 없으면 바깥에서 온 이 헤더를 버리고 실제 주소로 채운다.
+  const forwarded = LOOPBACK.includes(remote)
+    ? String(request.headers['x-forwarded-for'] || '')
+        .split(',')[0]
+        .trim()
+    : '';
+  return forwarded || remote;
+}
+
 export function createWorkspaceService(config: WorkspaceConfig = {}) {
-  const dataFile = config.databasePath
-    ? `sqlite:${resolve(config.databasePath)}`
-    : resolve(
-        config.dataFile ||
-          join(config.projectRoot || process.cwd(), '.local-data', 'workspace.json'),
-      );
-  let store = stores.get(dataFile);
-  if (!store) {
-    store = config.databasePath
-      ? sqliteDocumentStore(resolve(config.databasePath), 'workspace', emptyDatabase, validDatabase)
-      : diskStore(dataFile);
-    stores.set(dataFile, store);
-  }
-  const dbStore = store;
+  const dbStore = openWorkspaceStore(config);
+  const cookieSecure = config.cookieSecure === true;
   const clock = config.now || Date.now;
   const timestamp = () => new Date(clock()).toISOString();
+  // 로그인 실패 기록은 프로세스 메모리에만 둔다. dev·prod 가 따로 세고 재시작하면 지워지지만
+  // 막으려는 것은 짧은 시간의 연속 추측이라 이것으로 충분하다.
+  const loginAttempts = new Map<string, { failures: number[]; blockedUntil: number }>();
+  function countLoginAttempt(key: string) {
+    const now = clock();
+    const stale = (entry: { failures: number[]; blockedUntil: number }) =>
+      entry.blockedUntil <= now && entry.failures.every((at) => at <= now - LOGIN_LIMIT_MS);
+    if (loginAttempts.size > 10000)
+      for (const [name, entry] of loginAttempts) if (stale(entry)) loginAttempts.delete(name);
+    const entry = loginAttempts.get(key) || { failures: [], blockedUntil: 0 };
+    if (entry.blockedUntil > now)
+      fail(429, 'LOGIN_RATE_LIMITED', '로그인 시도가 너무 많아요. 10분 뒤 다시 시도해 주세요.');
+    // 결과를 보기 전에 실패로 먼저 센다. 동시에 보낸 추측도 다섯 번째에서 막힌다. 성공하면 지운다.
+    entry.failures = [...entry.failures.filter((at) => at > now - LOGIN_LIMIT_MS), now];
+    if (entry.failures.length >= LOGIN_MAX_FAILURES) {
+      entry.failures = [];
+      entry.blockedUntil = now + LOGIN_LIMIT_MS;
+    }
+    loginAttempts.set(key, entry);
+  }
   function userFor(db: Database, request: IncomingMessage): StoredUser | null {
     const tokenHash = readCookie(request);
     const session =
@@ -405,6 +475,8 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
     revision,
   });
   return {
+    /** /api/health 용. DB 를 실제로 한 번 읽어서 못 읽으면 실패한다 (배포 자동 롤백 기준). */
+    health: (): Promise<{ schema: number }> => dbStore.read((db) => ({ schema: db.version })),
     requireMember: (request: IncomingMessage, siteId: string, role?: MemberRole) =>
       dbStore.read((db) => requireMember(db, request, siteId, role)),
     session: (request: IncomingMessage) =>
@@ -427,11 +499,13 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
         db.users.push(user);
         return { token: issueSession(db, user, request), session: sessionFor(db, user) };
       });
-      setCookie(response, result.token, request);
+      setCookie(response, result.token, request, cookieSecure);
       return result.session;
     },
     async login(request: IncomingMessage, response: ServerResponse, body: unknown) {
       const input = readCredentials(body);
+      const attemptKey = `${clientAddress(request)} ${input.email}`;
+      countLoginAttempt(attemptKey);
       const candidate = await dbStore.read((db) => db.users.find((u) => u.email === input.email));
       const derived = await passwordHash(
         input.password,
@@ -442,11 +516,12 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
         !timingSafeEqual(Buffer.from(derived, 'hex'), Buffer.from(candidate.passwordHash, 'hex'))
       )
         fail(401, 'LOGIN_FAILED', '이메일 또는 비밀번호가 올바르지 않아요.');
+      loginAttempts.delete(attemptKey);
       const result = await dbStore.write((db) => {
         const user = db.users.find((u) => u.id === candidate.id)!;
         return { token: issueSession(db, user, request), session: sessionFor(db, user) };
       });
-      setCookie(response, result.token, request);
+      setCookie(response, result.token, request, cookieSecure);
       return result.session;
     },
     async logout(request: IncomingMessage, response: ServerResponse) {
@@ -456,7 +531,7 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
           (s) => s.tokenHash !== tokenHash && Date.parse(s.expiresAt) > clock(),
         );
       });
-      setCookie(response, '', request);
+      setCookie(response, '', request, cookieSecure);
       return { ok: true as const };
     },
     createSite: (request: IncomingMessage, body: unknown) =>
@@ -706,6 +781,9 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
   };
 }
 export type WorkspaceService = ReturnType<typeof createWorkspaceService>;
+// 관리 스크립트(scripts/admin.ts)가 서버와 같은 검증·해시를 쓰도록 내보낸다.
+export { emptyDatabase as emptyWorkspaceDocument, validDatabase as validWorkspaceDocument };
+export type { Database as WorkspaceDocument };
 
 /** Client saves cannot manufacture, erase, or edit another account's response history. */
 function protectWorkerHistory(previous: OperationsData, next: OperationsData) {
