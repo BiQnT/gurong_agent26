@@ -52,8 +52,10 @@ flock -n 9 || { echo '다른 배포가 진행 중이다'; exit 1; }
 # 빌드와 헬스체크를 통과한 release 에만 .ok 가 있다. 폴더 이름이 시각으로 시작하므로 역순 정렬 = 최신순.
 ok_releases() {
   local dir
+  # if 로 쓴다. `[[ ]] && echo` 는 마지막 폴더에 .ok 가 없으면 실패를 돌려주고, pipefail 때문에
+  # 성공한 배포가 정리 단계에서 exit 1 로 끝난다 (팀원이 만든 옛 release 처럼 .ok 가 없는 폴더가 있을 때).
   for dir in "$ROOT"/releases/*/; do
-    [[ -f "$dir.ok" ]] && echo "${dir%/}"
+    if [[ -f "$dir.ok" ]]; then echo "${dir%/}"; fi
   done | sort -r
 }
 
