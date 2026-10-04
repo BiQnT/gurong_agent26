@@ -45,3 +45,4 @@ cp docs/decisions/_template.md docs/decisions/0002-<slug>.md
 | [0003](0003-claude-cli-wrapper.md) | claude CLI 를 메시지마다 띄우고 E-UM 은 MCP 도구로 제공 | 2026-10-04 | 일부 대체됨 (→ 0005) |
 | [0004](0004-dev-port-open-for-phone.md) | dev 포트(3001)도 외부에 열어 폰으로 UI 를 확인 | 2026-10-04 | 대체됨 (→ 0005) |
 | [0005](0005-merge-backend-into-haepung-app.md) | 백엔드를 팀원의 해풍 앱 서버에 합치고 화면의 API 계약을 정본으로 둠 | 2026-10-04 | 확정 |
+| [0006](0006-shared-db-validation-order.md) | dev·prod DB 공유를 유지하고, 저장 검증 규칙 변경은 prod 배포를 먼저 함 | 2026-10-04 | 확정 |
