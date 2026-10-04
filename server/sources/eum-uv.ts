@@ -8,6 +8,7 @@ const FAILURE_CACHE_MS = 60 * 1000;
 const TIMEOUT_MS = 12000;
 // 센서 오류값(8.68e31 등)을 거르는 자료 확인 범위다. 위험·안전 기준이 아니다.
 const MAX_UV_INDEX = 20;
+const UV_MAX_AGE_MS = 60 * 60 * 1000;
 
 export type UvStage = '낮음' | '보통' | '높음' | '매우높음' | '위험';
 export type UvReading = { uvIndex: number; observedAt: string; stage: UvStage; fetchedAt: string };
@@ -61,7 +62,14 @@ export function readUvIndex(
   if (!Number.isFinite(uvIndex) || uvIndex < 0 || uvIndex > MAX_UV_INDEX) return null;
   const observedAt = readObservedAt(payload.data.dateTime, timezoneOffset);
   // 시각을 밝힐 수 없거나 조회 시각보다 미래인 값은 조언 근거로 쓰지 않는다 (시계 차이 5분 허용).
-  if (observedAt === null || observedAt > Date.parse(fetchedAt) + 5 * 60 * 1000) return null;
+  // 멈춘 센서의 옛 값도 쓰지 않는다. 갱신 주기를 아직 확인하지 못해 1시간까지 받는다.
+  const fetched = Date.parse(fetchedAt);
+  if (
+    observedAt === null ||
+    observedAt > fetched + 5 * 60 * 1000 ||
+    observedAt < fetched - UV_MAX_AGE_MS
+  )
+    return null;
   return {
     uvIndex,
     observedAt: new Date(observedAt).toISOString(),

@@ -18,6 +18,7 @@ import {
 import {
   downloadBatchReport,
   getBatchReport,
+  measuredObservations,
   GUIDANCE_FACTS,
   GUIDANCE_TEMPLATES,
   type Batch,
@@ -277,7 +278,7 @@ function EndDialog({ operations, batch }: ViewProps & { batch: Batch }) {
             <strong>{batch.name}</strong>
             <span>
               {batch.fish} {batch.quantity.toLocaleString()}마리 <span>·</span> 관측{' '}
-              {batch.observations.length}회
+              {measuredObservations(batch).length}회
             </span>
           </div>
           <BatchBadge status={batch.status} />

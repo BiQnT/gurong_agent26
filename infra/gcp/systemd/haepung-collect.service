@@ -14,8 +14,9 @@ NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=full
 ProtectHome=yes
-# 메모리가 모자란 VM 이라 prod 보다 뒤로 미룬다.
+# prod 보다 뒤로 미룬다. 한 번 돌고 끝나는 작업이라 메모리도 작게 끊는다.
 Nice=10
+MemoryMax=512M
 TimeoutStartSec=300
 WorkingDirectory=/srv/haepung/current
 # prod 와 같은 환경. dev 는 같은 DB 를 쓰므로 수집기를 절대 돌리지 않는다 (두 번 쌓인다).

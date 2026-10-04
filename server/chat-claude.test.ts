@@ -172,10 +172,10 @@ test('every claude failure kind falls back with its own Korean notice and no raw
   assert.ok(!JSON.stringify(auth).includes('Please run /login'));
 });
 
-test('a cancelled client gets the abort, and the finished run is still counted', async () => {
+test('a cancelled client stops claude and is charged for the time it ran', async () => {
   const databasePath = tempDatabase();
   const usage = usageLog(databasePath);
-  const fake = makeFakeClaude({ stdout: answer('관측값을 확인했어요.'), sleepMs: 500 });
+  const fake = makeFakeClaude({ sleepMs: 20000 }, { timeoutMs: 30000 });
   const controller = new AbortController();
   const pending = createLiveChat(bridge(fake.config, { databasePath }))(
     request,
@@ -184,9 +184,13 @@ test('a cancelled client gets the abort, and the finished run is still counted',
   );
   await fake.waitForCall();
   controller.abort();
+  const started = Date.now();
   await assert.rejects(pending, { name: 'AbortError' });
-  // 취소로 비용 기록을 피할 수 없다.
-  assert.equal(usage.spentLast24h(), 0.000978);
+  // 끝까지 기다리지 않고 멈춘다 (동시 실행 자리를 바로 돌려준다).
+  assert.ok(Date.now() - started < 10000);
+  // 취소로 비용 기록을 피할 수 없다. 돈 시간만큼 메시지당 상한(0.5)을 나눠 센다.
+  const spent = usage.spentLast24h();
+  assert.ok(spent > 0 && spent < 0.5 * (10000 / 30000), String(spent));
 });
 
 test('cost is recorded in the shared usage log and the daily budget switches to the fallback', async () => {

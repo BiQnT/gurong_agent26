@@ -384,16 +384,21 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
   // 로그인 실패 기록은 프로세스 메모리에만 둔다. dev·prod 가 따로 세고 재시작하면 지워지지만
   // 막으려는 것은 짧은 시간의 연속 추측이라 이것으로 충분하다.
   const loginAttempts = new Map<string, { failures: number[]; blockedUntil: number }>();
+  // 만든 계정만 센다. 이미 쓰는 이메일 등으로 실패한 시도는 세지 않는다 (같은 와이파이의 여러 사람).
   const signups = new Map<string, number[]>();
-  function countSignup(address: string) {
+  function recentSignups(address: string) {
     const now = clock();
     if (signups.size > 10000)
       for (const [name, times] of signups)
         if (times.every((at) => at <= now - SIGNUP_LIMIT_MS)) signups.delete(name);
-    const recent = (signups.get(address) || []).filter((at) => at > now - SIGNUP_LIMIT_MS);
-    if (recent.length >= SIGNUP_MAX)
+    return (signups.get(address) || []).filter((at) => at > now - SIGNUP_LIMIT_MS);
+  }
+  function checkSignup(address: string) {
+    if (recentSignups(address).length >= SIGNUP_MAX)
       fail(429, 'SIGNUP_RATE_LIMITED', '가입 요청이 너무 많아요. 1시간 뒤 다시 시도해 주세요.');
-    signups.set(address, [...recent, now]);
+  }
+  function countSignup(address: string) {
+    signups.set(address, [...recentSignups(address), clock()]);
   }
   function countLoginAttempt(key: string) {
     const now = clock();
@@ -511,7 +516,8 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
       dbStore.read((db) => sessionFor(db, userFor(db, request))),
     async signup(request: IncomingMessage, response: ServerResponse, body: unknown) {
       const input = readCredentials(body, true);
-      countSignup(clientAddress(request));
+      const address = clientAddress(request);
+      checkSignup(address);
       const salt = randomBytes(16).toString('hex');
       const derived = await passwordHash(input.password, salt);
       const result = await dbStore.write((db) => {
@@ -528,6 +534,7 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
         db.users.push(user);
         return { token: issueSession(db, user, request), session: sessionFor(db, user) };
       });
+      countSignup(address);
       setCookie(response, result.token, request, cookieSecure);
       return result.session;
     },

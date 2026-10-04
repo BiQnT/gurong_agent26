@@ -36,6 +36,9 @@ test('the recorded INT_S06_005 response parses into a dated UV reading with the 
     data({ dateTime: '2026-08-06 25:00:00' }),
     // 조회 시각보다 미래
     data({ dateTime: '2026-08-06 13:00:00' }),
+    // 조회 시각보다 1시간 넘게 지난 값 (멈춘 센서)
+    data({ dateTime: '2026-08-06 10:59:59' }),
+    data({ dateTime: '2026-08-04 11:59:05' }),
     { status: 'success', data: [] },
     null,
   ])

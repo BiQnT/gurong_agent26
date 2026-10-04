@@ -226,14 +226,15 @@ export function createLiveChat(
           // 기록하지 못해도 이미 받은 답변은 보여 준다.
         }
       };
+      const system = observationContext(snapshot, action, await readUv(uvIndex));
+      const startedAt = Date.now();
       try {
         const { text, costUsd } = await ask({
-          system: observationContext(snapshot, action, await readUv(uvIndex)),
+          system,
           history: request.history,
           message: request.message,
-          // 화면이 요청을 취소해도 claude 는 끝까지 돌려 실제 비용을 기록한다. 취소할 때마다 비용을 모르면
-          // 하루 한도를 피해 갈 수 있다. 실행 시간은 claude 쪽 시간 제한(AGENT_TIMEOUT_MS)이 막는다.
-          signal: new AbortController().signal,
+          // 화면이 취소하거나 경로 제한(45초)이 지나면 claude 도 멈춰 동시 실행 자리를 바로 돌려준다.
+          signal,
         });
         record(costUsd);
         signal.throwIfAborted();
@@ -245,11 +246,13 @@ export function createLiveChat(
         return { ...base, content: text, provider: 'claude' };
       } catch (error) {
         const failure = error instanceof ClaudeCliError ? error : undefined;
-        // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)는 그 값을 센다. 시간 초과는 비용을 알 수 없어
-        // 메시지당 상한을 쓴 것으로 센다 (적게 세면 하루 한도가 뚫린다).
+        // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)는 그 값을 센다. 시간 초과·취소는 비용을 알 수
+        // 없어, 돈 시간만큼 메시지당 상한을 나눠 센다 (제한 시간을 다 쓰면 상한 전체). 세지 않으면 취소를
+        // 반복해 하루 한도를 피해 갈 수 있다.
+        const unknownCost = failure?.kind === 'timeout' || failure?.kind === 'aborted';
+        const elapsed = Math.min(1, (Date.now() - startedAt) / config.claude.timeoutMs);
         record(
-          failure?.costUsd ??
-            (failure?.kind === 'timeout' ? config.claude.maxBudgetUsd : undefined),
+          failure?.costUsd ?? (unknownCost ? config.claude.maxBudgetUsd * elapsed : undefined),
         );
         signal.throwIfAborted();
         // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다. 사용자 메시지는 남기지 않지만, 원인 글에

@@ -750,7 +750,11 @@ test('login is limited per client address and email for ten minutes after five f
 
 test('signup is limited per client address and an account keeps only its ten newest sessions', async (t) => {
   const f = await fixture(t);
-  for (let index = 0; index < 10; index += 1) await f.agent().signup(`User${index}`);
+  await f.agent().signup('User0');
+  // 실패한 가입(이미 쓰는 이메일)은 세지 않는다.
+  for (let attempt = 0; attempt < 3; attempt += 1)
+    assert.equal((await f.agent().call('/auth/signup', 'POST', credentials('User0'))).status, 409);
+  for (let index = 1; index < 10; index += 1) await f.agent().signup(`User${index}`);
   const limited = await f.agent().call('/auth/signup', 'POST', credentials('User10'));
   assert.equal(limited.status, 429);
   assert.equal(limited.body.code, 'SIGNUP_RATE_LIMITED');

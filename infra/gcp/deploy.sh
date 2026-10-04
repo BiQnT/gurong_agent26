@@ -158,7 +158,11 @@ if [[ $started != true ]]; then
   if [[ -n "$current" && -f "$current/.ok" ]]; then
     echo "직전 release 로 되돌린다: $current"
     previous=$(sed -n 's/^GIT_COMMIT=//p' "$current/release.env" 2>/dev/null || true)
-    if switch_to "$current" && [[ -n "$previous" ]] && health "$previous"; then
+    if ! switch_to "$current"; then
+      echo '경고: 직전 release 로 되돌린 prod 가 시작하지 못했다. journalctl -u haepung-prod 를 확인한다' >&2
+    elif [[ -z "$previous" ]]; then
+      echo "경고: $current/release.env 에 커밋이 없어 되돌린 prod 를 헬스체크하지 못했다" >&2
+    elif health "$previous"; then
       echo "되돌린 prod 가 정상이다 ($previous)"
     else
       echo '경고: 되돌린 prod 도 헬스체크를 통과하지 못했다. journalctl -u haepung-prod 를 확인한다' >&2

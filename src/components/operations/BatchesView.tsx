@@ -12,7 +12,7 @@ import {
   Plus,
   Radio,
 } from 'lucide-react';
-import { getBatchReport, type Batch } from '../../lib/operations';
+import { getBatchReport, measuredObservations, type Batch } from '../../lib/operations';
 import {
   BatchBadge,
   MetricGroup,
@@ -205,7 +205,7 @@ export function BatchesView({
                     {batch.quantity.toLocaleString()}마리
                   </span>
                 </span>
-                <span className="op-row-count">관측 {batch.observations.length}회</span>
+                <span className="op-row-count">관측 {measuredObservations(batch).length}회</span>
                 <BatchBadge status={batch.status} />
                 <ChevronRight className="op-row-chevron" size={17} />
               </button>

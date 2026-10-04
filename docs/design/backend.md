@@ -61,7 +61,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 
 - 제한 플래그: `--tools ""`, `--strict-mcp-config`, `--disable-slash-commands`, `--setting-sources ""`, `--no-session-persistence`, `--max-budget-usd`. `api_key` 모드는 `--bare` 를 더한다.
 - 작업 폴더는 빈 폴더(`AGENT_WORKDIR`). 자식 프로세스에는 허용 목록의 환경변수(`PATH`, `HOME`, `CLAUDE_CONFIG_DIR` 등)와 인증 값 하나만 넘기고 `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` 을 건다. E-UM 키 같은 다른 비밀값은 넘기지 않는다.
-- 시간 초과(`AGENT_TIMEOUT_MS`)는 프로세스 그룹에 SIGTERM, 5초 뒤 SIGKILL 이다. 화면이 요청을 취소해도 claude 는 끝까지 돈다(아래 비용 기록).
+- 시간 초과(`AGENT_TIMEOUT_MS`)는 프로세스 그룹에 SIGTERM, 5초 뒤 SIGKILL 이다. 화면이 요청을 취소하거나 전체 45초 제한이 지나도 같은 방법으로 멈춰 동시 실행 자리를 바로 돌려준다.
 - 인증 값(`CLAUDE_CODE_OAUTH_TOKEN` 또는 `ANTHROPIC_API_KEY`)은 `.env.local` 이 아니라 프로세스 환경변수에서만 읽는다. VM 은 systemd 가 `backend.env` 로 넣는다.
 
 | 변수 | 기본값 | 뜻 |
@@ -82,8 +82,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 | --- | --- |
 | 정상 종료 | claude 가 알려 준 실제 비용 |
 | 비용을 알려 준 실패 (예: 메시지당 상한 초과) | 그 비용 |
-| 시간 초과 | 비용을 알 수 없어 `AGENT_MAX_BUDGET_USD` (메시지당 상한) |
-| 화면이 취소 (연결 끊김, 전체 45초 제한) | claude 를 죽이지 않고 끝까지 돌려 실제 비용. 응답은 버린다. 도는 동안 동시 실행 자리를 차지하고, 길이는 `AGENT_TIMEOUT_MS` 가 막는다 |
+| 시간 초과, 화면이 취소 (연결 끊김, 전체 45초 제한) | 비용을 알 수 없어 `AGENT_MAX_BUDGET_USD × (돈 시간 / AGENT_TIMEOUT_MS)`. 제한 시간을 다 쓰면 메시지당 상한 전체다. 세지 않으면 취소를 반복해 하루 한도를 피해 갈 수 있다 |
 | 그 밖에 비용을 알 수 없는 실패 | 세지 않는다 |
 
 VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env.example). OpenAI 호환 경로의 변수(`OPENAI_API_KEY`, `LLM_API_BASE` 등)와 응답 형식은 [chat-api.md](chat-api.md).
@@ -112,7 +111,7 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 **로그인·가입 제한.**
 
 - 로그인: 같은 `클라이언트 주소 + 이메일` 로 10분 안에 실패가 5번 쌓이면(성공하면 기록을 지운다) 이후 10분 동안 429 `LOGIN_RATE_LIMITED` 를 돌려준다. 차단 중에는 올바른 비밀번호도 거절한다.
-- 가입: 같은 클라이언트 주소에서 1시간에 10번까지만 받고, 넘으면 429 `SIGNUP_RATE_LIMITED` 를 돌려준다. 입력 형식 검사를 통과한 요청을 모두 세므로 이미 가입한 이메일로 실패한 시도도 센다. 계정을 대량으로 만들어 AI 사용량을 쓰는 것을 늦추려는 장치다.
+- 가입: 같은 클라이언트 주소에서 1시간에 10번까지만 받고, 넘으면 429 `SIGNUP_RATE_LIMITED` 를 돌려준다. 계정을 만든 요청만 세고, 이미 가입한 이메일 등으로 실패한 시도는 세지 않는다 (같은 와이파이를 쓰는 여러 사람). 계정을 대량으로 만들어 AI 사용량을 쓰는 것을 늦추려는 장치다.
 - 둘 다 기록은 프로세스 메모리에만 있어서 dev·prod 가 따로 세고 재시작하면 사라진다. 클라이언트 주소는 소켓이 루프백(Caddy)일 때만 `X-Forwarded-For` 를 믿는다.
 
 ## 수집기
