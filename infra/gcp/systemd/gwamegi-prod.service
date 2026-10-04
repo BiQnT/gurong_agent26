@@ -1,0 +1,25 @@
+[Unit]
+Description=gwamegi agent (prod, :3000)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=gwamegi
+Group=gwamegi
+UMask=0002
+# current 는 deploy.sh 가 바꾸는 링크다. 재시작할 때 새 release 를 가리킨다.
+WorkingDirectory=/srv/gwamegi/prod/current/prototype
+EnvironmentFile=/srv/gwamegi/env/secrets.env
+EnvironmentFile=-/srv/gwamegi/prod/current/release.env
+Environment=APP_ENV=prod NODE_ENV=production
+# dev 와 같은 DB·claude 작업 폴더를 쓴다 (공유 DB 결정: docs/decisions/0002)
+Environment=DATABASE_PATH=/srv/gwamegi/data/gwamegi.db
+Environment=AGENT_WORKDIR=/srv/gwamegi/data/agent-workdir
+Environment=CLAUDE_CONFIG_DIR=/srv/gwamegi/data/claude-home
+ExecStartPre=/usr/bin/npm run db:migrate
+ExecStart=/usr/bin/npm run start -- -p 3000 -H 0.0.0.0
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

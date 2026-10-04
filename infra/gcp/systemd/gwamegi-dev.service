@@ -1,0 +1,24 @@
+[Unit]
+Description=gwamegi agent (dev, 127.0.0.1:3001)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=gwamegi
+Group=gwamegi
+UMask=0002
+# 팀원이 SSH 로 고치는 작업 폴더를 그대로 next dev 로 띄운다 (저장하면 바로 반영).
+WorkingDirectory=/srv/gwamegi/dev/prototype
+EnvironmentFile=/srv/gwamegi/env/secrets.env
+Environment=APP_ENV=dev
+Environment=DATABASE_PATH=/srv/gwamegi/data/gwamegi.db
+Environment=AGENT_WORKDIR=/srv/gwamegi/data/agent-workdir
+Environment=CLAUDE_CONFIG_DIR=/srv/gwamegi/data/claude-home
+ExecStartPre=/usr/bin/npm run db:migrate
+# 외부에 열지 않는다. 보려면 SSH 터널: ssh -L 3001:localhost:3001 ...
+ExecStart=/usr/bin/npm run dev -- -p 3001 -H 127.0.0.1
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

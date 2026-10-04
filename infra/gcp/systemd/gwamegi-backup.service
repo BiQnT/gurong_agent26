@@ -1,0 +1,8 @@
+[Unit]
+Description=gwamegi SQLite backup
+
+[Service]
+Type=oneshot
+User=gwamegi
+Group=gwamegi
+ExecStart=/usr/local/bin/gwamegi-backup
