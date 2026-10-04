@@ -117,7 +117,7 @@ export function MiniChart({ batch }: { batch: Batch }) {
           <span className="op-chart-dot" />
           기온 변화
         </span>
-        <span>실제 관측값 · 수동 기록</span>
+        <span>실제 관측값 · 30분 자동·직접 기록</span>
       </div>
       <svg
         viewBox="0 0 600 86"

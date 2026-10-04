@@ -1,4 +1,5 @@
 import type { LiveDevice, LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
+import type { ClaudeConfig } from './claude-cli.ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -9,6 +10,21 @@ const SINGLE_PATH = '/dpg/atmosphere/device/realtime';
 
 export type BridgeConfig = {
   eumServiceKey: string;
+  /** 채팅 설명을 만들 제공자. claude: claude CLI, openai(또는 생략): OpenAI 호환 HTTP API */
+  llmProvider?: 'claude' | 'openai';
+  claude?: ClaudeConfig;
+  /** 설정하면 계정·작업 자료를 파일 대신 이 SQLite DB 에 저장한다 (VM 의 공유 DB). */
+  databasePath?: string;
+  /** 원격에서 들어와도 되는 화면 주소(스킴·호스트·포트 전체). 예: https://35-192-216-232.sslip.io:440 */
+  publicOrigins?: string[];
+  /** TLS 프록시(Caddy) 뒤에서 세션 쿠키에 Secure 를 붙인다. */
+  cookieSecure?: boolean;
+  /** dev 서버 앞의 공용 암호 "아이디:비밀번호". 설정하면 dev(Vite) 의 모든 요청에 Basic 인증. */
+  devBasicAuth?: string;
+  /** 기상청 API허브 인증키 (A1~A8, B1~B3) */
+  kmaAuthKey?: string;
+  /** 공공데이터포털 인증키 (B4~B6) */
+  dataGoKrKey?: string;
   openaiApiKey: string;
   openaiModel: string;
   /** OpenAI-compatible base URL, e.g. https://opencode.ai/zen/v1 */
@@ -17,6 +33,16 @@ export type BridgeConfig = {
   staleAfterMinutes: number;
   projectRoot: string;
 };
+
+/** 화면과 헬스체크에 보이는 AI 설정 상태. claude CLI 는 키 대신 서버 로그인·토큰을 쓰므로 선택만으로 설정된 것으로 본다. */
+export function llmStatus(config: BridgeConfig): { configured: boolean; model: string } {
+  if (config.llmProvider === 'claude' && config.claude)
+    return {
+      configured: true,
+      model: config.claude.model ? `claude · ${config.claude.model}` : 'claude (CLI 기본 모델)',
+    };
+  return { configured: !!config.openaiApiKey, model: config.openaiModel };
+}
 
 export class BridgeError extends Error {
   status: number;
@@ -88,6 +114,11 @@ export function normalizeDevice(value: unknown): LiveDevice | null {
   return { id, name, address: cleanText(value.address) ?? '', latitude, longitude };
 }
 
+// E-UM 원문 시각("2026-10-04 14:00:33")에는 시간대 표기가 없지만 한국 시간이다.
+// 2026-10-04T05:01:00Z(14:01 KST)에 부른 단건 관측이 "14:00:33" 이었다 (research/api-tests/2026-10-04-eum-key.md).
+// UTC 였다면 9시간 뒤 미래 시각이 된다. 이 값으로 읽을 때는 확인된 사실이라 확인 사항으로 남기지 않는다.
+export const EUM_SOURCE_OFFSET = '+09:00';
+
 export function normalizeObservation(
   device: LiveDevice,
   value: unknown,
@@ -107,9 +138,10 @@ export function normalizeObservation(
     let normalized = observedAtRaw.replace(' ', 'T');
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(normalized)) {
       normalized += timezoneOffset;
-      issues.push(
-        `원천 수집 시각에 시간대가 없어 ${timezoneOffset}으로 해석했어요. 시간대 확인이 필요해요.`,
-      );
+      if (timezoneOffset !== EUM_SOURCE_OFFSET)
+        issues.push(
+          `원천 수집 시각에 시간대가 없어 ${timezoneOffset}으로 해석했어요. 시간대 확인이 필요해요.`,
+        );
     }
     const parsed = parseObservationTimestamp(normalized);
     if (Number.isFinite(parsed)) {
@@ -406,7 +438,7 @@ export function createObservationService(config: BridgeConfig, fetcher: typeof f
         warnings,
         status: data.status,
         ...(data.archiveSourceDate ? { archiveSourceDate: data.archiveSourceDate } : {}),
-        llm: { configured: !!config.openaiApiKey, model: config.openaiModel },
+        llm: llmStatus(config),
       };
     },
   };

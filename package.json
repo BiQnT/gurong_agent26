@@ -10,11 +10,15 @@
     "dev": "vite",
     "build": "tsc && tsc -p tsconfig.server.json && vite build",
     "test": "node --experimental-strip-types --test src/lib/*.test.ts server/*.test.ts",
-    "format": "prettier --write src server index.html vite.config.ts tsconfig.json tsconfig.server.json package.json .prettierrc.json",
-    "format:check": "prettier --check src server index.html vite.config.ts tsconfig.json tsconfig.server.json package.json .prettierrc.json",
-    "preview": "vite preview"
+    "format": "prettier --write src server scripts index.html vite.config.ts tsconfig.json tsconfig.server.json package.json .prettierrc.json",
+    "format:check": "prettier --check src server scripts index.html vite.config.ts tsconfig.json tsconfig.server.json package.json .prettierrc.json",
+    "preview": "vite preview",
+    "start": "node server/main.ts",
+    "admin": "node scripts/admin.ts",
+    "collect": "node server/collect.ts"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "framer-motion": "^11.2.10",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.383.0",
@@ -22,6 +26,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.3",

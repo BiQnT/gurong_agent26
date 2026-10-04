@@ -20,7 +20,7 @@ export type ChatReply = {
   content: string;
   assessment?: Assessment;
   observation?: LiveObservation;
-  provider?: 'openai' | 'compatible' | 'local';
+  provider?: 'openai' | 'compatible' | 'claude' | 'local';
   providerNotice?: string;
   sourceFetchedAt?: string;
   action?: 'start-batch' | 'end-batch' | 'guidance';
@@ -342,7 +342,10 @@ export function readChatReply(value: unknown): ChatReply {
     ...(value.observation === undefined
       ? {}
       : { observation: readLiveObservation(value.observation) }),
-    ...(value.provider === 'openai' || value.provider === 'compatible' || value.provider === 'local'
+    ...(value.provider === 'openai' ||
+    value.provider === 'compatible' ||
+    value.provider === 'claude' ||
+    value.provider === 'local'
       ? { provider: value.provider }
       : {}),
     ...(typeof value.providerNotice === 'string' ? { providerNotice: value.providerNotice } : {}),

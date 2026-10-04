@@ -491,9 +491,11 @@ function OwnerWorkspace({
                               <CheckCheck size={13} />
                               {message.reply?.provider === 'openai'
                                 ? 'GPT 응답'
-                                : message.reply?.provider === 'compatible'
-                                  ? '외부 AI 응답'
-                                  : '관측 정보 안내'}
+                                : message.reply?.provider === 'claude'
+                                  ? 'Claude 응답'
+                                  : message.reply?.provider === 'compatible'
+                                    ? '외부 AI 응답'
+                                    : '관측 정보 안내'}
                             </span>
                             <button
                               className="icon-button"

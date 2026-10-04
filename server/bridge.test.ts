@@ -54,6 +54,25 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
     );
     assert.deepEqual(actual, {
       eumServiceKey: expected,
+      // 서버 설정 기본값: OpenAI 호환(팀원 로컬 그대로), 공유 DB·원격 출처·추가 키 없음
+      llmProvider: 'openai',
+      claude: {
+        bin: 'claude',
+        workdir: '/test/project/.local-data/agent-workdir',
+        authMode: 'subscription',
+        model: undefined,
+        effort: undefined,
+        maxBudgetUsd: 0.5,
+        timeoutMs: 40000,
+        maxConcurrency: 4,
+        dailyBudgetUsd: 10,
+      },
+      databasePath: undefined,
+      publicOrigins: [],
+      cookieSecure: false,
+      devBasicAuth: undefined,
+      kmaAuthKey: undefined,
+      dataGoKrKey: undefined,
       openaiApiKey: 'sk-test%2B+%3D',
       openaiModel: 'test-model',
       llmBaseUrl: 'https://api.openai.com/v1',
@@ -105,7 +124,7 @@ test('raw and encoded E-UM keys reach each upstream route with one query encodin
   }
 });
 
-test('upstream values preserve zeros, missing data, and explicit timezone assumptions', () => {
+test('upstream values preserve zeros, missing data, and flag unverified timezone assumptions', () => {
   assert.equal(
     normalizeDevice({ id: 1, latitude: '35.98', longitude: '129.55', nickname: '관측기' })
       ?.latitude,
@@ -123,7 +142,17 @@ test('upstream values preserve zeros, missing data, and explicit timezone assump
   assert.equal(current.windSpeed, 0);
   assert.equal(current.ageMinutes, 1);
   assert.equal(current.status, 'current');
-  assert.match(current.issues.join(' '), /시간대가 없어/);
+  // E-UM 원문은 한국 시간이라(호출 기록으로 확인) +09:00 으로 읽으면 확인 사항이 아니다.
+  assert.equal(current.issues.length, 0);
+  const otherOffset = normalizeObservation(
+    device,
+    { temp: 0, humi: '50', winsp: 0, logDateTime: '2026-10-03 02:59:00' },
+    now,
+    '+00:00',
+    30,
+  );
+  assert.equal(otherOffset.ageMinutes, 1);
+  assert.match(otherOffset.issues.join(' '), /시간대가 없어/);
   const utc = normalizeObservation(
     device,
     { temp: 10, humi: 50, winsp: 1, logDateTime: '2026-10-03T02:59:00Z' },
@@ -377,7 +406,12 @@ test('Responses output is read across messages and model failures keep immutable
     input = String(init?.body);
     return Response.json({
       choices: [
-        { message: { role: 'assistant', content: '보관된 과거 실측 자료이며 현재 날씨가 아니에요.' } },
+        {
+          message: {
+            role: 'assistant',
+            content: '보관된 과거 실측 자료이며 현재 날씨가 아니에요.',
+          },
+        },
       ],
     });
   });

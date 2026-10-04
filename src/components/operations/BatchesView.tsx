@@ -12,7 +12,7 @@ import {
   Plus,
   Radio,
 } from 'lucide-react';
-import { getBatchReport, type Batch } from '../../lib/operations';
+import { getBatchReport, measuredObservations, type Batch } from '../../lib/operations';
 import {
   BatchBadge,
   MetricGroup,
@@ -205,7 +205,7 @@ export function BatchesView({
                     {batch.quantity.toLocaleString()}마리
                   </span>
                 </span>
-                <span className="op-row-count">관측 {batch.observations.length}회</span>
+                <span className="op-row-count">관측 {measuredObservations(batch).length}회</span>
                 <BatchBadge status={batch.status} />
                 <ChevronRight className="op-row-chevron" size={17} />
               </button>
@@ -232,7 +232,8 @@ export function BatchesView({
       </button>
       <p className="op-demo-footnote">
         <span className="op-tiny-dot" />
-        승인한 배치와 확인한 관측값을 덕장별로 저장해요. 최신 관측값은 직접 확인해 기록해주세요.
+        승인한 배치와 확인한 관측값을 덕장별로 저장해요. 진행 중인 배치는 30분마다 관측값을 자동으로
+        기록하고, 직접 확인해 추가할 수도 있어요.
       </p>
     </motion.section>
   );

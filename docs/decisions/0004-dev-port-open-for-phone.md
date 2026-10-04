@@ -1,7 +1,7 @@
 # 0004. dev 포트(3001)도 외부에 열어 폰으로 UI 를 확인한다
 
 - **날짜**: 2026-10-04
-- **상태**: 제안
+- **상태**: 대체됨 (→ [0005](0005-merge-backend-into-haepung-app.md))
 - **정한 사람**: 안동현
 - **관련**: [0002](0002-gcp-runtime-layout.md) 의 "dev 는 127.0.0.1" 부분을 바꾼다, [infra/gcp/README.md](../../infra/gcp/README.md)
 

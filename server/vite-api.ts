@@ -1,5 +1,5 @@
 import type { Connect, Plugin } from 'vite';
-import { BridgeError, createObservationService, type BridgeConfig } from './eum.ts';
+import { BridgeError, createObservationService, llmStatus, type BridgeConfig } from './eum.ts';
 import { createLiveChat, readChatRequest } from './chat.ts';
 import {
   createWorkspaceMiddleware,
@@ -8,6 +8,9 @@ import {
   type WorkspaceService,
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
+import { createUvIndexSource } from './sources/eum-uv.ts';
+import { createHash, timingSafeEqual } from 'node:crypto';
+import { resolve } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
 const API_PATHS = new Set(['/api/health', '/api/observations', '/api/chat']);
@@ -22,13 +25,44 @@ function normalizeEumServiceKey(value: string | undefined): string {
   }
 }
 
+// 빈 값이 0 이 되거나 오타가 NaN 이 되어 상한이 사라지지 않게 한다.
+function positive(env: Record<string, string>, name: string, fallback: number): number {
+  const value = Number(env[name]);
+  return env[name]?.trim() && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
 export function readBridgeConfig(env: Record<string, string>, projectRoot: string): BridgeConfig {
   const offset = env.EUM_TIMEZONE_OFFSET?.trim() || '+09:00';
   const age = Number(env.EUM_STALE_AFTER_MINUTES || 30);
+  // workspace.ts 는 요청마다 process.env 를 읽으므로 .env 파일에서 온 값도 옮겨 둔다 (터널 주소와 같은 방식).
+  for (const name of ['PUBLIC_ORIGINS', 'COOKIE_SECURE'])
+    if (env[name] !== undefined && process.env[name] === undefined) process.env[name] = env[name];
   if (env.PUBLIC_TUNNEL_HOSTS !== undefined && process.env.PUBLIC_TUNNEL_HOSTS === undefined)
     process.env.PUBLIC_TUNNEL_HOSTS = env.PUBLIC_TUNNEL_HOSTS;
   return {
     eumServiceKey: normalizeEumServiceKey(env.EUM_SERVICE_KEY),
+    // 기본은 팀원 로컬 설정(OpenAI 호환)이 그대로 동작하도록 openai. VM 은 LLM_PROVIDER=claude
+    llmProvider: env.LLM_PROVIDER?.trim() === 'claude' ? 'claude' : 'openai',
+    claude: {
+      bin: env.CLAUDE_BIN?.trim() || 'claude',
+      workdir: env.AGENT_WORKDIR?.trim() || resolve(projectRoot, '.local-data', 'agent-workdir'),
+      authMode: env.AGENT_AUTH_MODE?.trim() === 'api_key' ? 'api_key' : 'subscription',
+      model: env.AGENT_MODEL?.trim() || undefined,
+      effort: env.AGENT_EFFORT?.trim() || undefined,
+      maxBudgetUsd: positive(env, 'AGENT_MAX_BUDGET_USD', 0.5),
+      timeoutMs: positive(env, 'AGENT_TIMEOUT_MS', 40000),
+      maxConcurrency: positive(env, 'AGENT_MAX_CONCURRENCY', 4),
+      dailyBudgetUsd: positive(env, 'AGENT_DAILY_BUDGET_USD', 10),
+    },
+    databasePath: env.DATABASE_PATH?.trim() || undefined,
+    publicOrigins: (env.PUBLIC_ORIGINS || '')
+      .split(',')
+      .map((origin) => origin.trim().replace(/\/+$/, ''))
+      .filter(Boolean),
+    cookieSecure: env.COOKIE_SECURE?.trim() === '1',
+    devBasicAuth: env.DEV_BASIC_AUTH?.trim() || undefined,
+    kmaAuthKey: env.KMA_AUTH_KEY?.trim() || undefined,
+    dataGoKrKey: env.DATA_GO_KR_KEY?.trim() || undefined,
     openaiApiKey: (env.LLM_API_KEY ?? env.OPENAI_API_KEY)?.trim() || '',
     openaiModel: (env.LLM_API_MODEL ?? env.OPENAI_MODEL)?.trim() || 'gpt-4.1-mini',
     llmBaseUrl: env.LLM_API_BASE?.trim() || 'https://api.openai.com/v1',
@@ -97,9 +131,17 @@ export function createApiMiddleware(
 ): Connect.NextHandleFunction {
   const workspaceMiddleware = createWorkspaceMiddleware(workspace);
   const observations = createObservationService(config);
-  const chat = createLiveChat(config);
+  const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config));
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
+    const send = (status: number, payload: unknown) => {
+      if (response.destroyed || response.writableEnded) return;
+      response.statusCode = status;
+      response.setHeader('Content-Type', 'application/json; charset=utf-8');
+      response.setHeader('Cache-Control', 'no-store');
+      response.setHeader('X-Content-Type-Options', 'nosniff');
+      response.end(JSON.stringify(payload));
+    };
     let decodedPath: string;
     try {
       decodedPath = decodeURIComponent(url.pathname).replaceAll('\\', '/');
@@ -120,7 +162,10 @@ export function createApiMiddleware(
       return;
     }
     if (!API_PATHS.has(url.pathname)) {
-      next();
+      // 없는 API 주소가 화면(index.html)으로 넘어가 200 HTML 이 되지 않게 한다.
+      if (/^\/api(?:\/|$)/.test(url.pathname))
+        send(404, { error: '요청한 API를 찾을 수 없어요.', code: 'NOT_FOUND' });
+      else next();
       return;
     }
     const controller = new AbortController();
@@ -130,14 +175,6 @@ export function createApiMiddleware(
     };
     request.once('aborted', disconnect);
     response.once('close', disconnect);
-    const send = (status: number, payload: unknown) => {
-      if (response.destroyed || response.writableEnded) return;
-      response.statusCode = status;
-      response.setHeader('Content-Type', 'application/json; charset=utf-8');
-      response.setHeader('Cache-Control', 'no-store');
-      response.setHeader('X-Content-Type-Options', 'nosniff');
-      response.end(JSON.stringify(payload));
-    };
     void (async () => {
       try {
         if (!isLocalWorkspaceRequest(request))
@@ -149,10 +186,26 @@ export function createApiMiddleware(
         if (url.pathname === '/api/health') {
           if (request.method !== 'GET')
             throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
+          // 저장소를 실제로 한 번 읽는다. 못 읽으면 503 이라 배포 스크립트가 자동으로 되돌린다.
+          let schema: number;
+          try {
+            ({ schema } = await workspace.health());
+          } catch (error) {
+            const code = (error as { code?: unknown }).code;
+            console.error('[health] 저장소를 읽지 못했다', error);
+            send(503, {
+              error: '저장소를 읽을 수 없어요.',
+              code: typeof code === 'string' ? code : 'STORE_UNAVAILABLE',
+            });
+            return;
+          }
           send(200, {
-            mode: 'local-bridge',
+            mode: process.env.APP_MODE || 'local-bridge',
             eum: { configured: !!config.eumServiceKey },
-            llm: { configured: !!config.openaiApiKey, model: config.openaiModel },
+            llm: { provider: config.llmProvider ?? 'openai', ...llmStatus(config) },
+            // 배포 스크립트가 새 버전이 떴는지 확인한다 (release.env 의 GIT_COMMIT).
+            commit: process.env.GIT_COMMIT || null,
+            schema,
           });
           return;
         }
@@ -200,10 +253,36 @@ export function createApiMiddleware(
   };
 }
 
+/** dev 공용 암호 "아이디:비밀번호" 를 HTTP Basic 으로 확인한다. */
+function devBasicAuth(credentials: string): Connect.NextHandleFunction {
+  // 길이가 달라도 비교 시간이 같도록 고정 길이 해시끼리 비교한다.
+  const digest = (value: Buffer) => createHash('sha256').update(value).digest();
+  // charset="UTF-8" 을 알리면 브라우저가 한글 비밀번호도 UTF-8 로 보내므로 바이트 그대로 비교한다.
+  const expected = digest(Buffer.from(credentials, 'utf8'));
+  return (request, response, next) => {
+    const match = /^Basic +([A-Za-z0-9+/]+={0,2}) *$/i.exec(request.headers.authorization ?? '');
+    if (match && timingSafeEqual(digest(Buffer.from(match[1], 'base64')), expected)) {
+      next();
+      return;
+    }
+    response.statusCode = 401;
+    response.setHeader('WWW-Authenticate', 'Basic realm="haepung-dev", charset="UTF-8"');
+    response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    response.setHeader('Cache-Control', 'no-store');
+    response.end('개발 서버 접속 암호가 필요해요.');
+  };
+}
+
 export function localApiPlugin(config: BridgeConfig): Plugin {
   return {
     name: 'guryongpo-local-api',
     configureServer(server) {
+      // 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주므로 모든 요청에 암호를 먼저 묻는다.
+      // preview·prod(main.ts)는 빌드 결과만 주므로 걸지 않는다.
+      if (config.devBasicAuth) server.middlewares.use(devBasicAuth(config.devBasicAuth));
+      // 공개 주소로 띄우는데 암호가 비어 있으면 저장소 전체가 열린다. 열지 않고 시작을 멈춘다.
+      else if (config.publicOrigins?.length)
+        throw new Error('PUBLIC_ORIGINS 로 공개한 dev 서버는 DEV_BASIC_AUTH 가 있어야 시작한다.');
       server.middlewares.use(createApiMiddleware(config));
     },
     configurePreviewServer(server) {

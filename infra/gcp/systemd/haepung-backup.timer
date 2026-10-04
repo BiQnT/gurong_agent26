@@ -1,0 +1,9 @@
+[Unit]
+Description=haepung SQLite 백업 (매일 04:00 KST)
+
+[Timer]
+OnCalendar=*-*-* 04:00:00 Asia/Seoul
+Persistent=true
+
+[Install]
+WantedBy=timers.target

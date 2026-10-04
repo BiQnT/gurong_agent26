@@ -1,7 +1,7 @@
 # 0002. GCP VM 하나에 dev·prod 를 나눠 띄우고 SQLite 는 공유한다
 
 - **날짜**: 2026-10-04
-- **상태**: 제안 · dev 포트 공개 범위는 대체됨 (→ [0004](0004-dev-port-open-for-phone.md))
+- **상태**: 대체됨 (→ [0005](0005-merge-backend-into-haepung-app.md))
 - **정한 사람**: 안동현
 - **관련**: [infra/gcp/README.md](../../infra/gcp/README.md), 본선 서비스 기획서 "기본 개발 환경"
 

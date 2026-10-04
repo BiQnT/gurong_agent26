@@ -1,8 +1,8 @@
-# 로컬 계정·덕장 API
+# 계정·덕장 API
 
 최종 확인: **2026-10-04**
 
-정본 계약: [`src/lib/workspace.ts`](../../src/lib/workspace.ts). 구현: [`server/workspace.ts`](../../server/workspace.ts), Vite 연결: [`server/vite-api.ts`](../../server/vite-api.ts). 이 문서는 실제 로컬 구현의 범위를 설명한다.
+정본 계약: [`src/lib/workspace.ts`](../../src/lib/workspace.ts). 구현: [`server/workspace.ts`](../../server/workspace.ts), Vite 연결: [`server/vite-api.ts`](../../server/vite-api.ts). 이 문서는 실제 구현의 범위를 설명한다. 서버 구성(저장소, 접근 제어)은 [서버 구조](backend.md)에 있다.
 
 모든 경로는 `/api` 기준이다. 요청 본문이 있는 호출은 `Content-Type: application/json`을 사용하며, 브라우저 클라이언트는 `credentials: include`로 세션 쿠키를 보낸다. 정상 응답은 HTTP 200, 실패는 `{ error: string, code: string }`이다. 응답에는 `Cache-Control: no-store`를 적용한다.
 
@@ -33,8 +33,8 @@
 ## 계정·초대 수명
 
 - 이메일은 공백 제거·소문자로 정규화하며 중복 가입을 거절한다. 비밀번호는 8~128자, 이름은 1~80자다. 비밀번호는 계정별 난수 salt와 Node `scrypt`로 해시한다.
-- 세션은 32바이트 난수의 불투명 토큰이다. `gwamegi_session` 쿠키는 `HttpOnly; SameSite=Lax; Path=/`, 30일 만료이며 서버에도 만료 시각을 저장한다. HTTPS 연결이면 `Secure`를 붙인다. 데이터 파일에는 토큰 원문 대신 SHA-256 해시만 저장한다.
-- 가입·로그인 시 현재 세션을 교체하고, 로그아웃 시 서버 세션과 쿠키를 폐기한다. `Account` 응답에는 `id`, `name`, `email`만 포함한다.
+- 세션은 32바이트 난수의 불투명 토큰이다. `gwamegi_session` 쿠키는 `HttpOnly; SameSite=Lax; Path=/`, 30일 만료이며 서버에도 만료 시각을 저장한다. 연결이 HTTPS이거나 `COOKIE_SECURE=1`이면 `Secure`를 붙인다. TLS 프록시(Caddy) 뒤의 서버는 평문 연결로 보이므로 VM은 `COOKIE_SECURE=1`을 쓴다. 저장소에는 토큰 원문 대신 SHA-256 해시만 저장한다.
+- 가입·로그인 시 현재 세션을 교체하고, 로그아웃 시 서버 세션과 쿠키를 폐기한다. 한 계정은 세션을 최근 10개만 둔다. 11번째를 만들면 가장 오래된 세션이 지워지고 그 기기는 로그아웃된 상태가 된다. `Account` 응답에는 `id`, `name`, `email`만 포함한다.
 - 초대는 32바이트 난수 링크이며 7일 후 만료한다. 초대 생성 응답에서만 토큰 원문을 제공하고 디스크에는 해시만 저장한다. 링크 전송은 운영자가 복사하여 수행하며 이메일을 발송하지 않는다.
 - 초대 상태는 `pending`, `accepted`, `revoked`, `expired`다. 만료 여부는 서버 시각으로 계산한다. 동일 계정의 성공한 수락 재시도는 멤버십이 남아 있을 때만 동일 덕장을 반환한다. 다른 계정의 재사용과 제거된 팀원의 기존 초대 재사용은 거절한다.
 - 이미 수락한 초대는 취소할 수 없다. 접근을 회수하려면 팀원 제거를 사용한다. 초대를 만든 운영자의 자기 수락은 거절한다.
@@ -54,15 +54,17 @@
 | 400 | `INVALID_CREDENTIALS`, `INVALID_SITE`, `INVALID_OPERATIONS`, `INVALID_REPLY`, `INVALID_ANSWER` | 입력 형식 오류 |
 | 400 | `PROTECTED_WORKER_HISTORY` | 응답·답변·근로자 로그 변조 시도 |
 | 401 | `AUTH_REQUIRED`, `LOGIN_FAILED` | 로그인 필요 또는 인증 실패 |
-| 403 | `SITE_ACCESS_DENIED`, `LOCAL_ORIGIN_REQUIRED` | 덕장 권한 또는 로컬 출처 불일치 |
+| 403 | `SITE_ACCESS_DENIED`, `LOCAL_ORIGIN_REQUIRED` | 덕장 권한 또는 허용 출처 불일치 |
 | 404 | `INVITATION_NOT_FOUND`, `GUIDANCE_NOT_FOUND`, `REPLY_NOT_FOUND` | 대상 없음 |
 | 409 | `EMAIL_IN_USE`, `REVISION_CONFLICT`, `ANSWER_EXISTS`, `BATCH_CLOSED` | 중복·동시 수정·종료 상태 충돌 |
 | 410 | `INVITATION_UNAVAILABLE` | 이미 사용·취소·만료된 초대 |
 | 413 / 415 | `BODY_TOO_LARGE` / `JSON_REQUIRED` | 1 MiB 초과 / JSON 형식 필요 |
-| 500 | `WORKSPACE_ERROR` | 디스크 읽기·저장 실패; 빈 데이터로 덮어쓰지 않음 |
+| 429 | `LOGIN_RATE_LIMITED` | `/auth/login` 실패가 같은 주소·이메일로 10분 안에 5번 쌓여 10분간 차단 |
+| 429 | `SIGNUP_RATE_LIMITED` | `/auth/signup` 이 같은 클라이언트 주소에서 1시간에 10번을 넘음. 기록 방식은 [로그인·가입 제한](backend.md#접근-제어) |
+| 500 | `WORKSPACE_ERROR` | 디스크·DB 읽기·저장 실패(저장소 schema 불일치 포함); 빈 데이터로 덮어쓰지 않음 |
 
-서버 데이터는 Git 제외 경로 `.local-data/workspace.json`에 저장한다. 파일 권한은 `0600`, 새 디렉터리는 `0700`이다. 한 Node 프로세스 안에서 파일별 트랜잭션을 직렬화하고 임시 파일 쓰기·동기화·rename으로 교체한다. 파일 손상은 실패로 처리하며 조용히 초기화하지 않는다. Vite 파일 접근 차단과 API 앞단 경로 검사로 `.local-data`의 정적 제공도 막는다.
+`DATABASE_PATH`가 설정되면 서버 데이터는 공유 SQLite 파일에 저장한다. dev·prod 프로세스가 같은 파일을 함께 쓰며, 쓰기는 트랜잭션 안에서 저장 전 검증을 거치고 문서 형식(schema) 번호를 확인한다([저장](backend.md#저장)). `DATABASE_PATH`가 없으면(로컬 개발 기본) Git 제외 경로 `.local-data/workspace.json`에 저장한다. 파일 권한은 `0600`, 새 디렉터리는 `0700`이다. 한 Node 프로세스 안에서 파일별 트랜잭션을 직렬화하고 임시 파일 쓰기·동기화·rename으로 교체한다. 파일 손상은 실패로 처리하며 조용히 초기화하지 않는다. Vite 파일 접근 차단과 API 앞단 경로 검사로 `.local-data`의 정적 제공도 막는다.
 
 클라이언트 API는 응답 본문을 포함해 20초 제한을 적용한다. 호출자의 취소 신호는 유지한다. 시간 초과는 저장 실패 확정이 아니므로 최신 상태를 확인한 뒤 재시도한다. 덕장 선택과 운영자 대화는 계정·덕장으로 범위를 나눈 브라우저 저장소를 사용하며, 비밀번호나 세션 토큰을 `localStorage`에 넣지 않는다.
 
-이 구현은 `localhost`/루프백 호스트와 동일 로컬 출처만 허용한다. 정식 서버 배포, 원격 휴대전화 연결, 이메일 인증·발송, 비밀번호 재설정, 여러 서버 프로세스의 데이터베이스 동시 쓰기·백업은 아직 제공하지 않는다. 정식 백엔드로 교체할 때는 프런트 계약을 유지하고 배포 환경의 인증·CORS·데이터베이스 트랜잭션을 구현해야 한다.
+요청은 `localhost`/루프백 호스트이거나 `PUBLIC_ORIGINS`에 적은 전체 출처(스킴·호스트·포트)와 같은 동일 출처만 허용한다. `Origin`이 목록의 출처와 정확히 같아야 하므로 호스트 이름이 같아도 포트가 다르면 거부한다. dev와 prod는 쿠키와 DB를 같이 쓰기 때문에 서로의 화면에서 온 요청을 받지 않는다. 직접 연결한 쪽은 루프백이어야 하므로 원격 접속은 TLS 프록시(Caddy)를 거친다([접근 제어](backend.md#접근-제어)). 이메일 인증·발송과 비밀번호 재설정은 아직 제공하지 않는다. 계정 복구는 관리 스크립트(`scripts/admin.ts`)로 한다. 서버를 바꾸더라도 이 계약을 유지해야 한다.

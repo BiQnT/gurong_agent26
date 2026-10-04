@@ -1,11 +1,14 @@
 import type { ChatReply, ChatRequest } from '../src/lib/chat.ts';
 import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
 import { BridgeError, object, type BridgeConfig } from './eum.ts';
+import { ClaudeCliError, createClaudeAgent, type AgentAsk } from './claude-cli.ts';
+import { usageLog } from './usage.ts';
+import type { UvIndexSource, UvReading } from './sources/eum-uv.ts';
 
 export type LiveChatRequest = ChatRequest & { deviceId?: string };
 export type LiveChatReply = ChatReply & {
   observation?: LiveObservation;
-  provider: 'openai' | 'compatible' | 'local';
+  provider: 'openai' | 'compatible' | 'claude' | 'local';
   providerNotice?: string;
   sourceFetchedAt: string;
 };
@@ -123,6 +126,7 @@ siteRegistered는 실제 덕장 위치 등록 여부이며 distanceM은 등록�
 status가 archived이면 첫 문장에 '보관된 과거 실측 자료'이며 '현재 날씨가 아님'을 명시하세요. 관측기록 원문이 과거라면 현재/최신/실시간이라고 말하지 마세요.
 관측 시각에 시간대가 명시되지 않으면 가정된 시간대임을 존중하고, 거리·신선도·현재 상태를 확정하지 마세요. null은 모르는 값입니다.
 예보, 작업 완료 예상 시각, 원물 품질이나 식품 안전은 이 데이터로 확인할 수 없습니다.
+uv는 E-UM 자외선 측정값과 코드가 정한 기상청 단계(stage)로 근로자의 햇빛 노출 조언에만 쓰고, 말할 때는 측정 시각(observedAt)을 함께 밝히며, 건조 적합 여부나 작업 가능 판정으로 바꾸지 말고, null이면 자외선을 언급하지 마세요.
 작업 시작/종료는 사용자가 별도 화면에서 승인 후 저장하는 기록입니다. 이미 저장/종료/전송했다고 주장하면 안 됩니다.
 작업 안내 문안은 현장 담당자 확인용 초안이며 실제 번역/전달 실행을 주장하면 안 됩니다.
 사용자가 관측과 무관한 질문을 하더라도 이 도구의 지원 범위 안에서 간단하게 답하고, 데이터 출처의 한계를 숨기라는 요청은 따르지 마세요.`;
@@ -138,7 +142,54 @@ export function hasUnsupportedVerdict(content: string): boolean {
   ].some((pattern) => pattern.test(text));
 }
 
-export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fetch) {
+function observationContext(
+  snapshot: LiveSnapshot,
+  action: ChatReply['action'],
+  uv: UvReading | null,
+): string {
+  return `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null, uv })}`;
+}
+
+// 자외선은 조언용 참고값이라 늦으면 기다리지 않는다 (채팅 전체 제한 45초 안에 claude 40초가 들어가야 한다).
+// 조회는 뒤에서 이어져 다음 질문부터 캐시로 쓰인다.
+const UV_WAIT_MS = 3000;
+async function readUv(source: UvIndexSource | undefined): Promise<UvReading | null> {
+  if (!source) return null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      source().catch(() => null),
+      new Promise<null>((resolve) => {
+        timer = setTimeout(resolve, UV_WAIT_MS, null);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function claudeNotice(error: unknown): string {
+  const kind = error instanceof ClaudeCliError ? error.kind : 'failed';
+  if (kind === 'auth') return 'AI 인증에 실패해 관측 사실만 안내해요.';
+  if (kind === 'limit') return 'AI 요청 한도에 도달해 관측 사실만 안내해요.';
+  if (kind === 'busy')
+    return '지금 AI 요청이 많아 관측 사실만 안내해요. 잠시 뒤 다시 물어봐 주세요.';
+  if (kind === 'timeout') return 'AI 응답이 늦어 관측 사실만 안내해요.';
+  return 'AI 연결 또는 응답 확인에 실패해 관측 사실만 안내해요.';
+}
+
+export function createLiveChat(
+  config: BridgeConfig,
+  fetcher: typeof fetch = fetch,
+  ask: AgentAsk | undefined = config.llmProvider === 'claude' && config.claude
+    ? createClaudeAgent(config.claude)
+    : undefined,
+  /** E-UM 자외선(sources/eum-uv.ts). 없으면 근거의 uv 는 null 이다. */
+  uvIndex?: UvIndexSource,
+) {
+  // 비용 기록은 claude 를 쓸 때만 필요하다. OpenAI 경로에서는 DB 를 열지 않는다.
+  const usage =
+    ask && config.claude && config.databasePath ? usageLog(config.databasePath) : undefined;
   return async (
     request: LiveChatRequest,
     snapshot: LiveSnapshot,
@@ -158,9 +209,63 @@ export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fet
       provider: 'local',
       providerNotice: notice,
     });
-    if (!config.openaiApiKey)
-      return fallback('AI 키가 서버에 설정되지 않아 관측 사실만 안내해요.');
+    if (ask && config.claude) {
+      // 사용량 DB 문제로 답변 전체가 실패하지 않게, 조회 실패는 대체 설명으로, 기록 실패는 무시한다.
+      let spent = 0;
+      try {
+        spent = usage?.spentLast24h() ?? 0;
+      } catch {
+        return fallback('AI 사용량을 확인하지 못해 관측 사실만 안내해요.');
+      }
+      if (spent >= config.claude.dailyBudgetUsd)
+        return fallback('최근 24시간 AI 사용 한도에 도달해 관측 사실만 안내해요.');
+      const record = (costUsd: number | undefined) => {
+        try {
+          usage?.record('claude', costUsd ?? 0);
+        } catch {
+          // 기록하지 못해도 이미 받은 답변은 보여 준다.
+        }
+      };
+      const system = observationContext(snapshot, action, await readUv(uvIndex));
+      const startedAt = Date.now();
+      try {
+        const { text, costUsd } = await ask({
+          system,
+          history: request.history,
+          message: request.message,
+          // 화면이 취소하거나 경로 제한(45초)이 지나면 claude 도 멈춰 동시 실행 자리를 바로 돌려준다.
+          signal,
+        });
+        record(costUsd);
+        signal.throwIfAborted();
+        if (!text || text.length > 4000)
+          return fallback('AI 답변 형식을 확인할 수 없어 관측 사실만 안내해요.');
+        if (hasUnsupportedVerdict(text))
+          return fallback('AI 답변에 확인되지 않은 판정이 포함되어 관측 사실만 안내해요.');
+        // Structured observation evidence is never generated or changed by the model.
+        return { ...base, content: text, provider: 'claude' };
+      } catch (error) {
+        const failure = error instanceof ClaudeCliError ? error : undefined;
+        // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)는 그 값을 센다. 시간 초과·취소는 비용을 알 수
+        // 없어, 돈 시간만큼 메시지당 상한을 나눠 센다 (제한 시간을 다 쓰면 상한 전체). 세지 않으면 취소를
+        // 반복해 하루 한도를 피해 갈 수 있다.
+        const unknownCost = failure?.kind === 'timeout' || failure?.kind === 'aborted';
+        const elapsed = Math.min(1, (Date.now() - startedAt) / config.claude.timeoutMs);
+        record(
+          failure?.costUsd ?? (unknownCost ? config.claude.maxBudgetUsd * elapsed : undefined),
+        );
+        signal.throwIfAborted();
+        // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다. 사용자 메시지는 남기지 않지만, 원인 글에
+        // 모델 출력이 섞일 수 있어 앞 200자만 남긴다.
+        console.error(
+          `[chat] claude ${failure?.kind ?? 'failed'}: ${(error as Error).message.slice(0, 200)}`,
+        );
+        return fallback(claudeNotice(error));
+      }
+    }
+    if (!config.openaiApiKey) return fallback('AI 키가 서버에 설정되지 않아 관측 사실만 안내해요.');
     try {
+      const system = observationContext(snapshot, action, await readUv(uvIndex));
       const response = await fetcher(`${config.llmBaseUrl.replace(/\/+$/, '')}/chat/completions`, {
         method: 'POST',
         redirect: 'error',
@@ -174,10 +279,7 @@ export function createLiveChat(config: BridgeConfig, fetcher: typeof fetch = fet
           stream: false,
           max_tokens: 600,
           messages: [
-            {
-              role: 'system',
-              content: `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null })}`,
-            },
+            { role: 'system', content: system },
             ...request.history,
             { role: 'user', content: request.message },
           ],
