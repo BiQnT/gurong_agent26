@@ -105,14 +105,6 @@ export function Sidebar({
       <div className="nav-caption">워크스페이스</div>
       <nav className="main-nav">
         <button
-          className={view === 'home' ? 'active' : ''}
-          aria-current={view === 'home' ? 'page' : undefined}
-          onClick={() => onNavigate('home')}
-        >
-          <Home size={19} />
-          <span>오늘의 덕장</span>
-        </button>
-        <button
           className={view === 'chat' ? 'active' : ''}
           aria-current={view === 'chat' ? 'page' : undefined}
           onClick={() => onNavigate('chat')}
@@ -122,6 +114,14 @@ export function Sidebar({
           <span className="nav-sparkle">
             <Sparkles size={14} />
           </span>
+        </button>
+        <button
+          className={view === 'home' ? 'active' : ''}
+          aria-current={view === 'home' ? 'page' : undefined}
+          onClick={() => onNavigate('home')}
+        >
+          <Home size={19} />
+          <span>오늘의 덕장</span>
         </button>
         <button
           className={view === 'batches' ? 'active' : ''}

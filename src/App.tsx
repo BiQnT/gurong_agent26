@@ -28,6 +28,7 @@ import { ThinkingPanel } from './components/chat/ThinkingPanel';
 import { Welcome } from './components/chat/Welcome';
 import { Composer } from './components/chat/Composer';
 import { Sidebar } from './components/layout/Sidebar';
+import { MobileTabBar } from './components/layout/MobileTabBar';
 import type { View } from './types/ui';
 import { WorkspaceGate, type WorkspaceContext } from './components/WorkspaceGate';
 import { OwnerHome } from './components/OwnerHome';
@@ -101,7 +102,8 @@ function OwnerWorkspace({
     role: site.role,
     userId: user.id,
   });
-  const [view, setView] = useState<View>('home');
+  // 로그인하면 AI 도우미부터 보인다. 첫 화면(Welcome)에 오늘의 관측도 함께 나온다.
+  const [view, setView] = useState<View>('chat');
   const [guidanceId, setGuidanceId] = useState<string | undefined>();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -571,6 +573,11 @@ function OwnerWorkspace({
             <GuidanceView operations={operations} initialGuidanceId={guidanceId} />
           )}
         </main>
+        <MobileTabBar
+          view={view}
+          activeBatchCount={operations.batches.filter((batch) => batch.status === 'ongoing').length}
+          onNavigate={navigate}
+        />
         {hasMessages && view === 'chat' && !atBottom && (
           <button
             className="jump-bottom"
