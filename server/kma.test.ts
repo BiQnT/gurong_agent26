@@ -127,3 +127,35 @@ test('the source caches, never leaks keys, and survives upstream failures', asyn
   assert.deepEqual(kept.weather, weather);
   assert.equal(kept.selected?.device.provider, 'kma');
 });
+
+test('a stalled call is retried once, an HTTP refusal is not, and callers wait at most a cap', async () => {
+  let calls = 0;
+  const flaky = createKmaSource(
+    { kmaAuthKey: 'kma-secret', staleAfterMinutes: 30 },
+    async () => {
+      calls++;
+      if (calls === 1)
+        throw new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+      return new Response(raw('kma-aws816-minute.txt'));
+    },
+    () => OBSERVED + 2 * 60_000,
+  )!;
+  assert.equal((await flaky.aws())?.temperature, 13.5);
+  assert.equal(calls, 2);
+
+  let refused = 0;
+  const denied = createKmaSource({ kmaAuthKey: 'kma-secret', staleAfterMinutes: 30 }, async () => {
+    refused++;
+    return new Response(raw('kma-wrn-now-403.json'), { status: 403 });
+  })!;
+  assert.equal(await denied.aws(), null);
+  assert.equal(refused, 1);
+
+  const { within } = await import('./sources/kma.ts');
+  const never = new Promise<number | null>(() => undefined);
+  const started = Date.now();
+  assert.equal(await within(never, 50), null);
+  assert.ok(Date.now() - started < 1000);
+  assert.equal(await within(Promise.resolve(7), 50), 7);
+  assert.equal(await within(Promise.reject(new Error('x')), 50), null);
+});

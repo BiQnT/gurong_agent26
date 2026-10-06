@@ -9,7 +9,7 @@ import {
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
-import { createKmaSource } from './sources/kma.ts';
+import { createKmaSource, KMA_WAIT_MS, within } from './sources/kma.ts';
 import { createGeocoder, readGeocodeReverse, readGeocodeSearch, type Geocoder } from './geocode.ts';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { readdirSync } from 'node:fs';
@@ -151,7 +151,7 @@ export function createApiMiddleware(
   const observations = createObservationService(config, fetch, kma);
   // 덕장 위치의 비·눈, 강수량, 일출·일몰. 키가 없거나 실패하면 붙이지 않는다.
   const siteWeather = async (site: { latitude: number; longitude: number }, signal: AbortSignal) =>
-    kma ? await kma.weather(site, signal).catch(() => null) : null;
+    kma ? await within(kma.weather(site, signal), KMA_WAIT_MS) : null;
   const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config));
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');

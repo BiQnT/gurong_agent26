@@ -16,7 +16,27 @@ const NOWCAST_URL =
   'https://apihub.kma.go.kr/api/typ02/openApi/VilageFcstInfoService_2.0/getUltraSrtNcst';
 const RISESET_URL =
   'https://apis.data.go.kr/B090041/openapi/service/RiseSetInfoService/getLCRiseSetInfo';
-const TIMEOUT_MS = 10000;
+// API허브는 대개 0.5~1초에 답하지만 가끔 응답 없이 멈춘다 (2026-10-06 VM 에서 6번 중 1번 10초 초과).
+// 한 번에 4초까지만 기다리고 한 번 더 부른다.
+const ATTEMPT_TIMEOUT_MS = 4000;
+const ATTEMPTS = 2;
+/** 관측 응답이 기상청을 기다리는 최대 시간. 늦은 결과는 캐시에 남아 다음 조회부터 쓰인다. */
+export const KMA_WAIT_MS = 5000;
+
+/** 정해진 시간 안에 끝나지 않으면 null. 원래 작업은 계속된다. */
+export async function within<T>(work: Promise<T | null>, ms: number): Promise<T | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work.catch(() => null),
+      new Promise<null>((resolve) => {
+        timer = setTimeout(resolve, ms, null);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 /** 기상청 관측지점 정보(A1)로 확인한 816 구룡포. */
 export const AWS_816 = {
@@ -235,20 +255,21 @@ export function createKmaSource(
     return entry.value as Promise<T | null>;
   }
 
-  async function get(url: URL, signal?: AbortSignal): Promise<string | null> {
-    try {
-      const response = await fetcher(url, {
-        redirect: 'error',
-        signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(TIMEOUT_MS)])
-          : AbortSignal.timeout(TIMEOUT_MS),
-      });
-      if (!response.ok) return null;
-      return await response.text();
-    } catch {
-      // 오류 글에 키가 든 URL 이 섞일 수 있어 그대로 넘기지 않는다.
-      return null;
+  async function get(url: URL): Promise<string | null> {
+    for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+      try {
+        const response = await fetcher(url, {
+          redirect: 'error',
+          signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+        });
+        // HTTP 오류(권한 없음 등)는 다시 불러도 같으므로 바로 끝낸다.
+        if (!response.ok) return null;
+        return await response.text();
+      } catch {
+        // 연결이 멈추거나 끊긴 경우만 다시 부른다. 오류 글에 키가 든 URL 이 섞일 수 있어 넘기지 않는다.
+      }
     }
+    return null;
   }
 
   const awsMinute = () =>
