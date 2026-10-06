@@ -71,6 +71,7 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
       publicOrigins: [],
       cookieSecure: false,
       devBasicAuth: undefined,
+      devOpen: false,
       kmaAuthKey: undefined,
       dataGoKrKey: undefined,
       openaiApiKey: 'sk-test%2B+%3D',

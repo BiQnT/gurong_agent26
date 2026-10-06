@@ -21,6 +21,8 @@ export type BridgeConfig = {
   cookieSecure?: boolean;
   /** dev 서버 앞의 공용 암호 "아이디:비밀번호". 설정하면 dev(Vite) 의 모든 요청에 Basic 인증. */
   devBasicAuth?: string;
+  /** 암호 없이 연 dev. 화면에 필요한 파일만 준다 (DEV_OPEN=1) */
+  devOpen?: boolean;
   /** 기상청 API허브 인증키 (A1~A8, B1~B3) */
   kmaAuthKey?: string;
   /** 공공데이터포털 인증키 (B4~B6) */

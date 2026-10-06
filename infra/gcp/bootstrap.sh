@@ -159,7 +159,8 @@ if [[ ! -f "$ENV_FILE" ]]; then
   install -o root -g "$APP_USER" -m 0640 "$ROOT/dev/infra/gcp/backend.env.example" "$ENV_FILE"
   echo "$ENV_FILE 를 만들었다. 키를 채워야 채팅·기상청 호출이 동작한다."
 fi
-# dev 는 공개 주소에 열리므로 접속 암호(Basic)를 기본으로 켠다. 값은 파일에서 확인한다 (화면에 찍지 않는다).
+# dev 접속 암호(Basic). 지금 VM 은 DEV_OPEN=1 로 암호 없이 열지만(아래 dev.env), 다시 잠글 때 쓰도록 만들어 둔다.
+# 값은 파일에서 확인한다 (화면에 찍지 않는다).
 if ! grep -q '^DEV_BASIC_AUTH=.' "$ENV_FILE"; then
   password=$(od -An -N12 -tx1 /dev/urandom | tr -d ' \n')
   sed -i '/^DEV_BASIC_AUTH=/d' "$ENV_FILE"
@@ -189,7 +190,9 @@ PUBLIC_ORIGINS=https://$DOMAIN" && origin_changed=true
 write_if_changed /etc/haepung/dev.env "# bootstrap.sh 가 만든 파일. 직접 고치지 않는다 (외부 IP 가 바뀌면 bootstrap 을 다시 실행).
 PUBLIC_ORIGINS=https://$DEV_DOMAIN
 DEV_ALLOWED_HOSTS=$DEV_DOMAIN
-DEV_HMR_CLIENT_PORT=443" && origin_changed=true
+DEV_HMR_CLIENT_PORT=443
+# 암호 없이 연다. 화면에 필요한 파일만 주고 저장소의 다른 파일은 404 (ADR 0008). 지우면 DEV_BASIC_AUTH 로 잠긴다.
+DEV_OPEN=1" && origin_changed=true
 
 step 'systemd'
 install -m 644 "$ROOT"/dev/infra/gcp/systemd/*.service "$ROOT"/dev/infra/gcp/systemd/*.timer /etc/systemd/system/
@@ -264,7 +267,7 @@ cat <<EOF
 - GCP 방화벽에 tcp:80,443 이 열려 있어야 인증서 발급과 접속이 된다 (VM 안에서는 확인할 수 없다)
 - prod 배포:      sudo haepung-deploy          (기본 origin/main. 옵션은 sudo haepung-deploy --list)
 - 비밀값:         sudoedit $ROOT/env/backend.env  후  sudo systemctl restart haepung-dev haepung-prod
-- dev 접속 암호:  sudo grep DEV_BASIC_AUTH $ROOT/env/backend.env
+- dev 는 암호 없이 열린다 (DEV_OPEN=1). 다시 잠그려면 ADR 0008 참고
 - 팀원 그룹 반영:  각자 SSH 재접속
 - 주소: https://$DOMAIN (prod), https://$DEV_DOMAIN (dev)
 EOF

@@ -10,7 +10,8 @@ import {
 import { attachSiteContext } from './site-observations.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { resolve } from 'node:path';
+import { readdirSync } from 'node:fs';
+import { posix, relative, resolve, sep } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
 const API_PATHS = new Set(['/api/health', '/api/observations', '/api/chat']);
@@ -61,6 +62,7 @@ export function readBridgeConfig(env: Record<string, string>, projectRoot: strin
       .filter(Boolean),
     cookieSecure: env.COOKIE_SECURE?.trim() === '1',
     devBasicAuth: env.DEV_BASIC_AUTH?.trim() || undefined,
+    devOpen: env.DEV_OPEN?.trim() === '1',
     kmaAuthKey: env.KMA_AUTH_KEY?.trim() || undefined,
     dataGoKrKey: env.DATA_GO_KR_KEY?.trim() || undefined,
     openaiApiKey: (env.LLM_API_KEY ?? env.OPENAI_API_KEY)?.trim() || '',
@@ -273,16 +275,78 @@ function devBasicAuth(credentials: string): Connect.NextHandleFunction {
   };
 }
 
+// 암호 없이 연 dev 가 줄 수 있는 주소. 화면(index.html, src)과 라이브러리, Vite 내부, API 만이다.
+const DEV_APP_PREFIXES = [
+  '/src/',
+  '/node_modules/',
+  '/@vite/',
+  '/@react-refresh',
+  '/@id/__x00__',
+  '/api/',
+];
+
+/**
+ * 암호 없이 연 dev 는 화면에 필요한 파일만 준다. Vite 는 저장소 안의 파일을 주소대로 내주므로
+ * 그대로 열면 비공개 저장소의 서버 코드·문서·조사 자료가 공개된다. 나머지 주소는 404.
+ */
+export function devAppFilesOnly(root: string): Connect.NextHandleFunction {
+  const publicDir = resolve(root, 'public');
+  let publicFiles = new Set<string>();
+  try {
+    publicFiles = new Set(
+      readdirSync(publicDir, { recursive: true, withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map(
+          (entry) =>
+            `/${relative(publicDir, resolve(entry.parentPath, entry.name)).split(sep).join('/')}`,
+        ),
+    );
+  } catch {
+    // public/ 이 없으면 줄 파일도 없다.
+  }
+  return (request, response, next) => {
+    let path = '';
+    try {
+      // 인코딩(%2e%2e 등)과 ../ 를 풀어 실제로 가리키는 경로로 판단한다.
+      path = posix.normalize(
+        decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname),
+      );
+    } catch {
+      path = '';
+    }
+    const allowed =
+      path !== '' &&
+      !path.includes('\0') &&
+      (path === '/' ||
+        path === '/index.html' ||
+        publicFiles.has(path) ||
+        DEV_APP_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+        (path.startsWith('/@fs/') && path.includes('/node_modules/')));
+    if (allowed) {
+      next();
+      return;
+    }
+    response.statusCode = 404;
+    response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    response.setHeader('Cache-Control', 'no-store');
+    response.end('Not found');
+  };
+}
+
 export function localApiPlugin(config: BridgeConfig): Plugin {
   return {
     name: 'guryongpo-local-api',
     configureServer(server) {
-      // 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주므로 모든 요청에 암호를 먼저 묻는다.
+      // 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 준다. 암호 없이 열면(DEV_OPEN=1) 화면에
+      // 필요한 파일만 주고, 아니면 모든 요청에 암호를 먼저 묻는다.
       // preview·prod(main.ts)는 빌드 결과만 주므로 걸지 않는다.
-      if (config.devBasicAuth) server.middlewares.use(devBasicAuth(config.devBasicAuth));
-      // 공개 주소로 띄우는데 암호가 비어 있으면 저장소 전체가 열린다. 열지 않고 시작을 멈춘다.
+      if (config.devOpen) server.middlewares.use(devAppFilesOnly(config.projectRoot));
+      else if (config.devBasicAuth) server.middlewares.use(devBasicAuth(config.devBasicAuth));
+      // 공개 주소로 띄우는데 둘 다 없으면 저장소 전체가 열린다. 열지 않고 시작을 멈춘다.
       else if (config.publicOrigins?.length)
-        throw new Error('PUBLIC_ORIGINS 로 공개한 dev 서버는 DEV_BASIC_AUTH 가 있어야 시작한다.');
+        throw new Error(
+          'PUBLIC_ORIGINS 로 공개한 dev 서버는 DEV_BASIC_AUTH 나 DEV_OPEN=1 이 있어야 시작한다.',
+        );
       server.middlewares.use(createApiMiddleware(config));
     },
     configurePreviewServer(server) {
