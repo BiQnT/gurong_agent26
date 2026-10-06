@@ -2298,3 +2298,159 @@ button:active:not(:disabled) {
     font-size: 16px;
   }
 }
+
+/* 폰 하단 탭 (900px 이하). 메뉴(☰)를 열지 않고 한 번에 화면을 옮긴다. */
+.mobile-tabbar {
+  display: none;
+}
+@media (max-width: 900px) {
+  :root {
+    --tabbar-height: 60px;
+  }
+  .workspace {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .mobile-tabbar {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    flex-shrink: 0;
+    min-height: var(--tabbar-height);
+    padding: 4px 6px max(4px, env(safe-area-inset-bottom));
+    border-top: 1px solid #ededed;
+    background: var(--bg);
+  }
+  .mobile-tabbar button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    min-height: 52px;
+    padding: 3px 0;
+    border: 0;
+    background: transparent;
+    color: #737373;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-tabbar button.active {
+    color: var(--ink);
+    font-weight: 650;
+  }
+  .mobile-tab-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 28px;
+    border-radius: 14px;
+  }
+  .mobile-tabbar button.active .mobile-tab-icon {
+    background: #ededed;
+  }
+  .mobile-tab-count {
+    position: absolute;
+    top: -3px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 16px;
+    text-align: center;
+  }
+  /* 키보드가 올라와 글을 쓰는 동안에는 탭을 숨겨 입력창 자리를 넓힌다. */
+  .workspace:has(textarea:focus, input:focus) .mobile-tabbar {
+    display: none;
+  }
+  /* 화면 아래에 뜨는 안내가 탭을 가리지 않게 올린다. */
+  .app-shell .toast,
+  .app-shell .op-toast {
+    bottom: calc(var(--tabbar-height) + 14px + env(safe-area-inset-bottom));
+  }
+  .jump-bottom {
+    bottom: calc(177px + var(--tabbar-height));
+  }
+}
+
+/* 손가락으로 쓰는 화면 */
+@media (pointer: coarse) {
+  /* iOS 는 16px 보다 작은 입력칸을 누르면 화면을 확대한다. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  .icon-button {
+    width: 40px;
+    height: 40px;
+  }
+  .send-button {
+    width: 40px;
+    height: 40px;
+  }
+  /* 마우스를 올려야 보이던 대화 삭제 버튼을 항상 보이게 한다. */
+  .history-delete {
+    width: 36px;
+    height: 36px;
+    opacity: 1;
+  }
+  .op-filter-row button {
+    min-height: 36px;
+  }
+  .message-tools > .icon-button,
+  .history-heading .icon-button {
+    width: 36px;
+    height: 36px;
+  }
+  .followup-suggestions > button,
+  .weather-grade,
+  .connection-note button,
+  .sidebar-help {
+    min-height: 36px;
+  }
+}
+
+/* 폰 첫 화면(AI 도우미)에서 오늘의 관측까지 스크롤 없이 보이게 머리말을 줄인다. */
+@media (max-width: 600px) {
+  .welcome {
+    padding-top: 18px;
+  }
+  .welcome-brand {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+  .brand-mark-large {
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+  }
+  .brand-mark-large svg {
+    width: 32px;
+    height: 32px;
+  }
+  .welcome-overline {
+    margin-bottom: 6px;
+  }
+  .welcome h1 {
+    font-size: 22px;
+    line-height: 1.4;
+  }
+  .welcome-description {
+    display: none;
+  }
+  .welcome .observation-summary {
+    margin-top: 18px;
+  }
+}
