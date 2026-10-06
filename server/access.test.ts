@@ -309,6 +309,54 @@ test('dev basic auth guards every dev request with UTF-8 credentials, but not pr
   // 공개 주소로 띄우는데 암호가 비어 있으면 열린 채로 뜨지 않고 시작이 실패한다.
   const exposed = await testConfig(t, { publicOrigins: ['https://example.test:440'] });
   assert.throws(() => installed(localApiPlugin(exposed).configureServer), /DEV_BASIC_AUTH/);
+  // DEV_OPEN=1 이면 암호 없이 시작하되 화면 파일만 거르는 단계가 붙는다.
+  const openExposed = installed(localApiPlugin({ ...exposed, devOpen: true }).configureServer);
+  assert.equal(openExposed.length, 2);
+});
+
+test('an open dev server serves only the app, never other repository files', async (t) => {
+  useEnv(t, { PUBLIC_ORIGINS: `${PROD},${DEV}`, PUBLIC_TUNNEL_HOSTS: undefined });
+  const config = await testConfig(t, { devOpen: true, devBasicAuth: DEV_PASSWORD });
+  const vite = await createViteServer({
+    configFile: false,
+    root: process.cwd(),
+    logLevel: 'silent',
+    appType: 'spa',
+    plugins: [localApiPlugin({ ...config, projectRoot: process.cwd() })],
+    server: { middlewareMode: true, hmr: false, allowedHosts: [DEV_HOST] },
+    optimizeDeps: { noDiscovery: true, include: [] },
+  });
+  t.after(() => vite.close());
+  const port = await listen(t, createServer(vite.middlewares));
+  const get = (path: string) => call(port, path, { headers: { Host: DEV_HOST } });
+  // 암호 없이 화면이 열린다 (DEV_OPEN 이 DEV_BASIC_AUTH 보다 앞선다).
+  for (const path of ['/', '/index.html', '/src/main.tsx', '/favicon.svg', '/@vite/client'])
+    assert.equal((await get(path)).status, 200, path);
+  assert.equal((await get('/api/health')).status, 200);
+  const root = process.cwd();
+  assert.equal((await get(`/@fs${root}/node_modules/react/package.json`)).status, 200);
+  for (const path of [
+    '/server/workspace.ts',
+    '/docs/design/backend.md',
+    '/research/api-tests/probe-summary.md',
+    '/CLAUDE.md',
+    '/package.json',
+    '/package',
+    '/vite.config',
+    '/vite.config.ts',
+    '/.env.local',
+    '/invite/abc',
+    '/src/%2e%2e/server/workspace.ts',
+    '/src/..%2fserver/workspace.ts',
+    `/@fs${root}/server/workspace.ts`,
+    `/@fs${root}/node_modules/../server/workspace.ts`,
+    '/@fs/etc/node_modules/passwd',
+    `/@id/${root}/server/workspace.ts`,
+  ]) {
+    const response = await get(path);
+    assert.equal(response.status, 404, path);
+    assert.ok(!response.body.includes('createWorkspaceService'), path);
+  }
 });
 
 test('the real Vite dev server asks for the password before serving repository files', async (t) => {

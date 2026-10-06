@@ -16,7 +16,7 @@ API 는 하나의 미들웨어(`createApiMiddleware`)이고, 아래 세 방식�
 
 ```
 브라우저 ──https──▶ Caddy ─┬─ 443 ──▶ prod  node server/main.ts           127.0.0.1:3000  (dist + API)
-                          ├─ 443 dev.<도메인> ──▶ dev   vite + API 미들웨어 (Basic 암호) 127.0.0.1:3001
+                          ├─ 443 dev.<도메인> ──▶ dev   vite + API 미들웨어 (화면 파일만) 127.0.0.1:3001
                           └─ 80  ──▶ 443 으로 넘김
 prod, dev ──▶ 같은 SQLite 파일 (DATABASE_PATH)
 prod 전용 타이머 ──30분마다──▶ node server/collect.ts ──▶ 같은 SQLite 파일
@@ -103,7 +103,7 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 
 **쿠키.** `gwamegi_session`: `HttpOnly; SameSite=Lax; Path=/`, 30일. `Secure` 는 소켓이 TLS 이거나 `COOKIE_SECURE=1` 일 때 붙는다. Caddy 뒤의 앱은 평문 연결로 보이므로 VM 은 `COOKIE_SECURE=1` 이 필요하다. `Domain` 을 붙이지 않으므로 dev(`dev.<도메인>`)와 prod 는 쿠키가 따로다. 계정은 같은 DB 라 같지만 로그인은 각각 한다.
 
-**dev 접속 암호.** `DEV_BASIC_AUTH=아이디:비밀번호` 를 설정하면 Vite dev 서버가 정적 파일을 포함한 모든 요청에 HTTP Basic 인증을 요구한다. 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주기 때문이다. `npm run preview` 와 `main.ts` 에는 걸지 않는다. `PUBLIC_ORIGINS` 가 설정돼 있는데 `DEV_BASIC_AUTH` 가 비어 있으면 dev 서버는 공개된 채 열리지 않도록 오류로 시작을 멈춘다. 같이 쓰는 Vite 설정:
+**dev 접속 암호.** `DEV_BASIC_AUTH=아이디:비밀번호` 를 설정하면 Vite dev 서버가 정적 파일을 포함한 모든 요청에 HTTP Basic 인증을 요구한다. 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주기 때문이다. `npm run preview` 와 `main.ts` 에는 걸지 않는다. `DEV_OPEN=1` 이면 암호 대신 화면에 필요한 주소(`/`, `/index.html`, `/src/`, `/node_modules/`, `public/` 의 파일, Vite 내부 `/@vite/`·`/@react-refresh`·`/@id/__x00__`, `/api/`)만 주고 나머지는 404 다. 인코딩과 `../` 를 푼 경로로 판단하며 `DEV_BASIC_AUTH` 보다 앞선다. VM 은 이 방식이다([0008](../decisions/0008-open-dev-app-files-only.md)). `PUBLIC_ORIGINS` 가 설정돼 있는데 둘 다 없으면 dev 서버는 공개된 채 열리지 않도록 오류로 시작을 멈춘다. 같이 쓰는 Vite 설정:
 
 - `DEV_ALLOWED_HOSTS`: 쉼표 목록, Vite `allowedHosts`.
 - `DEV_HMR_CLIENT_PORT`: 화면 자동 갱신 연결을 받는 포트(Caddy 의 443).
