@@ -85,6 +85,8 @@ test('the source caches, never leaks keys, and survives upstream failures', asyn
       if (url.pathname.endsWith('nph-aws2_min')) return new Response(raw('kma-aws816-minute.txt'));
       if (url.pathname.endsWith('getUltraSrtNcst'))
         return new Response(raw('kma-ultra-srt-ncst.json'));
+      if (url.pathname.endsWith('getUltraSrtFcst'))
+        return new Response(raw('kma-ultra-srt-fcst.json'));
       return new Response(raw('datagokr-risesetinfo.xml'));
     },
     () => OBSERVED + 2 * 60_000,
@@ -99,6 +101,18 @@ test('the source caches, never leaks keys, and survives upstream failures', asyn
   assert.deepEqual(weather?.precipitation?.type, '없음');
   assert.deepEqual(weather?.sun, { date: '2026-10-06', sunrise: '06:21', sunset: '17:59' });
   assert.equal(weather?.rain?.todayMm, 0);
+  // 초단기예보: 22:05 KST 에 21:30 발표분을 묻고, 22시부터 6시간을 쓴다 (00시 빗방울)
+  const fcst = urls.find((url) => url.pathname.endsWith('getUltraSrtFcst'))!;
+  assert.equal(fcst.searchParams.get('base_time'), '2130');
+  assert.equal(weather?.forecast?.hours.length, 6);
+  assert.equal(weather?.forecast?.hours[0].at, '2026-10-06T13:00:00.000Z');
+  assert.deepEqual(
+    {
+      precipitation: weather?.forecast?.hours[2].precipitation,
+      rain: weather?.forecast?.hours[2].rain,
+    },
+    { precipitation: '빗방울', rain: '1mm 미만' },
+  );
   const nowcast = urls.find((url) => url.pathname.endsWith('getUltraSrtNcst'))!;
   assert.equal(nowcast.searchParams.get('nx'), '105');
   assert.equal(nowcast.searchParams.get('base_time'), '2100');

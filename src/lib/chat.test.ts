@@ -136,7 +136,7 @@ async function runTests() {
   assert(getDemoAssessment('unsuitable').grade === '부적합', 'Unsuitable fixture missing');
   const unavailable = getDemoAssessment('unavailable');
   assert(
-    unavailable.grade === '판정 불가' && unavailable.distanceM > 1000,
+    unavailable.grade === '판정 불가' && (unavailable.distanceM ?? 0) > 1000,
     'Distant observation must prevent assessment',
   );
   assert(

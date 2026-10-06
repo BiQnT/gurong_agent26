@@ -1,5 +1,6 @@
 import { ChevronRight, Droplets, MapPin, RefreshCw, Thermometer, Wind } from 'lucide-react';
 import type { LiveObservation, LiveSnapshot, SiteWeather } from '../../lib/live';
+import { assessDrying } from '../../lib/drying';
 import { observationTime } from './ObservationCard';
 
 type Props = {
@@ -26,6 +27,27 @@ export function ObservationSummary({
     ? snapshot?.warnings.find((warning) => warning.includes('기상청 구룡포 AWS'))
     : undefined;
   const extra = weatherLine(snapshot?.weather);
+  // 덕장이 등록돼 있으면 규칙 함수의 널기 판정을 카드에 보여 준다.
+  // 사용자가 다른 관측기를 골랐으면 같은 규칙 함수로 그 관측기의 판정을 다시 계산한다.
+  const assessment =
+    snapshot?.assessment && observation
+      ? observation.device.id === snapshot.selected?.device.id
+        ? snapshot.assessment
+        : assessDrying(observation, snapshot.weather)
+      : undefined;
+  const grade = assessment
+    ? {
+        label: assessment.grade,
+        tone:
+          assessment.grade === '적합'
+            ? 'good'
+            : assessment.grade === '주의'
+              ? 'caution'
+              : assessment.grade === '부적합'
+                ? 'bad'
+                : 'muted',
+      }
+    : null;
   return (
     <div className="observation-summary">
       <section
@@ -73,19 +95,28 @@ export function ObservationSummary({
           </span>
         </div>
         <button
-          className="weather-grade"
-          onClick={() => onAsk('선택한 관측소의 실제 데이터와 측정 시각을 설명해 줘')}
+          className={`weather-grade${grade ? ` grade-${grade.tone}` : ''}`}
+          onClick={() =>
+            onAsk(
+              grade
+                ? '지금 널어도 될까? 판정 근거를 설명해 줘'
+                : '선택한 관측소의 실제 데이터와 측정 시각을 설명해 줘',
+            )
+          }
           disabled={loading || !observation}
+          aria-label={grade ? `건조 판정 ${grade.label}, 근거 묻기` : undefined}
         >
-          {archived
-            ? '보관된 실측'
-            : kma && observation?.status === 'current'
-              ? '기상청 관측'
-              : observation?.status === 'current'
-                ? '관측 정보'
-                : observation?.status === 'stale'
-                  ? '과거 관측'
-                  : '확인 필요'}
+          {grade
+            ? grade.label
+            : archived
+              ? '보관된 실측'
+              : kma && observation?.status === 'current'
+                ? '기상청 관측'
+                : observation?.status === 'current'
+                  ? '관측 정보'
+                  : observation?.status === 'stale'
+                    ? '과거 관측'
+                    : '확인 필요'}
           <ChevronRight size={13} />
         </button>
       </section>
@@ -105,6 +136,12 @@ export function ObservationSummary({
           <span>새로고침</span>
         </button>
       </div>
+      {assessment && <p className="weather-extra weather-judgment">{assessment.summary}</p>}
+      {assessment?.advice?.map((advice) => (
+        <p key={advice} className="weather-extra">
+          {advice}
+        </p>
+      ))}
       {extra && <p className="weather-extra">{extra}</p>}
     </div>
   );

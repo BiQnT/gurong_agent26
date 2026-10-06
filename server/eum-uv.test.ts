@@ -166,7 +166,12 @@ test('chat grounding carries the UV reading in OBSERVATION_CONTEXT, or null when
     fetchedAt: '2026-10-04T03:00:00.000Z',
   };
   const withUv = await openaiSystem(async () => reading);
-  assert.deepEqual(context(withUv).uv, reading);
+  // 시각은 한국 시간 문자열로 바꿔 넘긴다 (02:59 UTC = 11:59 KST).
+  assert.deepEqual(context(withUv).uv, {
+    uvIndex: 7.4,
+    stage: '높음',
+    observedAt: '10.04 11:59 KST',
+  });
   assert.match(withUv, /uv는 E-UM 자외선 측정값/);
 
   // 실제 E-UM 조회가 실패하는 소스

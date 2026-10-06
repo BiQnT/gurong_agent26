@@ -56,7 +56,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 
 ## LLM 제공자
 
-`LLM_PROVIDER` 가 `claude` 이면 claude CLI, 그 밖에는 OpenAI 호환 HTTP API(기본)다. 어느 쪽이든 서버가 관측 근거를 확보해 시스템 프롬프트로 주고 모델은 설명만 쓴다. 모델에는 도구가 없고 판정·등급은 코드가 정한다. 응답이 확인되지 않은 판정 표현을 담았거나 호출이 실패하면 관측 사실만 말하는 로컬 설명으로 바꾸고 `provider: local` 과 `providerNotice` 를 붙인다.
+`LLM_PROVIDER` 가 `claude` 이면 claude CLI, 그 밖에는 OpenAI 호환 HTTP API(기본)다. 어느 쪽이든 서버가 관측 근거를 확보해 시스템 프롬프트로 주고 모델은 설명만 쓴다. 모델에는 도구가 없고 판정·등급은 코드가 정한다. 응답이 규칙 등급과 어긋나거나(다른 등급, 적합이 아닌데 널어도 된다는 말, 안전 보장) 호출이 실패하면 규칙 등급을 옮긴 로컬 설명으로 바꾸고 `provider: local` 과 `providerNotice` 를 붙인다. 등급 규칙은 [0010](../decisions/0010-drying-grade-rules.md).
 
 **claude CLI** (`server/claude-cli.ts`): 메시지마다 `claude -p` 프로세스 하나. 프롬프트는 stdin, 결과는 `--output-format json`. 이전 대화는 화면이 보낸 `history` 를 글로 이어 붙이고, 첫 질문도 `지금 질문:` 으로 감싼다. `/` 로 시작하는 입력은 `--disable-slash-commands` 를 줘도 CLI 가 명령으로 가로채기 때문이다.
 
@@ -125,7 +125,7 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 - **결측:** 고르지 못했거나 기준에 못 미치면(E-UM 조회 실패, 보관 자료만 있음, 1km 안에 최근 관측 없음, 기록 기준 미달) 결측 샘플을 남긴다. 장비 ID 는 `collector-missing`, 값과 `distanceM` 은 `null`, `alert` 는 `false` 이고 이유는 배치 로그의 `detail` 에 적는다. 보고서에서 결측 샘플은 결측률에만 잡히고 유효 표본·거리 검증에서는 빠진다(`getBatchReport`).
 - **한 구간에 한 번:** 로그 id 를 `collect-<30분 구간 시작 시각(ISO)>` 로 정한다. 같은 id 가 이미 있으면(타이머가 두 번 돌아도) 아무것도 더하지 않는다. 운영자가 같은 장비·같은 관측 시각을 이미 손으로 기록했다면 그 표본이 대신한다.
 - **저장:** `workspace.appendCollected(siteId, update)` 가 잠금 안에서 최신 기록에 적용한다. 운영자 저장처럼 `revision` 을 올리므로 화면의 충돌 재시도가 그대로 동작하고, 저장 전 검증과 근로자 이력 보호도 같다. 사람의 요청이 아니라 쿠키·소속 검사는 없다.
-- **하지 않는 것:** 경보, 쿨다운, 적합 등급. 샘플의 `alert` 는 항상 `false` 다.
+- **등급과 경보:** 기록한 관측마다 규칙 함수(`assessDrying`, [0010](../decisions/0010-drying-grade-rules.md))로 등급을 매겨 로그 `detail` 에 등급·이유·기준 이름을 남긴다. 강수는 기상청 초단기실황을 쓴다. 부적합이면 직전 경보로부터 1시간이 지났을 때만 `kind: alert` 로그(`alert-<구간>`)를 더하고 그 샘플의 `alert` 를 `true` 로 한다. 근로자·휴대폰 알림 발신과 기본 조언 3시간 쿨다운은 아직 없다.
 - **끝나는 법:** 한 줄 요약(`[collect] <시각> source=… sites=… batches=… recorded=… missing=… skipped=… failed=…`)을 남기고 끝난다. 덕장 한 곳의 저장이 실패하면 나머지는 계속 수집하되 종료 코드가 1 이고, 저장소를 열지 못해도 1 이다. E-UM 조회 실패는 결측으로 기록하므로 종료 코드 0 이다.
 
 ## 헬스체크
@@ -135,7 +135,7 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 ## 지금 없는 것
 
 - 이메일 확인·비밀번호 재설정 메일. 계정 복구는 `scripts/admin.ts` 로 한다.
-- 경보, 쿨다운, 적합 등급. 수집기는 관측과 결측을 기록만 한다.
+- 경보 발신(근로자·휴대폰 알림), 기본 조언 3시간 쿨다운. 경보는 배치 기록에만 남는다.
 - 기상특보(B2), 초단기·단기예보. 특보는 API허브 활용신청이 필요하다 ([호출 기록](../../research/api-tests/2026-10-06-kma-apihub.md)). 기상청 보조 자료는 [chat-api.md](chat-api.md#기상청-보조).
 - 서버 쪽 대화 저장. 대화는 브라우저 저장소에 있다.
 - 데이터베이스 표 분리. 문서 하나를 한 행에 넣는다.

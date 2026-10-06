@@ -23,6 +23,7 @@ import {
   GUIDANCE_TEMPLATES,
   type Batch,
 } from '../../lib/operations';
+import { evaluateBatch, kst } from '../../lib/drying';
 import {
   BatchBadge,
   Facts,
@@ -405,6 +406,7 @@ function GuidanceDialog({ operations }: ViewProps) {
 function ReportDialog({ operations, batch }: ViewProps & { batch: Batch }) {
   const [tab, setTab] = useState<'summary' | 'observations' | 'activity'>('summary');
   const summary = batch.report ?? getBatchReport(batch);
+  const evaluation = evaluateBatch(batch.observations);
   return (
     <Dialog
       title={batch.name}
@@ -477,8 +479,18 @@ function ReportDialog({ operations, batch }: ViewProps & { batch: Batch }) {
               <div>
                 <span>경보 횟수</span>
                 <strong>{summary.alertCount}회</strong>
-                <small>기록된 경보 · 자동 감시 미연결</small>
+                <small>부적합 진입 시 30분 수집기가 기록 · 1시간 간격</small>
               </div>
+            </div>
+            <div className="op-report-note op-report-evaluation">
+              <span>건조 판정 분포 · 지금 기준으로 다시 계산</span>
+              <p>{evaluation.summary}</p>
+              {evaluation.firstUnsuitableAt && (
+                <p>처음 부적합: {kst(evaluation.firstUnsuitableAt)}</p>
+              )}
+              <small>
+                {evaluation.thresholds.version} · 기록마다 그때의 판정은 활동 이력에 남아 있어요.
+              </small>
             </div>
             {batch.note && (
               <div className="op-report-note">

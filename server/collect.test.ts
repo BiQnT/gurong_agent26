@@ -517,3 +517,80 @@ test('when E-UM is down and only archived data exists, a current KMA AWS value n
   assert.deepEqual([summary.recorded, summary.missing], [1, 0]);
   assert.equal((await operations()).data.batches[0].observations[0].sourceDeviceId, 'kma-aws-816');
 });
+
+test('each automatic sample keeps the grade it got, and 부적합 raises one alert per hour', async (t) => {
+  const config: BridgeConfig = {
+    eumServiceKey: '',
+    openaiApiKey: '',
+    openaiModel: 'test',
+    llmBaseUrl: 'https://api.openai.com/v1',
+    timezoneOffset: '+09:00',
+    staleAfterMinutes: 30,
+    projectRoot: process.cwd(),
+  };
+  let humidity = 90;
+  // 첫 실행은 구간 시작보다 30초 늦게 기록된다 (조회가 오래 걸린 경우)
+  let clock = Date.parse('2026-10-06T13:00:30.000Z');
+  const aws = (): LiveObservation => ({
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: '기상청 AWS 816',
+      latitude: SITE.latitude + 0.002,
+      longitude: SITE.longitude,
+      provider: 'kma',
+    },
+    temperature: 8,
+    humidity,
+    windSpeed: 3,
+    observedAt: new Date(clock - 60 * 1000).toISOString(),
+    observedAtRaw: '202610062159',
+    ageMinutes: 1,
+    status: 'current',
+    issues: [],
+  });
+  const f = await fixture(t);
+  const { operations } = await siteWithBatch(f);
+  const service = createObservationService(
+    config,
+    async () => {
+      throw new Error('E-UM 을 부르면 안 된다');
+    },
+    { aws: async () => aws(), weather: async () => null },
+  );
+  const run = async () =>
+    collectOnce({
+      workspace: f.workspace,
+      observations: service,
+      now: () => clock,
+      // 기상청 실황: 비·눈 없음 (없으면 적합을 주지 않는다)
+      weather: async () => ({
+        precipitation: { type: '없음', rain1hMm: 0, observedAt: new Date(clock).toISOString() },
+        rain: null,
+        sun: null,
+      }),
+    });
+  await run(); // 22:00:30 KST 부적합 → 경보
+  clock = Date.parse('2026-10-06T13:30:10.000Z');
+  await run(); // 22:30 부적합 → 1시간 안이라 경보 없음
+  clock = Date.parse('2026-10-06T14:00:05.000Z');
+  await run(); // 23:00:05 부적합 → 기록 시각으로는 59.6분이지만 구간으로 1시간이라 경보
+  humidity = 50;
+  clock = Date.parse('2026-10-06T14:30:00.000Z');
+  await run(); // 23:30 적합
+  const batch = (await operations()).data.batches[0];
+  const alerts = batch.logs.filter((log) => log.kind === 'alert');
+  assert.equal(alerts.length, 2);
+  assert.match(alerts[0].title, /부적합 경보/);
+  assert.deepEqual(
+    batch.observations.map((item) => item.alert),
+    [true, false, true, false],
+  );
+  const recorded = batch.logs.filter((log) => log.title.includes('30분 자동 수집으로'));
+  assert.match(
+    recorded[0].detail,
+    /등급 부적합 · 습도가 매우 높아요\(90%\).* · 기준 2026-10-06 가설값/,
+  );
+  assert.match(recorded[3].detail, /등급 적합/);
+  assert.match(recorded[0].detail, /실제 관측 10\.06 21:59 KST/);
+});

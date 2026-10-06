@@ -1,20 +1,9 @@
+import { readAssessment, type Assessment } from './drying.ts';
 import { readLiveObservation, type LiveObservation } from './live.ts';
 
 export type Scenario = 'normal' | 'caution' | 'unsuitable' | 'unavailable';
 
-export type Assessment = {
-  grade: '적합' | '주의' | '부적합' | '판정 불가';
-  summary: string;
-  temperature: number | null;
-  humidity: number | null;
-  windSpeed: number | null;
-  observedAt: string;
-  ageMinutes: number;
-  distanceM: number;
-  deviceName: string;
-  source: string;
-  reasons: string[];
-};
+export type { Assessment } from './drying.ts';
 
 export type ChatReply = {
   content: string;
@@ -286,48 +275,13 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(isText);
 }
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
-}
-
-function isAssessment(value: unknown): value is Assessment {
-  if (!isObject(value)) return false;
-  if (!isText(value.grade) || !['적합', '주의', '부적합', '판정 불가'].includes(value.grade))
-    return false;
-  if (!isText(value.summary) || !isText(value.deviceName) || !isText(value.source)) return false;
-  if (!isStringArray(value.reasons) || value.reasons.length === 0) return false;
-  if (
-    !isText(value.observedAt) ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
-      value.observedAt,
-    ) ||
-    Number.isNaN(Date.parse(value.observedAt))
-  )
-    return false;
-  if (!isFiniteNumber(value.ageMinutes) || value.ageMinutes < 0) return false;
-  if (!isFiniteNumber(value.distanceM) || value.distanceM < 0) return false;
-  if (value.temperature !== null && !isFiniteNumber(value.temperature)) return false;
-  if (
-    value.humidity !== null &&
-    (!isFiniteNumber(value.humidity) || value.humidity < 0 || value.humidity > 100)
-  )
-    return false;
-  if (value.windSpeed !== null && (!isFiniteNumber(value.windSpeed) || value.windSpeed < 0))
-    return false;
-  const insufficientEvidence =
-    value.distanceM > 1000 ||
-    value.temperature === null ||
-    value.humidity === null ||
-    value.windSpeed === null;
-  return !insufficientEvidence || value.grade === '판정 불가';
-}
-
 /** Validate API or persisted replies before presenting their structured evidence. */
 export function readChatReply(value: unknown): ChatReply {
   if (!isObject(value) || !isText(value.content) || !isStringArray(value.suggestions)) {
     throw new Error('서버 응답 형식이 올바르지 않아요. 다시 요청해 주세요.');
   }
-  if (value.assessment !== undefined && !isAssessment(value.assessment)) {
+  const assessment = value.assessment === undefined ? undefined : readAssessment(value.assessment);
+  if (assessment === null) {
     throw new Error('서버의 환경 판정 데이터를 확인할 수 없어요. 다시 요청해 주세요.');
   }
   if (
@@ -352,7 +306,7 @@ export function readChatReply(value: unknown): ChatReply {
     ...(typeof value.sourceFetchedAt === 'string'
       ? { sourceFetchedAt: value.sourceFetchedAt }
       : {}),
-    ...(value.assessment === undefined ? {} : { assessment: value.assessment as Assessment }),
+    ...(assessment ? { assessment } : {}),
     ...(value.action === undefined ? {} : { action: value.action as ChatReply['action'] }),
   };
 }
