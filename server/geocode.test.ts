@@ -225,3 +225,31 @@ test('the geocode routes need a logged-in account and return the geocoder result
     405,
   );
 });
+
+test('a cancelled request leaves the line at once and is never sent', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((done) => (release = done));
+  const sent: string[] = [];
+  const geocoder = createGeocoder(
+    () => 'ua',
+    async (input) => {
+      sent.push(new URL(String(input)).searchParams.get('q') ?? '');
+      await gate;
+      return new Response('[]');
+    },
+    () => 0,
+    async () => undefined,
+  );
+  const first = geocoder.search('먼저 보낸 주소');
+  const controllers = Array.from({ length: 19 }, () => new AbortController());
+  const cancelled = controllers.map((controller, index) =>
+    geocoder.search(`취소할 주소 ${index}`, controller.signal),
+  );
+  for (const controller of controllers) controller.abort();
+  for (const pending of cancelled) await assert.rejects(pending);
+  // 취소한 요청은 대기 수에서 바로 빠져 새 요청이 429 없이 들어간다.
+  const next = geocoder.search('다음 주소');
+  release();
+  await Promise.all([first, next]);
+  assert.deepEqual(sent, ['먼저 보낸 주소', '다음 주소']);
+});

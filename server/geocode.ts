@@ -46,6 +46,15 @@ function unavailable(): never {
   );
 }
 
+function untilAborted(signal: AbortSignal): Promise<never> {
+  const stopped = new Promise<never>((_, reject) => {
+    if (signal.aborted) reject(signal.reason);
+    else signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+  });
+  stopped.catch(() => undefined);
+  return stopped;
+}
+
 export function createGeocoder(
   userAgent: () => string,
   fetcher: typeof fetch = fetch,
@@ -77,9 +86,11 @@ export function createGeocoder(
     waiting++;
     // 서버 전체에서 한 줄로 세워 Nominatim 에 1.1초에 한 번만 보낸다.
     const task = queue.then(async () => {
-      await sleep(Math.max(0, last + MIN_INTERVAL_MS - now()));
-      last = now();
+      // 이미 취소된 요청은 차례가 와도 기다리거나 보내지 않고 바로 빠진다 (뒤 사람을 늦추지 않게).
       signal?.throwIfAborted();
+      await sleep(Math.max(0, last + MIN_INTERVAL_MS - now()));
+      signal?.throwIfAborted();
+      last = now();
       let response: Response;
       try {
         response = await fetcher(url, {
@@ -106,7 +117,8 @@ export function createGeocoder(
     });
     queue = task.catch(() => undefined);
     try {
-      return await task;
+      // 취소하면 차례를 기다리지 않고 바로 돌아가 대기 수에서 빠진다.
+      return await (signal ? Promise.race([task, untilAborted(signal)]) : task);
     } finally {
       waiting--;
     }

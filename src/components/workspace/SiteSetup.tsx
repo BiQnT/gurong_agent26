@@ -37,7 +37,11 @@ export function SiteSetup({
   const lastSearched = useRef(initialSite?.address.trim() ?? '');
   const reverseRequest = useRef<AbortController | null>(null);
   const searchRequest = useRef<AbortController | null>(null);
-  const [geoBusy, setGeoBusy] = useState<'address' | 'pin' | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [reversing, setReversing] = useState(false);
+  // 응답이 늦게 와도 그때의 주소칸 값과 비교한다.
+  const addressNow = useRef(address);
+  addressNow.current = address;
   const [geoNote, setGeoNote] = useState<string | null>(null);
   const [addressSuggestion, setAddressSuggestion] = useState<string | null>(null);
   const [pinSuggestion, setPinSuggestion] = useState<GeocodeHit | null>(null);
@@ -63,12 +67,16 @@ export function SiteSetup({
 
   /** 지도에서 핀을 놓으면 그 위치의 주소를 찾아 주소칸을 채운다. */
   async function pinMoved(next: { latitude: number; longitude: number }) {
+    // 지도를 직접 누른 것이 마지막 동작이다. 늦게 오는 주소 검색 결과가 핀을 다시 옮기지 않게 끊는다.
+    searchRequest.current?.abort();
+    searchRequest.current = null;
+    setSearching(false);
     placePin(next, 'map');
     setAddressSuggestion(null);
     reverseRequest.current?.abort();
     const controller = new AbortController();
     reverseRequest.current = controller;
-    setGeoBusy('pin');
+    setReversing(true);
     setGeoNote(null);
     try {
       const { address: found } = await workspaceApi.reverseGeocode(next, controller.signal);
@@ -76,7 +84,7 @@ export function SiteSetup({
       if (!found) {
         setGeoNote('이 위치의 주소를 찾지 못했어요. 주소는 직접 입력해 주세요.');
       } else if (addressFrom.current === 'typed') {
-        if (found !== address.trim()) setAddressSuggestion(found);
+        if (found !== addressNow.current.trim()) setAddressSuggestion(found);
       } else {
         setAddress(found);
         addressFrom.current = 'map';
@@ -87,7 +95,7 @@ export function SiteSetup({
       if (!controller.signal.aborted)
         setGeoNote('주소를 찾지 못했어요. 주소는 직접 입력해 주세요.');
     } finally {
-      if (reverseRequest.current === controller) setGeoBusy(null);
+      if (reverseRequest.current === controller) setReversing(false);
     }
   }
 
@@ -96,10 +104,14 @@ export function SiteSetup({
     const query = address.trim().replace(/\s+/g, ' ');
     if (query.length < 2 || (!force && query === lastSearched.current)) return;
     lastSearched.current = query;
+    // 주소로 찾는 것이 마지막 동작이다. 진행 중인 핀 주소 찾기가 주소칸을 덮지 않게 끊는다.
+    reverseRequest.current?.abort();
+    reverseRequest.current = null;
+    setReversing(false);
     searchRequest.current?.abort();
     const controller = new AbortController();
     searchRequest.current = controller;
-    setGeoBusy('address');
+    setSearching(true);
     setGeoNote(null);
     setPinSuggestion(null);
     try {
@@ -120,7 +132,7 @@ export function SiteSetup({
       if (!controller.signal.aborted)
         setGeoNote('주소로 위치를 찾지 못했어요. 지도에서 덕장을 직접 눌러 주세요.');
     } finally {
-      if (searchRequest.current === controller) setGeoBusy(null);
+      if (searchRequest.current === controller) setSearching(false);
     }
   }
 
@@ -224,6 +236,10 @@ export function SiteSetup({
                   setAddress(event.target.value);
                   addressFrom.current = event.target.value.trim() ? 'typed' : 'empty';
                   setAddressSuggestion(null);
+                  // 고치는 중이면 이전 주소로 찾던 결과는 버린다.
+                  searchRequest.current?.abort();
+                  searchRequest.current = null;
+                  setSearching(false);
                 }}
                 onBlur={() => {
                   if (addressFrom.current === 'typed') void searchAddress(false);
@@ -242,12 +258,13 @@ export function SiteSetup({
                 type="button"
                 className="ws-text-button"
                 onClick={() => void searchAddress(true)}
-                disabled={busy || geoBusy !== null || address.trim().length < 2}
+                // 칸을 벗어나며 시작한 검색 중에도 누를 수 있다 (누르면 다시 찾아 핀을 옮긴다).
+                disabled={busy || address.trim().length < 2}
               >
-                {geoBusy === 'address' ? <BusyIcon /> : <Search size={14} />}
-                {geoBusy === 'address' ? '주소 찾는 중' : '주소로 지도에서 찾기'}
+                {searching ? <BusyIcon /> : <Search size={14} />}
+                {searching ? '주소 찾는 중' : '주소로 지도에서 찾기'}
               </button>
-              {geoBusy === 'pin' && (
+              {reversing && (
                 <p className="ws-field-note">
                   <BusyIcon /> 핀 위치의 주소를 찾고 있어요.
                 </p>
