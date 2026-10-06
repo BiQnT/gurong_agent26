@@ -177,24 +177,52 @@ export function hasUnsupportedVerdict(content: string): boolean {
   ].some((pattern) => pattern.test(text));
 }
 
+/** 문장 속 등급 주장만 뽑는다. "부적합 조건은 아니지만", "적합 기준보다" 같은 언급은 주장이 아니다. */
+function claimedGrades(text: string): DryingGrade[] {
+  const claims = new Set<DryingGrade>();
+  const grade = String.raw`(적합|주의|부적합|판정\s*불가)`;
+  const ending = String.raw`(?:입니다|이에요|예요|에요|이며|이고|으로\s*판정|로\s*판정|\s*등급|\s*단계)`;
+  // "등급은 '주의'예요", "판정: 부적합입니다", "건조 조건은 적합이에요"
+  for (const match of text.matchAll(
+    new RegExp(
+      String.raw`(?:등급|판정|건조\s*조건|널기)\s*(?:은|는|이|가|:)?\s*["'“‘「]?\s*${grade}\s*["'”’」]?\s*${ending}`,
+      'g',
+    ),
+  ))
+    claims.add(normalize(match[1]));
+  // "지금은 부적합입니다", "'적합'이에요" 처럼 등급 단어가 바로 서술되는 경우
+  for (const match of text.matchAll(
+    new RegExp(
+      String.raw`(?<![가-힣])["'“‘「]?${grade}["'”’」]?\s*(?:등급\s*)?(?:입니다|이에요|예요|에요)`,
+      'g',
+    ),
+  ))
+    claims.add(normalize(match[1]));
+  // "적합합니다/적합해요" (뒤에 부정이 없을 때), "부적합합니다"
+  if (/(?<!부)적합(?:합니다|해요)(?!\s*(?:않|아니))/.test(text)) claims.add('적합');
+  if (/부적합(?:합니다|해요)/.test(text)) claims.add('부적합');
+  return [...claims];
+}
+const normalize = (value: string): DryingGrade =>
+  (value.replace(/\s+/g, ' ') === '판정 불가' ? '판정 불가' : value) as DryingGrade;
+
 /**
- * AI 답변이 규칙 판정과 어긋나는가. 다른 등급을 말하거나, 적합이 아닌데 널어도 된다고 하거나,
+ * AI 답변이 규칙 판정과 어긋나는가. 다른 등급을 주장하거나, 부적합·판정 불가인데 널어도 된다고 하거나,
  * 안전을 보장하면 규칙 문장으로 바꾼다 (기획서: 생성형 AI 출력은 코드가 재검사).
  */
 export function contradictsAssessment(content: string, grade: DryingGrade | undefined): boolean {
-  if (!grade || grade === '판정 불가') return hasUnsupportedVerdict(content);
+  if (!grade) return hasUnsupportedVerdict(content);
   const text = content.replace(/[*_`]/g, '');
-  if (grade !== '부적합' && /부적합/.test(text)) return true;
-  if (/판정\s*불가/.test(text)) return true;
+  if (claimedGrades(text).some((claim) => claim !== grade)) return true;
   if (
-    grade !== '적합' &&
-    (/(?<!부)적합(?:합니다|해요|입니다|이에요|예요|한\s*(?:상태|조건|환경)|으로\s*판정|\s*등급)/.test(
+    (grade === '부적합' || grade === '판정 불가') &&
+    /(?:널어도|건조해도|말려도)\s*(?:괜찮|좋|됩니다|돼요)|(?:널기|말리기|건조하기)\s*(?:에\s*)?(?:좋|딱)/.test(
       text,
-    ) ||
-      /(?:널어도|건조해도|말려도)\s*(?:괜찮|좋|됩니다|돼요)/.test(text))
+    )
   )
     return true;
-  return /안전(?:합니다|해요|하다|을\s*보장)/.test(text);
+  // "안전을 보장하지는 않아요" 같은 부정은 괜찮다.
+  return /안전(?:합니다|해요)|안전을\s*보장(?:합니다|해요|해\s*드려요|할\s*수\s*있)/.test(text);
 }
 
 /** 배치 평가 요약 (AI 근거용). 최근 5개. */

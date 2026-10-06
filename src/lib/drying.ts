@@ -165,7 +165,9 @@ function unavailable(
 /** 예보·강수는 등급을 바꾸지 않는 조언으로 정리한다 (기획서: 강우·자외선은 조언으로만). */
 export function weatherAdvice(weather: SiteWeather | undefined | null): string[] {
   const advice: string[] = [];
-  const next = weather?.forecast?.hours.find((hour) => hour.precipitation !== '없음');
+  const next = weather?.forecast?.hours.find(
+    (hour) => hour.precipitation !== '없음' && hour.precipitation !== '알 수 없음',
+  );
   if (next)
     advice.push(
       `${kst(next.at)} ${next.precipitation} 예보예요 (기상청 초단기예보). 덮개나 회수를 미리 준비해 주세요.`,
@@ -256,6 +258,12 @@ export function assessDrying(
     );
   const raining = Boolean(weather?.precipitation && weather.precipitation.type !== '없음');
   const graded = gradeConditions({ temperature, humidity, windSpeed, raining }, t);
+  // 비·눈을 확인하지 못했으면 적합이라고 하지 않는다 (기상청 실황이 없거나 늦은 경우).
+  const rainUnknown = !weather?.precipitation;
+  if (rainUnknown && graded.grade === '적합') {
+    graded.grade = '주의';
+    graded.problems.push('비·눈 여부를 확인하지 못했어요');
+  }
   const summary =
     graded.grade === '적합'
       ? '습도가 낮고 바람이 있어 널기 좋은 조건이에요.'
@@ -263,10 +271,11 @@ export function assessDrying(
         ? `${graded.problems.join(', ')}. 현장 상태를 확인하고 널어 주세요.`
         : `${graded.problems.join(', ')}. 지금은 널기를 미루거나 회수를 검토해 주세요.`;
   const reasons = [...graded.reasons];
-  if (weather?.precipitation)
-    reasons.push(
-      `강수 ${weather.precipitation.type} · ${kst(weather.precipitation.observedAt)} 기상청 초단기실황`,
-    );
+  reasons.push(
+    weather?.precipitation
+      ? `강수 ${weather.precipitation.type} · ${kst(weather.precipitation.observedAt)} 기상청 초단기실황`
+      : '강수 확인 불가 · 기상청 초단기실황을 받지 못해 적합으로 판정하지 않아요',
+  );
   reasons.push(`${kst(observation.observedAt)} 측정 (${observation.ageMinutes}분 전) · ${where}`);
   return withAdvice({
     grade: graded.grade,
@@ -300,6 +309,7 @@ export function evaluateBatch(
     temperature: number | null;
     humidity: number | null;
     wind: number | null;
+    distanceM?: number | null;
   }[],
   t: DryingThresholds = DRYING_THRESHOLDS,
 ): BatchEvaluation {
@@ -312,7 +322,9 @@ export function evaluateBatch(
       item.humidity === null ||
       item.wind === null ||
       implausibleReading(item.humidity) ||
-      item.temperature < t.minTemperature
+      item.temperature < t.minTemperature ||
+      // 거리를 모르거나 1km 밖의 표본은 판정 게이트를 통과하지 못한다.
+      (item.distanceM !== undefined && (item.distanceM === null || item.distanceM > t.maxDistanceM))
     ) {
       unrated += 1;
       continue;
@@ -331,8 +343,9 @@ export function evaluateBatch(
   }
   const rated = counts.적합 + counts.주의 + counts.부적합;
   const percent = (value: number) => (rated ? Math.round((value / rated) * 100) : 0);
+  // 기록된 표본에는 그때의 비·눈이 없어 세 축만으로 다시 매긴다. 당시 판정은 수집 기록에 남아 있다.
   const summary = rated
-    ? `적합 ${percent(counts.적합)}% · 주의 ${percent(counts.주의)}% · 부적합 ${percent(counts.부적합)}% (표본 ${rated}개${unrated ? `, 결측·판정 제외 ${unrated}개` : ''})`
+    ? `적합 ${percent(counts.적합)}% · 주의 ${percent(counts.주의)}% · 부적합 ${percent(counts.부적합)}% (표본 ${rated}개${unrated ? `, 결측·판정 제외 ${unrated}개` : ''}, 비·눈 제외)`
     : '판정할 수 있는 관측 표본이 아직 없어요.';
   return { thresholds: t, counts, unrated, firstUnsuitableAt, summary };
 }
@@ -347,6 +360,16 @@ const timestamp = (value: unknown): value is string =>
   text(value) &&
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
   Number.isFinite(Date.parse(value));
+
+function validThresholds(value: unknown): value is DryingThresholds {
+  return (
+    record(value) &&
+    text(value.version) &&
+    (Object.keys(DRYING_THRESHOLDS) as (keyof DryingThresholds)[])
+      .filter((key) => key !== 'version')
+      .every((key) => finite(value[key]))
+  );
+}
 
 /** 서버·저장된 응답의 판정을 화면에 쓰기 전에 확인한다. 맞지 않으면 null. */
 export function readAssessment(value: unknown): Assessment | null {
@@ -382,8 +405,6 @@ export function readAssessment(value: unknown): Assessment | null {
     source: value.source,
     reasons: [...(value.reasons as string[])],
     ...(value.advice ? { advice: [...(value.advice as string[])] } : {}),
-    ...(record(value.thresholds) && text(value.thresholds.version)
-      ? { thresholds: value.thresholds as DryingThresholds }
-      : {}),
+    ...(validThresholds(value.thresholds) ? { thresholds: value.thresholds } : {}),
   };
 }

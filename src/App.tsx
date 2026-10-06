@@ -130,7 +130,11 @@ function OwnerWorkspace({
   } = useChat({
     siteId: site.id,
     scopeKey: `${user.id}:${site.id}`,
-    deviceId: live.deviceId || undefined,
+    // 사용자가 직접 고른 장비일 때만 보낸다. 자동 선택을 보내면 서버가 기상청 대체·이상 장비 판단을 못 한다.
+    deviceId:
+      live.preferredDeviceId && live.preferredDeviceId === live.deviceId
+        ? live.preferredDeviceId
+        : undefined,
     onNotice: setToast,
   });
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -288,7 +292,8 @@ function OwnerWorkspace({
     }
     if (reply.action === 'guidance') {
       navigate('guidance');
-      if (reply.assessment) operations.openGuidanceFromAssessment(reply.assessment);
+      if (reply.assessment)
+        operations.openGuidanceFromAssessment(reply.assessment, reply.observation ?? live.selected);
       else operations.openGuidanceFromObservation(reply.observation ?? live.selected);
     }
   }
@@ -465,7 +470,10 @@ function OwnerWorkspace({
                             }}
                             onGuide={() => {
                               navigate('guidance');
-                              operations.openGuidanceFromAssessment(message.reply!.assessment!);
+                              operations.openGuidanceFromAssessment(
+                                message.reply!.assessment!,
+                                message.reply?.observation ?? live.selected,
+                              );
                             }}
                           />
                         )}

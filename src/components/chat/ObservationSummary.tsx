@@ -1,5 +1,6 @@
 import { ChevronRight, Droplets, MapPin, RefreshCw, Thermometer, Wind } from 'lucide-react';
 import type { LiveObservation, LiveSnapshot, SiteWeather } from '../../lib/live';
+import { assessDrying } from '../../lib/drying';
 import { observationTime } from './ObservationCard';
 
 type Props = {
@@ -27,7 +28,13 @@ export function ObservationSummary({
     : undefined;
   const extra = weatherLine(snapshot?.weather);
   // 덕장이 등록돼 있으면 규칙 함수의 널기 판정을 카드에 보여 준다.
-  const assessment = snapshot?.assessment;
+  // 사용자가 다른 관측기를 골랐으면 같은 규칙 함수로 그 관측기의 판정을 다시 계산한다.
+  const assessment =
+    snapshot?.assessment && observation
+      ? observation.device.id === snapshot.selected?.device.id
+        ? snapshot.assessment
+        : assessDrying(observation, snapshot.weather)
+      : undefined;
   const grade = assessment
     ? {
         label: assessment.grade,

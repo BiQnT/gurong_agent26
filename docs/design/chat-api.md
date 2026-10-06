@@ -97,7 +97,7 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 | 판정 불가 | 1km 안 최근 관측 없음, 오래됨, 값 누락, 습도 5% 미만 같은 비정상 값, 기온 -5°C 미만 |
 | 부적합 | 비·눈(초단기실황), 풍속 14m/s 이상(강풍주의보 육상), 습도 85% 이상, 기온 15°C 초과 중 하나 |
 | 적합 | 습도 60% 미만, 풍속 2~14m/s, 기온 -5~10°C 모두 |
-| 주의 | 그 밖 |
+| 주의 | 그 밖. 비·눈을 확인하지 못했으면(기상청 실황 없음) 적합 대신 주의 |
 
 필드: `grade`, `summary`, `temperature`·`humidity`·`windSpeed`, `observedAt`·`ageMinutes`·`distanceM`(판정 불가면 `null` 가능), `deviceName`, `source`, `reasons`(축별 이유·측정 시각 KST·장비·거리), `advice`(예보·강수 조언, 등급 불변), `thresholds`(적용 기준 전체). 화면 검증기 `readAssessment` 는 등급이 있는데 수치가 없거나 1km 를 넘으면 받지 않는다.
 

@@ -522,8 +522,14 @@ export function factsFromObservation(observation?: LiveObservation | null): Guid
 export function factsFromAssessment(
   assessment: Assessment,
   observation?: LiveObservation | null,
+  recordedAt = now(),
 ): GuidanceFacts {
+  // 지난 대화의 판정 카드로 안내를 만들면 그때의 등급이 지금처럼 전달된다. 30분이 지났으면 판정 불가.
+  const stale =
+    !assessment.observedAt ||
+    Date.parse(recordedAt) - Date.parse(assessment.observedAt) > 30 * 60 * 1000;
   if (
+    stale ||
     assessment.grade === '판정 불가' ||
     assessment.temperature === null ||
     assessment.humidity === null ||
@@ -1145,8 +1151,10 @@ export function useOperations(
     openGuidance: () => open({ type: 'guidance', facts: factsFromObservation(currentObservation) }),
     openGuidanceFromObservation: (observation: LiveObservation | null = currentObservation) =>
       open({ type: 'guidance', facts: factsFromObservation(observation) }),
-    openGuidanceFromAssessment: (assessment: Assessment) =>
-      open({ type: 'guidance', facts: factsFromAssessment(assessment, currentObservation) }),
+    openGuidanceFromAssessment: (
+      assessment: Assessment,
+      observation: LiveObservation | null = currentObservation,
+    ) => open({ type: 'guidance', facts: factsFromAssessment(assessment, observation) }),
     closeDialog: () => {
       if (!saving) setDialog(null);
     },

@@ -249,3 +249,45 @@ test('an E-UM reading of 0°C and 0% is not trusted: the AWS judges, or another 
   assert.equal(alone.assessment?.grade, '판정 불가');
   assert.match(alone.assessment?.summary ?? '', /비정상/);
 });
+
+test('a device id the screen picked automatically is not an explicit pick, and a broken KMA value is not a reference', () => {
+  const aws = (humidity: number): LiveObservation => ({
+    ...observation('kma-aws-816', 36.006, 'current'),
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: 'AWS',
+      latitude: 36.006,
+      longitude: 129.5,
+      provider: 'kma',
+    },
+    humidity,
+  });
+  const stale = observation('eum', 36.001, 'stale');
+  // 화면이 지난번 자동 선택(기상청)을 그대로 보내도 자동 선택의 이유가 남는다
+  const echoed = attachSiteContext(snapshot([stale, aws(55)]), site, 'kma-aws-816');
+  assert.equal(echoed.selected?.device.id, 'kma-aws-816');
+  assert.equal(echoed.selectionReason, 'kma-no-recent-eum');
+  // 사용자가 다른 장비를 고르면 explicit
+  const picked = attachSiteContext(
+    snapshot([observation('eum', 36.001, 'current'), aws(55)]),
+    site,
+    'kma-aws-816',
+  );
+  assert.equal(picked.selectionReason, 'explicit');
+  // 기상청 값이 비정상(습도 2%)이면 정상 E-UM 을 비정상으로 몰지 않는다
+  const brokenKma = attachSiteContext(
+    snapshot([observation('eum', 36.001, 'current'), aws(2)]),
+    site,
+  );
+  assert.equal(brokenKma.selected?.device.id, 'eum');
+  assert.equal(brokenKma.selectionReason, 'eum');
+  // 가까운 장비는 정상, 먼 장비가 비정상이면 '가까운 … 비정상' 경고를 내지 않는다
+  const farBroken = { ...observation('far', 36.005, 'current'), humidity: 0 };
+  const fine = attachSiteContext(
+    snapshot([observation('near', 36.001, 'current'), farBroken]),
+    site,
+  );
+  assert.equal(fine.selected?.device.id, 'near');
+  assert.ok(!fine.warnings.some((warning) => warning.includes('가까운 E-UM')));
+});

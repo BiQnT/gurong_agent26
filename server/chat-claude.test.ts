@@ -405,3 +405,31 @@ test('the rule grade rides on the reply, the AI must keep it, and a contradictio
     assert.match(replaced.content, /가설값/);
   }
 });
+
+test('only explicit claims of another grade count as a contradiction', async () => {
+  const { contradictsAssessment: contradicts } = await import('./chat.ts');
+  const faithful: [string, string][] = [
+    ['주의', '부적합 조건은 아니지만 습도가 높아 현장 상태를 확인하고 널어 주세요.'],
+    ['적합', '부적합 조건은 없어요. 널기 좋은 조건이에요.'],
+    ['주의', '품질이나 식품 안전을 보장하지는 않아요.'],
+    ['부적합', '널기에 적합한 조건이 아니에요. 지금은 미뤄 주세요.'],
+    ['주의', '적합 등급이 되려면 습도가 60% 미만이어야 해요.'],
+    ['주의', '지난 배치는 적합 60% · 주의 20% · 부적합 20%였어요.'],
+    ['주의', '현재 널기 등급은 "주의"입니다. 현장 상태를 확인한 뒤 널어 주세요.'],
+    ['적합', '지금은 적합합니다. 널어도 됩니다.'],
+    ['주의', '현장 상태를 확인하고 널어도 됩니다.'],
+  ];
+  for (const [grade, text] of faithful)
+    assert.equal(contradicts(text, grade as '주의'), false, `${grade}: ${text}`);
+  const wrong: [string, string][] = [
+    ['주의', '지금은 적합합니다. 널어도 됩니다.'],
+    ['주의', '부적합이에요. 회수하세요.'],
+    ['부적합', "'주의' 등급이에요."],
+    ['부적합', '지금 널기 좋아요.'],
+    ['판정 불가', '등급은 적합입니다.'],
+    ['적합', '안전합니다.'],
+    ['적합', '판정 불가예요.'],
+  ];
+  for (const [grade, text] of wrong)
+    assert.equal(contradicts(text, grade as '주의'), true, `${grade}: ${text}`);
+});

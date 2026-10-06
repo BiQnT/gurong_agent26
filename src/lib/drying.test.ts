@@ -35,14 +35,20 @@ function observed(overrides: Partial<LiveObservation> = {}): LiveObservation {
   };
 }
 
+const dry: SiteWeather = {
+  precipitation: { type: '없음', rain1hMm: 0, observedAt: at },
+  rain: null,
+  sun: null,
+};
+
 test('three axes give 적합, 주의 and 부적합 the same way every time (기획서 + 보완 기준)', () => {
-  // 기획서 예시: 기온 3.2℃ · 습도 46% · 풍속 4.3m/s → 적합
-  const suitable = assessDrying(observed());
+  // 기획서 예시: 기온 3.2℃ · 습도 46% · 풍속 4.3m/s, 비·눈 없음 → 적합
+  const suitable = assessDrying(observed(), dry);
   assert.equal(suitable.grade, '적합');
   assert.equal(suitable.thresholds?.version, DRYING_THRESHOLDS.version);
   assert.ok(suitable.reasons.some((reason) => reason.includes('10.06 22:31 KST')));
   // 사용자가 겪은 상황: 기상청 AWS 13.9℃ · 83% · 2.2m/s → 기온과 습도가 높아 주의
-  const caution = assessDrying(observed({ temperature: 13.9, humidity: 83, windSpeed: 2.2 }));
+  const caution = assessDrying(observed({ temperature: 13.9, humidity: 83, windSpeed: 2.2 }), dry);
   assert.equal(caution.grade, '주의');
   assert.match(caution.summary, /기온이 적정보다 높아요\(13\.9°C\), 습도가 높아요\(83%\)/);
   // 경계값: 습도 60 은 적합이 아니고, 풍속 2 는 적합이다
@@ -86,6 +92,15 @@ test('three axes give 적합, 주의 and 부적합 the same way every time (기�
   const wet = assessDrying(observed(), rain);
   assert.equal(wet.grade, '부적합');
   assert.match(wet.summary, /비·눈이 오고 있어요/);
+});
+
+test('without a rain check the grade is never 적합', () => {
+  const unknown = assessDrying(observed());
+  assert.equal(unknown.grade, '주의');
+  assert.match(unknown.summary, /비·눈 여부를 확인하지 못했어요/);
+  assert.ok(unknown.reasons.some((reason) => reason.startsWith('강수 확인 불가')));
+  // 다른 이유로 이미 주의·부적합이면 그대로다
+  assert.equal(assessDrying(observed({ humidity: 90 })).grade, '부적합');
 });
 
 test('every gate that cannot be trusted ends in 판정 불가 with its reason', () => {
@@ -176,7 +191,21 @@ test('a batch is evaluated from its recorded samples with the current rules', ()
   assert.equal(evaluation.firstUnsuitableAt, sample(0, 0, 0, 60).observedAt);
   assert.equal(
     evaluation.summary,
-    '적합 33% · 주의 33% · 부적합 33% (표본 3개, 결측·판정 제외 2개)',
+    '적합 33% · 주의 33% · 부적합 33% (표본 3개, 결측·판정 제외 2개, 비·눈 제외)',
   );
+  // 거리를 모르거나 1km 밖인 표본(수동 기록 등)은 판정하지 않는다
+  const gated = evaluateBatch([
+    { ...sample(3, 50, 3, 0), distanceM: 300 },
+    { ...sample(3, 50, 3, 30), distanceM: null },
+    { ...sample(3, 50, 3, 60), distanceM: 1500 },
+  ]);
+  assert.deepEqual([gated.counts.적합, gated.unrated], [1, 2]);
   assert.equal(evaluateBatch([]).summary, '판정할 수 있는 관측 표본이 아직 없어요.');
+});
+
+test('a judgment older than 30 minutes is not passed on to workers as a grade', async () => {
+  const { factsFromAssessment } = await import('./operations.ts');
+  const fresh = assessDrying(observed(), dry);
+  assert.equal(factsFromAssessment(fresh, null, '2026-10-06T13:40:00.000Z').grade, '적합');
+  assert.equal(factsFromAssessment(fresh, null, '2026-10-06T14:05:00.000Z').grade, '판정 불가');
 });

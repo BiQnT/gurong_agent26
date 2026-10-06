@@ -30,7 +30,8 @@ export function attachSiteContext(
   const nearby = byDistance.filter((item) => item.status === 'current' && item.distanceM <= 1000);
   // E-UM 우선. 1km 안에 믿을 만한 최근 E-UM 값이 없을 때만 기상청 AWS 를 쓴다 (ADR 0009).
   const nearbyEum = nearby.filter((item) => !isKma(item));
-  const reference = nearby.find(isKma);
+  // 기상청 값도 비정상이면 비교 기준·대체값으로 쓰지 않는다.
+  const reference = nearby.find((item) => isKma(item) && !implausibleReading(item.humidity));
   // 습도 5% 미만처럼 나올 수 없는 값이거나 기상청과 크게 다르면 그 E-UM 값은 고르지 않는다.
   const anomalous = (item: LiveObservation) =>
     implausibleReading(item.humidity) || (reference ? differs(item, reference) : false);
@@ -41,7 +42,15 @@ export function attachSiteContext(
     : undefined;
   let selectionReason: SelectionReason = 'eum';
   let selected: LiveObservation | null;
-  if (explicit) {
+  // 화면이 자동으로 고른 장비를 그대로 보내도 사용자가 고른 것으로 치지 않는다 (자동 선택과 같으면 자동).
+  const automatic =
+    trusted ??
+    reference ??
+    skipped ??
+    byDistance.find((item) => item.status !== 'invalid' && !isKma(item)) ??
+    byDistance.find((item) => item.status !== 'invalid') ??
+    byDistance[0];
+  if (explicit && explicit.device.id !== automatic?.device.id) {
     selected = explicit;
     selectionReason = 'explicit';
   } else if (trusted) {
@@ -73,7 +82,13 @@ export function attachSiteContext(
     warnings.push(
       `E-UM ${skipped.device.name} 값(${values(skipped)})이 비정상이거나 기상청 구룡포 AWS(${values(selected)})와 크게 달라 기상청 AWS(약 ${selected.distanceM}m) 값을 기준으로 판단해요. 관측기 상태를 확인해 주세요.`,
     );
-  else if (selectionReason === 'eum' && skipped && selected && skipped !== selected)
+  else if (
+    selectionReason === 'eum' &&
+    skipped &&
+    selected &&
+    skipped !== selected &&
+    skipped.distanceM < (selected.distanceM ?? Infinity)
+  )
     warnings.push(
       `가까운 E-UM ${skipped.device.name} 값(${values(skipped)})이 비정상으로 보여 ${selected.device.name} 값을 썼어요. 관측기 상태를 확인해 주세요.`,
     );

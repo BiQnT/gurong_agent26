@@ -115,8 +115,16 @@ function collectBatch(
           : {}),
       };
       if (assessment?.grade === '부적합') {
+        // 조회가 늦어 기록 시각이 밀려도 간격이 줄지 않게 30분 구간 시작 시각으로 잰다.
+        const slotOf = (id: string, at: string) => {
+          const slot = Date.parse(id.replace(/^(?:collect|alert)-/, ''));
+          return Number.isFinite(slot) ? slot : Date.parse(at);
+        };
         const lastAlert = batch.logs.filter((log) => log.kind === 'alert').at(-1);
-        if (!lastAlert || Date.parse(recordedAt) - Date.parse(lastAlert.at) >= ALERT_COOLDOWN_MS) {
+        if (
+          !lastAlert ||
+          slotOf(logId, recordedAt) - slotOf(lastAlert.id, lastAlert.at) >= ALERT_COOLDOWN_MS
+        ) {
           const sample = updated.observations.length - 1;
           updated.observations[sample] = { ...updated.observations[sample], alert: true };
           updated.logs.push({
