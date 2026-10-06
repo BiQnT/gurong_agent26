@@ -8,6 +8,7 @@ import {
   type WorkspaceService,
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
+import { summarizeBatches, withAssessment } from './assessment.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
 import { createKmaSource, KMA_WAIT_MS, within } from './sources/kma.ts';
 import { createGeocoder, readGeocodeReverse, readGeocodeSearch, type Geocoder } from './geocode.ts';
@@ -261,10 +262,10 @@ export function createApiMiddleware(
           send(
             200,
             access
-              ? {
+              ? withAssessment({
                   ...attachSiteContext(snapshot, access.site, deviceId),
                   ...(weather ? { weather } : {}),
-                }
+                })
               : snapshot,
           );
           return;
@@ -273,15 +274,18 @@ export function createApiMiddleware(
           throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
         const input = readChatRequest(await readBody(request, controller.signal));
         const { site } = await workspace.requireMember(request, input.siteId, 'owner');
-        const [observed, weather] = await Promise.all([
+        const [observed, weather, operations] = await Promise.all([
           observations.snapshot(controller.signal, input.deviceId),
           siteWeather(site),
+          // 배치 평가는 AI 설명 근거일 뿐이라 읽지 못해도 답변은 한다.
+          workspace.operations(request, site.id).catch(() => null),
         ]);
-        const snapshot = {
+        const snapshot = withAssessment({
           ...attachSiteContext(observed, site, input.deviceId),
           ...(weather ? { weather } : {}),
-        };
-        send(200, await chat(input, snapshot, controller.signal, deadlineAt));
+        });
+        const batches = operations ? summarizeBatches(operations.data) : [];
+        send(200, await chat(input, snapshot, controller.signal, deadlineAt, batches));
       } catch (error) {
         if (controller.signal.aborted)
           send(504, {

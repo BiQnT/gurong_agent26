@@ -1,6 +1,7 @@
 import {
   Check,
   ChevronDown,
+  CloudRain,
   Droplets,
   Globe2,
   Plus,
@@ -9,6 +10,7 @@ import {
   Wind,
 } from 'lucide-react';
 import type { Assessment } from '../../lib/chat';
+import { describeThresholds } from '../../lib/drying';
 
 type AssessmentCardProps = {
   assessment: Assessment;
@@ -31,7 +33,9 @@ export function AssessmentCard({ assessment, isDemo, onStart, onGuide }: Assessm
   const unavailable = assessment.grade === '판정 불가';
   const tone =
     assessment.grade === '적합' ? 'good' : assessment.grade === '주의' ? 'caution' : 'muted';
-  const observedAt = observedAtFormatter.format(new Date(assessment.observedAt));
+  const observedAt = assessment.observedAt
+    ? `${observedAtFormatter.format(new Date(assessment.observedAt))} KST`
+    : '측정값 없음';
   return (
     <section className={`assessment-card ${tone}`} aria-label="건조 조건 판단 결과">
       <div className="assessment-title">
@@ -83,6 +87,12 @@ export function AssessmentCard({ assessment, isDemo, onStart, onGuide }: Assessm
             {reason}
           </p>
         ))}
+        {assessment.advice?.map((advice, index) => (
+          <p key={`advice-${index}`} className="assessment-advice">
+            <CloudRain size={14} />
+            {advice}
+          </p>
+        ))}
       </div>
       <details className="evidence-details">
         <summary>
@@ -93,12 +103,13 @@ export function AssessmentCard({ assessment, isDemo, onStart, onGuide }: Assessm
         <dl>
           <div>
             <dt>관측 시각</dt>
-            <dd>{observedAt} KST</dd>
+            <dd>{observedAt}</dd>
           </div>
           <div>
             <dt>데이터 경과</dt>
             <dd>
-              {assessment.ageMinutes}분 · {isDemo ? '시연' : '서버 응답'} 기준
+              {assessment.ageMinutes === null ? '확인 불가' : `${assessment.ageMinutes}분`} ·{' '}
+              {isDemo ? '시연' : '서버 응답'} 기준
             </dd>
           </div>
           <div>
@@ -107,12 +118,22 @@ export function AssessmentCard({ assessment, isDemo, onStart, onGuide }: Assessm
           </div>
           <div>
             <dt>덕장과의 거리</dt>
-            <dd>{assessment.distanceM.toLocaleString()}m</dd>
+            <dd>
+              {assessment.distanceM === null
+                ? '확인 불가'
+                : `${assessment.distanceM.toLocaleString()}m`}
+            </dd>
           </div>
           <div>
             <dt>수집 경로</dt>
             <dd>{assessment.source}</dd>
           </div>
+          {assessment.thresholds && (
+            <div>
+              <dt>적용 기준</dt>
+              <dd>{describeThresholds(assessment.thresholds)}</dd>
+            </div>
+          )}
         </dl>
         <p>
           {isDemo

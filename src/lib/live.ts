@@ -1,3 +1,5 @@
+import { readAssessment, type Assessment } from './drying.ts';
+
 export type LiveDevice = {
   id: string;
   name: string;
@@ -29,7 +31,22 @@ export type SiteWeather = {
   rain: { last60mMm: number | null; todayMm: number | null; observedAt: string } | null;
   /** 한국천문연구원 일출·일몰 (HH:MM) */
   sun: { date: string; sunrise: string; sunset: string } | null;
+  /** 기상청 초단기예보: 앞으로 6시간 (예보라서 등급을 바꾸지 않고 조언으로만 쓴다) */
+  forecast?: {
+    issuedAt: string;
+    hours: {
+      at: string;
+      temperature: number | null;
+      humidity: number | null;
+      windSpeed: number | null;
+      precipitation: string;
+      rain: string | null;
+    }[];
+  } | null;
 };
+
+/** 왜 이 관측을 골랐는지. E-UM 이 정본이고 기상청은 보조다 (ADR 0009). */
+export type SelectionReason = 'eum' | 'kma-no-recent-eum' | 'kma-eum-anomaly' | 'explicit';
 
 export type LiveSnapshot = {
   fetchedAt: string;
@@ -45,6 +62,9 @@ export type LiveSnapshot = {
   llm: { configured: boolean; model: string };
   site?: { id: string; name: string; latitude: number; longitude: number };
   weather?: SiteWeather;
+  selectionReason?: SelectionReason;
+  /** 규칙 함수의 널기 판정 (덕장이 있을 때만) */
+  assessment?: Assessment;
 };
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -124,8 +144,40 @@ function readWeather(value: unknown): SiteWeather | undefined {
     clock(s.sunset)
       ? { date: s.date, sunrise: s.sunrise, sunset: s.sunset }
       : null;
-  return precipitation || rain || sun ? { precipitation, rain, sun } : undefined;
+  const f = value.forecast;
+  const forecast =
+    record(f) &&
+    timestamp(f.issuedAt) &&
+    Array.isArray(f.hours) &&
+    f.hours.every(
+      (hour) =>
+        record(hour) &&
+        timestamp(hour.at) &&
+        (hour.temperature === null || finite(hour.temperature)) &&
+        (hour.humidity === null ||
+          (finite(hour.humidity) && hour.humidity >= 0 && hour.humidity <= 100)) &&
+        mm(hour.windSpeed) &&
+        text(hour.precipitation) &&
+        (hour.rain === null || text(hour.rain)),
+    )
+      ? {
+          issuedAt: f.issuedAt,
+          hours: (f.hours as Record<string, unknown>[]).map((hour) => ({
+            at: hour.at as string,
+            temperature: hour.temperature as number | null,
+            humidity: hour.humidity as number | null,
+            windSpeed: hour.windSpeed as number | null,
+            precipitation: hour.precipitation as string,
+            rain: hour.rain as string | null,
+          })),
+        }
+      : null;
+  return precipitation || rain || sun || forecast
+    ? { precipitation, rain, sun, forecast }
+    : undefined;
 }
+
+const SELECTION_REASONS = ['eum', 'kma-no-recent-eum', 'kma-eum-anomaly', 'explicit'];
 
 export function readLiveObservation(value: unknown): LiveObservation {
   if (
@@ -213,6 +265,11 @@ export function readLiveSnapshot(value: unknown): LiveSnapshot {
     throw new Error('선택한 관측기를 목록에서 찾을 수 없어요.');
   }
   const weather = readWeather(value.weather);
+  const assessment = value.assessment === undefined ? null : readAssessment(value.assessment);
+  const selectionReason =
+    typeof value.selectionReason === 'string' && SELECTION_REASONS.includes(value.selectionReason)
+      ? (value.selectionReason as SelectionReason)
+      : undefined;
   return {
     fetchedAt: value.fetchedAt,
     source: value.source,
@@ -229,5 +286,7 @@ export function readLiveSnapshot(value: unknown): LiveSnapshot {
     llm: { configured: value.llm.configured, model: value.llm.model },
     ...(site ? { site } : {}),
     ...(weather ? { weather } : {}),
+    ...(selectionReason ? { selectionReason } : {}),
+    ...(assessment ? { assessment } : {}),
   };
 }

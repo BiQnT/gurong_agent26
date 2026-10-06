@@ -1,3 +1,4 @@
+import { kst } from './drying.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Assessment } from './chat.ts';
 import type { LiveObservation } from './live.ts';
@@ -495,7 +496,7 @@ export function appendLiveObservation(
         id: logId,
         at: recordedAt,
         title: '최신 관측값을 기록했어요',
-        detail: `${live.device.name} · 실제 관측 ${live.observedAt} · ${nonnegative(live.distanceM) ? `덕장에서 ${Math.round(live.distanceM)}m` : '덕장 거리 미확인'}`,
+        detail: `${live.device.name} · 실제 관측 ${kst(live.observedAt)} · ${nonnegative(live.distanceM) ? `덕장에서 ${Math.round(live.distanceM)}m` : '덕장 거리 미확인'}`,
         kind: 'observation',
       },
     ],
@@ -514,6 +515,33 @@ export function factsFromObservation(observation?: LiveObservation | null): Guid
     sourceDeviceName: observation.device?.name || null,
     sourceStatus: observation.status,
     sourceIssues: [...observation.issues],
+  };
+}
+
+/** 규칙 함수의 판정을 근로자 안내에 그대로 싣는다 (운영자와 근로자가 같은 등급을 본다). */
+export function factsFromAssessment(
+  assessment: Assessment,
+  observation?: LiveObservation | null,
+): GuidanceFacts {
+  if (
+    assessment.grade === '판정 불가' ||
+    assessment.temperature === null ||
+    assessment.humidity === null ||
+    assessment.windSpeed === null ||
+    assessment.distanceM === null ||
+    assessment.observedAt === null
+  )
+    return { ...factsFromObservation(observation), grade: '판정 불가' };
+  return {
+    grade: assessment.grade,
+    temperature: assessment.temperature,
+    humidity: assessment.humidity,
+    wind: assessment.windSpeed,
+    distanceM: assessment.distanceM,
+    observedAt: assessment.observedAt,
+    sourceDeviceName: assessment.deviceName,
+    sourceStatus: 'current',
+    sourceIssues: [],
   };
 }
 
@@ -1117,8 +1145,8 @@ export function useOperations(
     openGuidance: () => open({ type: 'guidance', facts: factsFromObservation(currentObservation) }),
     openGuidanceFromObservation: (observation: LiveObservation | null = currentObservation) =>
       open({ type: 'guidance', facts: factsFromObservation(observation) }),
-    openGuidanceFromAssessment: (_assessment: Assessment) =>
-      open({ type: 'guidance', facts: factsFromObservation(currentObservation) }),
+    openGuidanceFromAssessment: (assessment: Assessment) =>
+      open({ type: 'guidance', facts: factsFromAssessment(assessment, currentObservation) }),
     closeDialog: () => {
       if (!saving) setDialog(null);
     },

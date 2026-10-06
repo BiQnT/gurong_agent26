@@ -14,6 +14,8 @@ export type { SiteWeather };
 const AWS_URL = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min';
 const NOWCAST_URL =
   'https://apihub.kma.go.kr/api/typ02/openApi/VilageFcstInfoService_2.0/getUltraSrtNcst';
+const FORECAST_URL =
+  'https://apihub.kma.go.kr/api/typ02/openApi/VilageFcstInfoService_2.0/getUltraSrtFcst';
 const RISESET_URL =
   'https://apis.data.go.kr/B090041/openapi/service/RiseSetInfoService/getLCRiseSetInfo';
 // API허브는 대개 0.5~1초에 답하지만 가끔 응답 없이 멈춘다 (2026-10-06 VM 에서 6번 중 1번 10초 초과).
@@ -202,6 +204,46 @@ export function readNowcast(payload: unknown): SiteWeather['precipitation'] {
   };
 }
 
+/** 초단기예보(A4) JSON 에서 지금 시각 이후 6시간을 읽는다. 예보라서 등급에는 쓰지 않는다. */
+export function readUltraForecast(payload: unknown, now: number): SiteWeather['forecast'] {
+  const items = (payload as { response?: { body?: { items?: { item?: unknown } } } })?.response
+    ?.body?.items?.item;
+  if (!Array.isArray(items) || !items.length) return null;
+  const rows = items as Record<string, unknown>[];
+  const issuedAt = kstIso(`${String(rows[0].baseDate)}${String(rows[0].baseTime)}`);
+  if (!issuedAt) return null;
+  const byTime = new Map<string, Record<string, string>>();
+  for (const row of rows) {
+    const key = `${String(row.fcstDate)}${String(row.fcstTime)}`;
+    if (typeof row.category !== 'string' || typeof row.fcstValue !== 'string') continue;
+    byTime.set(key, { ...byTime.get(key), [row.category]: row.fcstValue });
+  }
+  const number = (value: string | undefined) => {
+    const parsed = Number(value);
+    return value !== undefined && value !== '' && Number.isFinite(parsed) ? parsed : null;
+  };
+  const hourStart = now - (now % (60 * 60_000));
+  const hours = [...byTime.entries()]
+    .map(([key, values]) => ({ at: kstIso(key), values }))
+    .filter((entry): entry is { at: string; values: Record<string, string> } => entry.at !== null)
+    .filter((entry) => Date.parse(entry.at) >= hourStart)
+    .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
+    .slice(0, 6)
+    .map(({ at, values }) => {
+      const humidity = number(values.REH);
+      const wind = number(values.WSD);
+      return {
+        at,
+        temperature: number(values.T1H),
+        humidity: humidity !== null && humidity >= 0 && humidity <= 100 ? humidity : null,
+        windSpeed: wind !== null && wind >= 0 ? wind : null,
+        precipitation: PRECIPITATION[values.PTY ?? ''] ?? '알 수 없음',
+        rain: values.RN1 && values.RN1 !== '강수없음' ? values.RN1 : null,
+      };
+    });
+  return hours.length ? { issuedAt, hours } : null;
+}
+
 /** 출몰시각(B6) XML 에서 일출·일몰을 `HH:MM` 으로 읽는다. */
 export function readRiseSet(xml: string): SiteWeather['sun'] {
   const field = (name: string) => new RegExp(`<${name}>\\s*([^<]*?)\\s*</${name}>`).exec(xml)?.[1];
@@ -304,7 +346,9 @@ export function createKmaSource(
       // 매시 자료가 약 40분 뒤 나오므로 45분 전 시각의 정시를 묻는다.
       const base = kstParts(now() - 45 * 60_000);
       const today = kstParts(now()).date;
-      const [precipitation, aws, sun] = await Promise.all([
+      // 초단기예보는 매시 30분 자료가 약 45분 뒤 나오므로 50분 전 시각의 30분을 묻는다.
+      const issue = kstParts(now() - 50 * 60_000);
+      const [precipitation, aws, sun, forecast] = await Promise.all([
         cached(`ncst:${nx},${ny}:${base.date}${base.hour}`, 10 * 60_000, 60_000, async () => {
           const url = new URL(NOWCAST_URL);
           for (const [name, value] of Object.entries({
@@ -344,9 +388,30 @@ export function createKmaSource(
               },
             )
           : Promise.resolve(null),
+        cached(`fcst:${nx},${ny}:${issue.date}${issue.hour}`, 10 * 60_000, 60_000, async () => {
+          const url = new URL(FORECAST_URL);
+          for (const [name, value] of Object.entries({
+            pageNo: '1',
+            numOfRows: '60',
+            dataType: 'JSON',
+            base_date: issue.date,
+            base_time: `${issue.hour}30`,
+            nx: String(nx),
+            ny: String(ny),
+            authKey: kmaKey,
+          }))
+            url.searchParams.set(name, value);
+          const body = await get(url);
+          if (!body) return null;
+          try {
+            return readUltraForecast(JSON.parse(body), now());
+          } catch {
+            return null;
+          }
+        }),
       ]);
-      if (!precipitation && !aws?.rain && !sun) return null;
-      return { precipitation, rain: aws?.rain ?? null, sun };
+      if (!precipitation && !aws?.rain && !sun && !forecast) return null;
+      return { precipitation, rain: aws?.rain ?? null, sun, forecast };
     },
   };
 }

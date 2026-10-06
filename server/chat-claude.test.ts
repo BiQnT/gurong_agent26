@@ -100,7 +100,10 @@ test('claude answers are returned as provider claude without touching the observ
   const system = call.argv[call.argv.indexOf('--system-prompt') + 1];
   assert.match(system, /OBSERVATION_CONTEXT/);
   assert.match(system, /구룡포 해안 관측기/);
-  assert.match(system, /"assessment":"판정 불가"/);
+  // 덕장 판정이 없는 근거에는 등급이 없고, 시각은 한국 시간으로 간다.
+  assert.match(system, /"assessment":null/);
+  assert.match(system, /"observedAt":"10\.04 09:00 KST"/);
+  assert.ok(!system.includes('2026-10-04T'));
   assert.ok(
     !JSON.stringify(call).includes(SECRETS.eum) && !JSON.stringify(call).includes(SECRETS.openai),
   );
@@ -315,15 +318,90 @@ test('the KMA fallback reason is told only when the server chose KMA because E-U
     localExplanation(
       {
         ...chosen,
-        warnings: [
-          '덕장 1km 안 E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS(약 690m) 관측값을 대신 보여드려요.',
-        ],
+        selectionReason: 'kma-no-recent-eum',
+        warnings: [],
       },
       undefined,
     ),
     /E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS/,
   );
-  const picked = localExplanation({ ...chosen, warnings: [] }, undefined);
+  const picked = localExplanation(
+    { ...chosen, selectionReason: 'explicit', warnings: [] },
+    undefined,
+  );
   assert.match(picked, /^기상청 구룡포 AWS 관측값을 확인했어요/);
   assert.ok(!picked.includes('최근 값이 없어'));
+});
+
+test('the rule grade rides on the reply, the AI must keep it, and a contradiction is replaced by the rule sentence', async () => {
+  const { assessDrying } = await import('../src/lib/drying.ts');
+  const kmaObservation = {
+    ...observation,
+    temperature: 13.9,
+    humidity: 83,
+    windSpeed: 2.2,
+    distanceM: 690,
+    device: {
+      ...observation.device,
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      provider: 'kma' as const,
+    },
+  };
+  const graded = {
+    ...snapshot,
+    site: { id: 'site-1', name: '덕장', latitude: 35.98, longitude: 129.54 },
+    selected: kmaObservation,
+    devices: [kmaObservation.device],
+    selectionReason: 'kma-eum-anomaly' as const,
+    assessment: assessDrying(kmaObservation),
+  };
+  assert.equal(graded.assessment.grade, '주의');
+  const batches = [
+    {
+      name: '꽁치 1차',
+      status: '진행 중',
+      startedAt: '2026-10-06T00:00:00.000Z',
+      endedAt: null,
+      samples: 3,
+      evaluation: '적합 33% · 주의 67% · 부적합 0% (표본 3개)',
+      alerts: 0,
+      missingRate: 0,
+    },
+  ];
+
+  // 1) 등급을 그대로 말하는 답은 통과하고, 근거에는 판정·배치·KST 시각이 간다
+  const faithful = makeFakeClaude({
+    stdout: answer("건조 조건은 '주의'예요. 기온과 습도가 높아 현장 상태를 확인하고 널어 주세요."),
+  });
+  const ok = await createLiveChat(bridge(faithful.config))(
+    request,
+    graded,
+    live(),
+    undefined,
+    batches,
+  );
+  assert.equal(ok.provider, 'claude');
+  assert.equal(ok.assessment?.grade, '주의');
+  const system = faithful.calls()[0].argv[faithful.calls()[0].argv.indexOf('--system-prompt') + 1];
+  const context = JSON.parse(system.split('OBSERVATION_CONTEXT\n')[1]);
+  assert.equal(context.assessment.grade, '주의');
+  assert.match(context.assessment.appliedRules, /가설값/);
+  assert.equal(context.selectionReason, 'kma-eum-anomaly');
+  assert.equal(context.batches[0].startedAt, '10.06 09:00 KST');
+  assert.equal(context.observation.observedAt, '10.04 09:00 KST');
+
+  // 2) 규칙과 다른 등급(적합)이나 '널어도 됩니다' 는 규칙 문장으로 바뀌고 화면에 알린다
+  for (const text of ['지금은 적합합니다. 널어도 됩니다.', '부적합이에요. 회수하세요.']) {
+    const wrong = makeFakeClaude({ stdout: answer(text) });
+    const replaced = await createLiveChat(bridge(wrong.config))(request, graded, live());
+    assert.equal(replaced.provider, 'local', text);
+    assert.match(replaced.providerNotice ?? '', /규칙 판정과 달라 규칙 문장으로/);
+    assert.match(replaced.content, /^건조 조건은 '주의'예요\./);
+    assert.match(
+      replaced.content,
+      /비정상이거나 기상청과 크게 달라 기상청 구룡포 AWS 값을 기준으로/,
+    );
+    assert.match(replaced.content, /가설값/);
+  }
 });

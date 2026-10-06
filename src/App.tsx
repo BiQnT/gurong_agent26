@@ -288,7 +288,8 @@ function OwnerWorkspace({
     }
     if (reply.action === 'guidance') {
       navigate('guidance');
-      operations.openGuidanceFromObservation(reply.observation ?? live.selected);
+      if (reply.assessment) operations.openGuidanceFromAssessment(reply.assessment);
+      else operations.openGuidanceFromObservation(reply.observation ?? live.selected);
     }
   }
 
@@ -464,9 +465,7 @@ function OwnerWorkspace({
                             }}
                             onGuide={() => {
                               navigate('guidance');
-                              operations.openGuidanceFromObservation(
-                                message.reply?.observation ?? live.selected,
-                              );
+                              operations.openGuidanceFromAssessment(message.reply!.assessment!);
                             }}
                           />
                         )}

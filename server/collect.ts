@@ -6,7 +6,8 @@
 // 진행 중인 배치가 있는 덕장마다 1km 기준 관측을 배치 기록에 붙이고, 못 붙이면 결측 표본을 남겨
 // 보고서의 결측률에 반영한다. 검증된 건조 기준이 없으므로 등급·경보는 만들지 않는다.
 import { resolve } from 'node:path';
-import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
+import { assessDrying, type Assessment } from '../src/lib/drying.ts';
+import type { LiveObservation, LiveSnapshot, SiteWeather } from '../src/lib/live.ts';
 import {
   appendLiveObservation,
   observationRecordIssue,
@@ -15,6 +16,7 @@ import {
   type Observation,
 } from '../src/lib/operations.ts';
 import { createObservationService } from './eum.ts';
+import { createKmaSource, KMA_WAIT_MS, within } from './sources/kma.ts';
 import { attachSiteContext } from './site-observations.ts';
 import { readBridgeConfig } from './vite-api.ts';
 import { createWorkspaceService, openWorkspaceStore, type WorkspaceConfig } from './workspace.ts';
@@ -74,11 +76,15 @@ function choose(snapshot: LiveSnapshot | null, site: SiteLocation, recordedAt: s
   return { observation: selected };
 }
 
+// 부적합 경보는 1시간에 한 번만 남긴다 (기획서 US-2 쿨다운).
+const ALERT_COOLDOWN_MS = 60 * 60 * 1000;
+
 function collectBatch(
   batch: Batch,
   choice: Choice,
   recordedAt: string,
   logId: string,
+  assessment?: Assessment,
 ): { batch: Batch; outcome: Outcome } {
   // 같은 30분 구간에 이미 수집했으면(타이머가 두 번 돌아도) 아무것도 더하지 않는다.
   if (batch.logs.some((log) => log.id === logId)) return { batch, outcome: 'skipped' };
@@ -101,7 +107,27 @@ function collectBatch(
       updated.logs[last] = {
         ...updated.logs[last],
         title: '30분 자동 수집으로 관측값을 기록했어요',
+        // 그때의 규칙 판정과 적용 기준을 함께 남긴다 (기준이 바뀌어도 당시 판정을 다시 볼 수 있게).
+        ...(assessment
+          ? {
+              detail: `${updated.logs[last].detail} · 등급 ${assessment.grade} · ${assessment.summary} · 기준 ${assessment.thresholds?.version ?? '알 수 없음'}`,
+            }
+          : {}),
       };
+      if (assessment?.grade === '부적합') {
+        const lastAlert = batch.logs.filter((log) => log.kind === 'alert').at(-1);
+        if (!lastAlert || Date.parse(recordedAt) - Date.parse(lastAlert.at) >= ALERT_COOLDOWN_MS) {
+          const sample = updated.observations.length - 1;
+          updated.observations[sample] = { ...updated.observations[sample], alert: true };
+          updated.logs.push({
+            id: logId.replace(/^collect-/, 'alert-'),
+            at: recordedAt,
+            title: '부적합 경보: 회수 또는 널기 연기를 검토해 주세요',
+            detail: `${assessment.summary} 근거: ${assessment.reasons.slice(0, 3).join(' / ')}`,
+            kind: 'alert',
+          });
+        }
+      }
       return { batch: updated, outcome: 'recorded' };
     }
   } else {
@@ -136,6 +162,8 @@ function collectBatch(
 export async function collectOnce(options: {
   workspace: WorkspaceConfig;
   observations: ObservationSource;
+  /** 덕장 위치의 비·눈 (기상청). 판정의 강수 조건에 쓴다. 없으면 강수는 모르는 채로 판정한다 */
+  weather?: (site: { latitude: number; longitude: number }) => Promise<SiteWeather | null>;
   now?: () => number;
 }): Promise<CollectSummary> {
   const now = options.now ?? Date.now;
@@ -182,6 +210,12 @@ export async function collectOnce(options: {
 
   for (const site of sites) {
     const choice = choose(snapshot, site, recordedAt);
+    const weather =
+      'observation' in choice && options.weather
+        ? await within(options.weather(site), KMA_WAIT_MS)
+        : null;
+    const assessment =
+      'observation' in choice ? assessDrying(choice.observation, weather) : undefined;
     const counts = { batches: 0, recorded: 0, missing: 0, skipped: 0 };
     try {
       // 잠금을 잡은 뒤 최신 기록에 적용한다. 그 사이 운영자가 종료한 배치는 건너뛴다.
@@ -191,7 +225,7 @@ export async function collectOnce(options: {
         const batches = data.batches.map((batch) => {
           if (batch.status !== 'ongoing') return batch;
           counts.batches += 1;
-          const result = collectBatch(batch, choice, recordedAt, logId);
+          const result = collectBatch(batch, choice, recordedAt, logId, assessment);
           counts[result.outcome] += 1;
           if (result.batch !== batch) changed = true;
           return result.batch;
@@ -223,9 +257,11 @@ if (import.meta.main) {
   const projectRoot = resolve(import.meta.dirname, '..');
   const config = readBridgeConfig(process.env as Record<string, string>, projectRoot);
   try {
+    const kma = createKmaSource(config);
     const summary = await collectOnce({
       workspace: config,
-      observations: createObservationService(config),
+      observations: createObservationService(config, fetch, kma),
+      ...(kma ? { weather: (site) => kma.weather(site) } : {}),
     });
     console.log(formatSummary(summary));
     if (summary.failedSites) process.exitCode = 1;

@@ -2472,3 +2472,21 @@ button:active:not(:disabled) {
   font-size: 11px;
   line-height: 1.6;
 }
+
+/* 관측 카드의 널기 판정 (규칙 함수) */
+.weather-grade.grade-good {
+  background: #e7f4ec;
+  color: #1f6b3a;
+}
+.weather-grade.grade-caution {
+  background: #fdf3dc;
+  color: #7a5a12;
+}
+.weather-grade.grade-bad {
+  background: #fbe5e2;
+  color: #8a2e22;
+}
+.weather-judgment {
+  color: #404040;
+  font-weight: 500;
+}

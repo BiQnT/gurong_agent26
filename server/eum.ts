@@ -460,6 +460,7 @@ export function createObservationService(
         devices,
         observations: all,
         selected: useKma ? aws : selectObservation(deviceId ? all : observations, deviceId),
+        selectionReason: useKma ? 'kma-no-recent-eum' : deviceId ? 'explicit' : 'eum',
         warnings,
         status: data.status,
         ...(data.archiveSourceDate ? { archiveSourceDate: data.archiveSourceDate } : {}),
