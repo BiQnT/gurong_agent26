@@ -38,6 +38,10 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 | `GET /api/health`                         | 저장소 읽기 확인, 서버 모드·커밋·저장 schema, E-UM 설정 여부, LLM 제공자·설정 여부·모델 이름 |
 | `GET /api/observations?siteId=덕장ID&deviceId=관측기ID` | 실제 장비 목록·관측값·선택 관측·출처·한계              |
 | `POST /api/chat`                          | 관측 근거와 완성된 설명, 처리 제공자, 선택적 작업 의도 |
+| `GET /api/geocode/search?q=주소`          | 로그인 필요. 주소 → 좌표 후보 최대 3개 `{ results: [{ latitude, longitude, label }] }` |
+| `GET /api/geocode/reverse?lat=위도&lng=경도` | 로그인 필요. 좌표 → 한국식 주소 `{ address }` (없으면 `null`) |
+
+주소 검색은 OpenStreetMap Nominatim 을 서버가 대신 부른다. 서버 전체에서 1.1초에 한 번, 하루 캐시, 대기 20건을 넘으면 429 `GEOCODER_BUSY`, 연결 실패는 502 `GEOCODER_UNAVAILABLE`, 입력 오류는 400 `INVALID_ADDRESS`·`INVALID_LOCATION` 이다. 한국은 도로·마을 단위까지만 찾으므로 화면은 결과로 핀을 근처에 놓고 정확한 위치는 사용자가 맞춘다. 호출 기록: [2026-10-06 Nominatim](../../research/api-tests/2026-10-06-nominatim-geocode.md).
 
 `GET /api/health` 응답은 `{ mode, eum: { configured }, llm: { provider, configured, model }, commit, schema }`이다. `mode`는 운영 서버(`main.ts`)에서 `server`, Vite 개발·미리보기에서 `local-bridge`다. `llm.provider`는 `openai` 또는 `claude`다. `commit`은 서버가 받은 `GIT_COMMIT`이며 없으면 `null`, `schema`는 저장 문서의 형식 번호다. 저장소를 읽지 못하면 `{ error, code }`와 HTTP 503을 돌려주며, 배포 스크립트가 이 응답으로 새 버전을 확인한다. `configured`는 키가 설정되었다는 뜻이며 실제 인증 성공을 검증하지 않는다. claude 제공자는 키 대신 서버의 로그인·토큰을 쓰므로 선택만으로 `true`다.
 

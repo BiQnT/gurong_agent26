@@ -1,7 +1,7 @@
-import { lazy, Suspense, useId, useRef, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, Check, MapPin, Radio, Users } from 'lucide-react';
-import { workspaceApi, type Site } from '../../lib/workspace';
+import { ArrowRight, Check, MapPin, Radio, Search, Users } from 'lucide-react';
+import { workspaceApi, type GeocodeHit, type Site } from '../../lib/workspace';
 import { BrandMark } from '../BrandMark';
 import type { SiteLocation } from './LocationPicker';
 import { BusyIcon, errorMessage, FormError } from './shared';
@@ -31,9 +31,98 @@ export function SiteSetup({
   const [confirmed, setConfirmed] = useState(Boolean(initialSite));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 주소와 핀은 서로를 채운다. 사용자가 직접 쓴 주소·직접 놓은 핀은 덮어쓰지 않고 바꿀지 묻는다.
+  const addressFrom = useRef<'empty' | 'typed' | 'map'>(initialSite ? 'typed' : 'empty');
+  const pinFrom = useRef<'none' | 'map' | 'address'>(initialSite ? 'map' : 'none');
+  const lastSearched = useRef(initialSite?.address.trim() ?? '');
+  const reverseRequest = useRef<AbortController | null>(null);
+  const searchRequest = useRef<AbortController | null>(null);
+  const [geoBusy, setGeoBusy] = useState<'address' | 'pin' | null>(null);
+  const [geoNote, setGeoNote] = useState<string | null>(null);
+  const [addressSuggestion, setAddressSuggestion] = useState<string | null>(null);
+  const [pinSuggestion, setPinSuggestion] = useState<GeocodeHit | null>(null);
   const submitting = useRef(false);
   const id = useId();
   const reducedMotion = useReducedMotion();
+
+  useEffect(
+    () => () => {
+      reverseRequest.current?.abort();
+      searchRequest.current?.abort();
+    },
+    [],
+  );
+
+  function placePin(next: { latitude: number; longitude: number }, from: 'map' | 'address') {
+    setLocation(next);
+    setConfirmed(false);
+    setError(null);
+    pinFrom.current = from;
+    setPinSuggestion(null);
+  }
+
+  /** 지도에서 핀을 놓으면 그 위치의 주소를 찾아 주소칸을 채운다. */
+  async function pinMoved(next: { latitude: number; longitude: number }) {
+    placePin(next, 'map');
+    setAddressSuggestion(null);
+    reverseRequest.current?.abort();
+    const controller = new AbortController();
+    reverseRequest.current = controller;
+    setGeoBusy('pin');
+    setGeoNote(null);
+    try {
+      const { address: found } = await workspaceApi.reverseGeocode(next, controller.signal);
+      if (controller.signal.aborted) return;
+      if (!found) {
+        setGeoNote('이 위치의 주소를 찾지 못했어요. 주소는 직접 입력해 주세요.');
+      } else if (addressFrom.current === 'typed') {
+        if (found !== address.trim()) setAddressSuggestion(found);
+      } else {
+        setAddress(found);
+        addressFrom.current = 'map';
+        lastSearched.current = found;
+        setGeoNote('지도 위치로 주소를 채웠어요. 번지·동은 직접 고쳐 주세요.');
+      }
+    } catch {
+      if (!controller.signal.aborted)
+        setGeoNote('주소를 찾지 못했어요. 주소는 직접 입력해 주세요.');
+    } finally {
+      if (reverseRequest.current === controller) setGeoBusy(null);
+    }
+  }
+
+  /** 입력한 주소로 위치를 찾는다. force 는 버튼으로 직접 요청한 경우 (직접 놓은 핀도 옮긴다). */
+  async function searchAddress(force: boolean) {
+    const query = address.trim().replace(/\s+/g, ' ');
+    if (query.length < 2 || (!force && query === lastSearched.current)) return;
+    lastSearched.current = query;
+    searchRequest.current?.abort();
+    const controller = new AbortController();
+    searchRequest.current = controller;
+    setGeoBusy('address');
+    setGeoNote(null);
+    setPinSuggestion(null);
+    try {
+      const { results } = await workspaceApi.geocode(query, controller.signal);
+      if (controller.signal.aborted) return;
+      const hit = results[0];
+      if (!hit) {
+        setGeoNote('주소로 위치를 찾지 못했어요. 지도에서 덕장을 직접 눌러 주세요.');
+      } else if (force || pinFrom.current !== 'map') {
+        placePin(hit, 'address');
+        setGeoNote(
+          `‘${hit.label}’ 근처로 옮겼어요. 번지까지는 찾지 못하니 핀을 실제 덕장 위치로 옮겨 주세요.`,
+        );
+      } else {
+        setPinSuggestion(hit);
+      }
+    } catch {
+      if (!controller.signal.aborted)
+        setGeoNote('주소로 위치를 찾지 못했어요. 지도에서 덕장을 직접 눌러 주세요.');
+    } finally {
+      if (searchRequest.current === controller) setGeoBusy(null);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -131,7 +220,14 @@ export function SiteSetup({
               <textarea
                 id={`${id}-address`}
                 value={address}
-                onChange={(event) => setAddress(event.target.value)}
+                onChange={(event) => {
+                  setAddress(event.target.value);
+                  addressFrom.current = event.target.value.trim() ? 'typed' : 'empty';
+                  setAddressSuggestion(null);
+                }}
+                onBlur={() => {
+                  if (addressFrom.current === 'typed') void searchAddress(false);
+                }}
                 required
                 maxLength={240}
                 placeholder="덕장을 찾을 수 있는 주소를 입력해 주세요"
@@ -139,8 +235,58 @@ export function SiteSetup({
                 rows={3}
                 disabled={busy}
               />
-              <small>주소 입력 후, 지도에서 정확한 위치를 선택해 주세요.</small>
+              <small>주소를 쓰면 지도가 그 근처로, 지도를 누르면 주소가 채워져요.</small>
             </label>
+            <div className="ws-geo" aria-live="polite">
+              <button
+                type="button"
+                className="ws-text-button"
+                onClick={() => void searchAddress(true)}
+                disabled={busy || geoBusy !== null || address.trim().length < 2}
+              >
+                {geoBusy === 'address' ? <BusyIcon /> : <Search size={14} />}
+                {geoBusy === 'address' ? '주소 찾는 중' : '주소로 지도에서 찾기'}
+              </button>
+              {geoBusy === 'pin' && (
+                <p className="ws-field-note">
+                  <BusyIcon /> 핀 위치의 주소를 찾고 있어요.
+                </p>
+              )}
+              {geoNote && <p className="ws-field-note">{geoNote}</p>}
+              {addressSuggestion && (
+                <div className="ws-geo-suggestion">
+                  <span>
+                    지도 위치 주소: <strong>{addressSuggestion}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    className="ws-text-button"
+                    onClick={() => {
+                      setAddress(addressSuggestion);
+                      addressFrom.current = 'map';
+                      lastSearched.current = addressSuggestion;
+                      setAddressSuggestion(null);
+                    }}
+                  >
+                    주소 바꾸기
+                  </button>
+                </div>
+              )}
+              {pinSuggestion && (
+                <div className="ws-geo-suggestion">
+                  <span>
+                    입력한 주소 위치: <strong>{pinSuggestion.label}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    className="ws-text-button"
+                    onClick={() => placePin(pinSuggestion, 'address')}
+                  >
+                    핀 옮기기
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="ws-setup-note">
               <Radio size={19} />
               <div>
@@ -165,11 +311,7 @@ export function SiteSetup({
                 value={location}
                 confirmed={confirmed}
                 disabled={busy}
-                onChange={(next) => {
-                  setLocation(next);
-                  setConfirmed(false);
-                  setError(null);
-                }}
+                onChange={(next) => void pinMoved(next)}
                 onConfirm={setConfirmed}
               />
             </Suspense>
