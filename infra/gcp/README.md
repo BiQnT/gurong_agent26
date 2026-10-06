@@ -8,7 +8,7 @@
 | | 주소 | 앱 (내부) | 접속 암호 |
 | --- | --- | --- | --- |
 | prod | `https://35-192-216-232.sslip.io` (80 은 https 로 넘김) | `node server/main.ts` 127.0.0.1:3000 | 없음 (앱 로그인) |
-| dev | `https://35-192-216-232.sslip.io:440` | `vite` 127.0.0.1:3001 (저장하면 바로 반영) | Basic (`backend.env` 의 `DEV_BASIC_AUTH`) |
+| dev | `https://dev.35-192-216-232.sslip.io` (80 은 https 로 넘김) | `vite` 127.0.0.1:3001 (저장하면 바로 반영) | Basic (`backend.env` 의 `DEV_BASIC_AUTH`) |
 
 ## 구성
 
@@ -30,12 +30,11 @@
 ```
 
 - 유닛은 `infra/gcp/systemd/`. 서비스는 `haepung` 계정으로 돌고, NoNewPrivileges·PrivateTmp·ProtectSystem=full·ProtectHome 으로 좁힌다 (`/srv`·`/var` 는 쓰기 가능).
-- Caddy 가 80·443·440 을 받아 앱(127.0.0.1)으로 넘긴다. 440 은 Vite 의 웹소켓(화면 자동 갱신)도 같이 넘긴다.
-- 443(prod)과 440(dev) 응답에는 `X-Frame-Options: DENY` 와 `Content-Security-Policy: frame-ancestors 'none'` 을 붙인다. 다른 사이트가 화면을 iframe 으로 감싸 덕장 주인의 버튼을 누르게 만드는 것(클릭재킹)을 막는다. 80 은 https 로 넘기기만 한다.
+- Caddy 가 80·443 을 받아 앱(127.0.0.1)으로 넘긴다. 443 은 주소 이름으로 prod(`<도메인>`)와 dev(`dev.<도메인>`)를 나누고, dev 는 Vite 의 웹소켓(화면 자동 갱신)도 같이 넘긴다. 이유는 [0007](../../docs/decisions/0007-dev-subdomain-on-443.md).
+- prod 와 dev 응답에는 `X-Frame-Options: DENY` 와 `Content-Security-Policy: frame-ancestors 'none'` 을 붙인다. 다른 사이트가 화면을 iframe 으로 감싸 덕장 주인의 버튼을 누르게 만드는 것(클릭재킹)을 막는다. 80 은 https 로 넘기기만 한다.
 - 수집기: `haepung-collect.timer` 가 매시 00분·30분에 `haepung-collect.service`(oneshot, prod 와 같은 환경, `Nice=10`, 시간 제한 300초)를 띄운다. current 에 `server/collect.ts` 가 없는 옛 release 면 건너뛴다. 동작은 [수집기](../../docs/design/backend.md#수집기).
 - 인증서는 Caddy 가 자동 발급한다. sslip.io 는 공용 도메인이라 발급 한도에 걸릴 수 있다 (`journalctl -u caddy`, Caddy 가 다른 발급처로 재시도한다).
-- 방화벽(tcp:80,443,440)은 VM 안에서 바꿀 수 없다. 소유 계정에서 규칙을 만들어야 한다:
-  `gcloud compute firewall-rules create haepung-web --network=default --allow=tcp:80,tcp:443,tcp:440 --target-tags=haepung-web` 후 VM 에 태그 추가.
+- 방화벽은 tcp:80,443 만 있으면 된다. 지금 VM 의 `http-server`·`https-server` 태그(GCP 기본 규칙)가 연다. 방화벽은 VM 안(sudo)에서 바꿀 수 없고, GCP 프로젝트에 권한(예: Compute Security Admin)이 있는 계정이 콘솔이나 `gcloud` 로 바꾼다.
 - `claude` CLI 는 전역 설치 (버전은 `bootstrap.sh` 의 `CLAUDE_CODE_VERSION`). 서버도 팀원도 같은 걸 쓴다.
 - 옛 `haepung.service` (vite preview 4173)는 bootstrap 이 끄고 비활성화한다. 파일과 `data/`·`env/` 는 지우지 않는다.
 
@@ -192,7 +191,7 @@ df -h /
 
 외부 IP 가 바뀌면 주소(`<IP 를 -로>.sslip.io`)도 바뀐다. 같은 VM 에서 IP 만 바뀐 경우는 4번(bootstrap 재실행)만 하면 된다.
 
-1. 새 VM: Debian 12, 팀원 계정·SSH 키, GCP 방화벽 tcp:22,80,443,440. Node 22.18 이상은 bootstrap 이 없으면 설치한다.
+1. 새 VM: Debian 12, 팀원 계정·SSH 키, GCP 방화벽 tcp:22,80,443 (`http-server`·`https-server` 태그). Node 22.18 이상은 bootstrap 이 없으면 설치한다.
 2. 옛 VM 에서 가져올 것: `env/haepung.env`, `env/backend.env` (`scp` 로 내 맥을 거쳐 옮기고 화면에 찍지 않는다), 최신 DB 백업 하나.
 3. 새 VM 에서 "처음 한 번" 1-2 단계 (deploy key 는 새로 만들어진다. 옛 키는 `gh repo deploy-key delete` 로 지운다).
 4. `sudo bash /srv/haepung/dev/infra/gcp/bootstrap.sh`: 메타데이터의 외부 IP 로 Caddyfile 과 `/etc/haepung/*.env` 를 다시 만든다.

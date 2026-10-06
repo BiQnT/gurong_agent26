@@ -16,7 +16,7 @@ API 는 하나의 미들웨어(`createApiMiddleware`)이고, 아래 세 방식�
 
 ```
 브라우저 ──https──▶ Caddy ─┬─ 443 ──▶ prod  node server/main.ts           127.0.0.1:3000  (dist + API)
-                          ├─ 440 ──▶ dev   vite + API 미들웨어 (Basic 암호) 127.0.0.1:3001
+                          ├─ 443 dev.<도메인> ──▶ dev   vite + API 미들웨어 (Basic 암호) 127.0.0.1:3001
                           └─ 80  ──▶ 443 으로 넘김
 prod, dev ──▶ 같은 SQLite 파일 (DATABASE_PATH)
 prod 전용 타이머 ──30분마다──▶ node server/collect.ts ──▶ 같은 SQLite 파일
@@ -96,17 +96,17 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 
 1. `Host` 가 루프백(`localhost`, `127.0.0.1`, `[::1]`)이거나 `PUBLIC_ORIGINS` 의 호스트여야 한다. 개발용 터널 호스트(`PUBLIC_TUNNEL_HOSTS`)도 허용한다.
 2. 연결한 쪽(소켓)이 루프백이어야 한다. 원격 요청은 같은 VM 의 Caddy 를 거쳐서만 들어온다.
-3. 호스트가 `PUBLIC_ORIGINS` 에 해당하면 `Origin` 헤더가 있을 때 **목록의 전체 출처(스킴·호스트·포트)와 정확히 같아야** 하고, `Sec-Fetch-Site` 는 없거나 `same-origin`·`none` 이어야 한다. 이름이 같고 포트만 다른 출처(dev 440 의 화면이 prod 443 을 부르는 경우)는 거부한다. dev·prod 가 쿠키와 DB 를 같이 쓰기 때문이다. 기본 포트(443, 80)는 `Host` 에서 생략돼도 받는다.
+3. 호스트가 `PUBLIC_ORIGINS` 에 해당하면 `Origin` 헤더가 있을 때 **목록의 전체 출처(스킴·호스트·포트)와 정확히 같아야** 하고, `Sec-Fetch-Site` 는 없거나 `same-origin`·`none` 이어야 한다. 이름이나 포트가 다른 출처(dev.<도메인> 의 화면이 prod 를 부르는 경우)는 같은 사이트(same-site)여도 거부한다. dev·prod 가 DB 를 같이 쓰기 때문이다. 기본 포트(443, 80)는 `Host` 에서 생략돼도 받는다.
 4. 루프백·터널이면 `Origin` 이 `Host` 와 같은 출처(터널은 호스트 이름만)이고 `Sec-Fetch-Site` 가 `cross-site` 가 아니어야 한다.
 
 `PUBLIC_ORIGINS` 는 쉼표로 구분한 전체 출처 목록이다. 요청마다 읽으며, `.env` 파일의 값은 시작할 때 프로세스 환경으로 옮겨진다(이미 있는 값은 덮지 않는다).
 
-**쿠키.** `gwamegi_session`: `HttpOnly; SameSite=Lax; Path=/`, 30일. `Secure` 는 소켓이 TLS 이거나 `COOKIE_SECURE=1` 일 때 붙는다. Caddy 뒤의 앱은 평문 연결로 보이므로 VM 은 `COOKIE_SECURE=1` 이 필요하다. 쿠키는 포트별로 나뉘지 않아 같은 호스트의 dev(440)와 prod(443)는 로그인이 공유된다.
+**쿠키.** `gwamegi_session`: `HttpOnly; SameSite=Lax; Path=/`, 30일. `Secure` 는 소켓이 TLS 이거나 `COOKIE_SECURE=1` 일 때 붙는다. Caddy 뒤의 앱은 평문 연결로 보이므로 VM 은 `COOKIE_SECURE=1` 이 필요하다. `Domain` 을 붙이지 않으므로 dev(`dev.<도메인>`)와 prod 는 쿠키가 따로다. 계정은 같은 DB 라 같지만 로그인은 각각 한다.
 
 **dev 접속 암호.** `DEV_BASIC_AUTH=아이디:비밀번호` 를 설정하면 Vite dev 서버가 정적 파일을 포함한 모든 요청에 HTTP Basic 인증을 요구한다. 공개된 Vite dev 는 저장소의 코드·문서 파일을 그대로 주기 때문이다. `npm run preview` 와 `main.ts` 에는 걸지 않는다. `PUBLIC_ORIGINS` 가 설정돼 있는데 `DEV_BASIC_AUTH` 가 비어 있으면 dev 서버는 공개된 채 열리지 않도록 오류로 시작을 멈춘다. 같이 쓰는 Vite 설정:
 
 - `DEV_ALLOWED_HOSTS`: 쉼표 목록, Vite `allowedHosts`.
-- `DEV_HMR_CLIENT_PORT`: 화면 자동 갱신 연결을 받는 포트(Caddy 의 440).
+- `DEV_HMR_CLIENT_PORT`: 화면 자동 갱신 연결을 받는 포트(Caddy 의 443).
 - `.env*`, 키·인증서 파일, `.npmrc`, `.git`, `.local-data` 는 Vite 가 주지 않는다(`server.fs.deny`).
 
 **로그인·가입 제한.**

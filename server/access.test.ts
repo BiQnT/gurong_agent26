@@ -17,9 +17,9 @@ import { createApiMiddleware, localApiPlugin } from './vite-api.ts';
 import { isLocalWorkspaceRequest } from './workspace.ts';
 
 const PROD = 'https://35-192-216-232.sslip.io';
-const DEV = 'https://35-192-216-232.sslip.io:440';
+const DEV = 'https://dev.35-192-216-232.sslip.io';
 const PROD_HOST = '35-192-216-232.sslip.io';
-const DEV_HOST = '35-192-216-232.sslip.io:440';
+const DEV_HOST = 'dev.35-192-216-232.sslip.io';
 const DEV_PASSWORD = 'team:바다-덕장 2026';
 
 function useEnv(t: TestContext, values: Record<string, string | undefined>) {
@@ -141,13 +141,15 @@ test('a configured public origin passes from its own page with or without an Ori
   assert.equal(allowed({ host: PROD_HOST, origin: PROD }), true);
 });
 
-test('the same hostname on another port is another origin, so dev and prod pages reject each other', (t) => {
+test('another host name or port is another origin, so dev and prod pages reject each other', (t) => {
   // 터널 규칙(호스트 이름만 비교)이 공개 주소에 섞여 들어오지 않는지도 함께 본다.
   useEnv(t, { PUBLIC_ORIGINS: `${PROD},${DEV}`, PUBLIC_TUNNEL_HOSTS: '.sslip.io' });
   assert.equal(allowed({ host: PROD_HOST, origin: DEV }), false);
   assert.equal(allowed({ host: DEV_HOST, origin: PROD }), false);
   assert.equal(allowed({ host: PROD_HOST, origin: `http://${PROD_HOST}` }), false);
   assert.equal(allowed({ host: PROD_HOST, origin: `${PROD}:8443` }), false);
+  // 이름이 같고 포트만 다른 화면도 다른 출처다 (예전 dev 주소 :440).
+  assert.equal(allowed({ host: PROD_HOST, origin: `${PROD}:440` }), false);
   assert.equal(allowed({ host: PROD_HOST, origin: 'null' }), false);
   // Origin 이 없는 요청도 브라우저가 다른 출처라고 알리면 막는다 (dev 화면의 img·form 등).
   assert.equal(allowed({ host: PROD_HOST, 'sec-fetch-site': 'same-site' }), false);
@@ -155,6 +157,10 @@ test('the same hostname on another port is another origin, so dev and prod pages
   assert.equal(allowed({ host: `${PROD_HOST}:3000` }), false);
   assert.equal(allowed({ host: `user@${DEV_HOST}`, origin: DEV }), false);
   useEnv(t, { PUBLIC_ORIGINS: PROD });
+  // 공개 주소와 이름이 같으면 목록에 없는 포트라도 터널 규칙(호스트 이름만 비교)으로 넘어가지 않는다.
+  assert.equal(allowed({ host: `${PROD_HOST}:440` }), false);
+  assert.equal(allowed({ host: `${PROD_HOST}:440`, origin: `${PROD}:440` }), false);
+  useEnv(t, { PUBLIC_ORIGINS: PROD, PUBLIC_TUNNEL_HOSTS: undefined });
   assert.equal(allowed({ host: DEV_HOST }), false);
   assert.equal(allowed({ host: DEV_HOST, origin: DEV }), false);
 });
@@ -313,7 +319,7 @@ test('the real Vite dev server asks for the password before serving repository f
     logLevel: 'silent',
     appType: 'spa',
     plugins: [localApiPlugin(await testConfig(t, { devBasicAuth: DEV_PASSWORD }))],
-    server: { middlewareMode: true, hmr: false, allowedHosts: [PROD_HOST] },
+    server: { middlewareMode: true, hmr: false, allowedHosts: [DEV_HOST] },
     optimizeDeps: { noDiscovery: true, include: [] },
   });
   t.after(() => vite.close());

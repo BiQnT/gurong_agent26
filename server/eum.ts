@@ -15,7 +15,7 @@ export type BridgeConfig = {
   claude?: ClaudeConfig;
   /** 설정하면 계정·작업 자료를 파일 대신 이 SQLite DB 에 저장한다 (VM 의 공유 DB). */
   databasePath?: string;
-  /** 원격에서 들어와도 되는 화면 주소(스킴·호스트·포트 전체). 예: https://35-192-216-232.sslip.io:440 */
+  /** 원격에서 들어와도 되는 화면 주소(스킴·호스트·포트 전체). 예: https://dev.35-192-216-232.sslip.io */
   publicOrigins?: string[];
   /** TLS 프록시(Caddy) 뒤에서 세션 쿠키에 Secure 를 붙인다. */
   cookieSecure?: boolean;

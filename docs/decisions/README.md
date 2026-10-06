@@ -44,5 +44,6 @@ cp docs/decisions/_template.md docs/decisions/0002-<slug>.md
 | [0002](0002-gcp-runtime-layout.md) | GCP VM 하나에 dev·prod 를 나눠 띄우고 SQLite 는 공유 | 2026-10-04 | 대체됨 (→ 0005) |
 | [0003](0003-claude-cli-wrapper.md) | claude CLI 를 메시지마다 띄우고 E-UM 은 MCP 도구로 제공 | 2026-10-04 | 일부 대체됨 (→ 0005) |
 | [0004](0004-dev-port-open-for-phone.md) | dev 포트(3001)도 외부에 열어 폰으로 UI 를 확인 | 2026-10-04 | 대체됨 (→ 0005) |
-| [0005](0005-merge-backend-into-haepung-app.md) | 백엔드를 팀원의 해풍 앱 서버에 합치고 화면의 API 계약을 정본으로 둠 | 2026-10-04 | 확정 |
+| [0005](0005-merge-backend-into-haepung-app.md) | 백엔드를 팀원의 해풍 앱 서버에 합치고 화면의 API 계약을 정본으로 둠 | 2026-10-04 | 일부 대체됨 (→ 0007) |
 | [0006](0006-shared-db-validation-order.md) | dev·prod DB 공유를 유지하고, 저장 검증 규칙 변경은 prod 배포를 먼저 함 | 2026-10-04 | 확정 |
+| [0007](0007-dev-subdomain-on-443.md) | dev 를 440 대신 같은 443 의 `dev.` 주소로 연다 | 2026-10-06 | 확정 |
