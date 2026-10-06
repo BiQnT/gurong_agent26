@@ -2,6 +2,7 @@ import type { LiveDevice, LiveObservation, LiveSnapshot } from '../src/lib/live.
 import type { ClaudeConfig } from './claude-cli.ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { AWS_816, createKmaSource, KMA_WAIT_MS, within, type KmaSource } from './sources/kma.ts';
 
 const EUM_BASE = 'https://genix.pohang-eum.kr';
 const DEVICE_PATH = '/dpg/atmosphere/devices';
@@ -194,7 +195,16 @@ export function selectObservation(
   );
 }
 
-export function createObservationService(config: BridgeConfig, fetcher: typeof fetch = fetch) {
+/** E-UM 에 최근 값이 없어 기상청 AWS 를 대신 보여 줄 때의 안내 (덕장 기준 선택은 다시 정한다). */
+export const KMA_FALLBACK_WARNING =
+  'E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS 관측값을 대신 보여드려요.';
+
+export function createObservationService(
+  config: BridgeConfig,
+  fetcher: typeof fetch = fetch,
+  /** 기상청 보조 자료 (sources/kma.ts). KMA_AUTH_KEY 가 없으면 null 이고 E-UM 만 쓴다. */
+  kma: KmaSource | null = createKmaSource(config, fetcher),
+) {
   type CachedData = {
     fetchedAt: string;
     devices: LiveDevice[];
@@ -393,9 +403,15 @@ export function createObservationService(config: BridgeConfig, fetcher: typeof f
   return {
     async snapshot(signal: AbortSignal, deviceId?: string): Promise<LiveSnapshot> {
       signal.throwIfAborted();
+      // 기상청 AWS 는 E-UM 과 같이 불러 기다리는 시간을 늘리지 않는다. 실패하면 null 이다.
+      const awsPending = kma ? within(kma.aws(), KMA_WAIT_MS) : Promise.resolve(null);
       const data = await readUpstream(signal);
       signal.throwIfAborted();
-      if (deviceId && !data.devices.some((device) => device.id === deviceId)) {
+      const aws = await awsPending;
+      const devices = aws ? [...data.devices, aws.device] : data.devices;
+      // 화면이 기상청 AWS 를 고른 채 묻는데 이번에 기상청을 못 받았으면 오류 대신 기본 선택을 쓴다.
+      if (deviceId === AWS_816.id && !aws) deviceId = undefined;
+      if (deviceId && !devices.some((device) => device.id === deviceId)) {
         throw new BridgeError(
           400,
           'UNKNOWN_DEVICE',
@@ -430,13 +446,20 @@ export function createObservationService(config: BridgeConfig, fetcher: typeof f
       warnings.push(
         '관측기 위치는 실제 E-UM 정보예요. 실제 덕장 좌표와 검증된 건조 판정 기준이 없어 건조 적합 여부를 판정하지 않아요.',
       );
+      // E-UM 우선: 최근 E-UM 값이 하나도 없을 때만 기상청 AWS 를 고른다.
+      const all = aws ? [...observations, aws] : observations;
+      const useKma =
+        !deviceId &&
+        aws?.status === 'current' &&
+        !observations.some((observation) => observation.status === 'current');
+      if (useKma) warnings.push(KMA_FALLBACK_WARNING);
       return {
         fetchedAt: data.fetchedAt,
         source: data.status === 'archived' ? 'E-UM 보관된 실측' : '포항 E-UM · 대기환경 관측 API',
         sourceUrl: `${EUM_BASE}${REALTIME_PATH}`,
-        devices: data.devices,
-        observations,
-        selected: selectObservation(observations, deviceId),
+        devices,
+        observations: all,
+        selected: useKma ? aws : selectObservation(deviceId ? all : observations, deviceId),
         warnings,
         status: data.status,
         ...(data.archiveSourceDate ? { archiveSourceDate: data.archiveSourceDate } : {}),

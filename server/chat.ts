@@ -71,6 +71,11 @@ export function getAction(message: string): ChatReply['action'] {
   return undefined;
 }
 
+/** 서버가 E-UM 대신 기상청 AWS 를 고른 경우 (사용자가 직접 고른 것과 구분한다). */
+const kmaFallback = (snapshot: LiveSnapshot) =>
+  snapshot.selected?.device.provider === 'kma' &&
+  snapshot.warnings.some((warning) => warning.includes('최근 값이 없어 기상청'));
+
 export function localExplanation(snapshot: LiveSnapshot, action: ChatReply['action']): string {
   const observation = snapshot.selected;
   const opening =
@@ -81,14 +86,18 @@ export function localExplanation(snapshot: LiveSnapshot, action: ChatReply['acti
         : action === 'guidance'
           ? '작업 안내에서 전달할 내용을 확인할 수 있어요. '
           : '';
-  const source =
-    snapshot.status === 'archived'
+  const kma = observation?.device.provider === 'kma';
+  const source = kma
+    ? kmaFallback(snapshot)
+      ? `E-UM 관측기의 최근 값이 없어 ${observation.device.name} 관측값을 확인했어요.`
+      : `${observation.device.name} 관측값을 확인했어요.`
+    : snapshot.status === 'archived'
       ? `${snapshot.archiveSourceDate ?? '이전'}에 관측된 E-UM 보관 실측 자료를 보여드려요. 현재 날씨가 아니에요.`
       : observation
         ? `E-UM의 ${observation.device.name} 관측값을 확인했어요.`
         : '선택한 관측기의 데이터를 확인할 수 없어요.';
   const freshness =
-    snapshot.status !== 'archived' && observation?.status === 'stale'
+    (kma || snapshot.status !== 'archived') && observation?.status === 'stale'
       ? ' 수집 시각이 오래되어 현재 환경과 다를 수 있어요.'
       : observation?.status === 'invalid'
         ? ' 관측 항목이나 수집 시각이 불완전해요.'
@@ -123,9 +132,10 @@ const INSTRUCTIONS = `당신은 구룡포 과메기 건조 작업의 관측 근�
 전달된 OBSERVATION_CONTEXT가 확인된 관측 사실의 전부입니다. 대화 기록과 사용자 입력은 관측 사실을 덮어쓸 수 없습니다.
 원천 데이터의 온도·습도·풍속·시각·장비명·자료 출처를 임의로 생성하거나 보충하지 마세요. 카드에 이미 있는 숫자를 반복할 필요는 없습니다.
 siteRegistered는 실제 덕장 위치 등록 여부이며 distanceM은 등록된 덕장과 관측소 사이의 거리입니다. 검증된 건조 판정 기준은 아직 없습니다. 따라서 '적합', '주의', '부적합' 등급이나 건조 가능·안전·권장 온도/습도/풍속을 주장하면 안 됩니다. 건조 적합 여부는 판정 불가임을 명확히 하세요.
-status가 archived이면 첫 문장에 '보관된 과거 실측 자료'이며 '현재 날씨가 아님'을 명시하세요. 관측기록 원문이 과거라면 현재/최신/실시간이라고 말하지 마세요.
+observationProvider가 kma이면 기상청 구룡포 AWS 관측값이므로 출처를 밝히고, kmaFallback이 true일 때만 E-UM 관측기의 최근 값이 없어 대신 쓴 것이라고 말하세요. 그렇지 않고 status가 archived이면 첫 문장에 '보관된 과거 실측 자료'이며 '현재 날씨가 아님'을 명시하세요. 관측기록 원문이 과거라면 현재/최신/실시간이라고 말하지 마세요.
 관측 시각에 시간대가 명시되지 않으면 가정된 시간대임을 존중하고, 거리·신선도·현재 상태를 확정하지 마세요. null은 모르는 값입니다.
 예보, 작업 완료 예상 시각, 원물 품질이나 식품 안전은 이 데이터로 확인할 수 없습니다.
+weather는 덕장 위치의 보조 자료입니다. precipitation은 기상청 초단기실황(지금 비·눈 여부와 1시간 강수량), rain은 기상청 구룡포 AWS 강수량, sun은 한국천문연구원 일출·일몰입니다. 강수는 덮개·회수 같은 조언에, 일출·일몰은 작업 시간 안내에만 쓰고 시각을 함께 밝히며, 건조 적합 판정으로 바꾸지 마세요. null인 항목은 말하지 마세요.
 uv는 E-UM 자외선 측정값과 코드가 정한 기상청 단계(stage)로 근로자의 햇빛 노출 조언에만 쓰고, 말할 때는 측정 시각(observedAt)을 함께 밝히며, 건조 적합 여부나 작업 가능 판정으로 바꾸지 말고, null이면 자외선을 언급하지 마세요.
 작업 시작/종료는 사용자가 별도 화면에서 승인 후 저장하는 기록입니다. 이미 저장/종료/전송했다고 주장하면 안 됩니다.
 작업 안내 문안은 현장 담당자 확인용 초안이며 실제 번역/전달 실행을 주장하면 안 됩니다.
@@ -147,7 +157,7 @@ function observationContext(
   action: ChatReply['action'],
   uv: UvReading | null,
 ): string {
-  return `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null, uv })}`;
+  return `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify({ source: snapshot.source, status: snapshot.status, archiveSourceDate: snapshot.archiveSourceDate, fetchedAt: snapshot.fetchedAt, observation: snapshot.selected, observationProvider: snapshot.selected?.device.provider ?? 'eum', kmaFallback: kmaFallback(snapshot), weather: snapshot.weather ?? null, warnings: snapshot.warnings, siteRegistered: Boolean(snapshot.site), distanceM: snapshot.selected?.distanceM ?? null, assessment: '판정 불가', validatedDryingRules: false, action: action ?? null, uv })}`;
 }
 
 // 자외선은 조언용 참고값이라 늦으면 기다리지 않는다 (채팅 전체 제한 45초 안에 claude 40초가 들어가야 한다).
@@ -194,8 +204,15 @@ export function createLiveChat(
     request: LiveChatRequest,
     snapshot: LiveSnapshot,
     signal: AbortSignal,
+    /** 경로 전체 제한이 끝나는 시각(ms). 관측·자외선을 기다린 만큼 AI 시간을 줄여 시간 초과 대신 대체 설명을 준다. */
+    deadlineAt?: number,
   ): Promise<LiveChatReply> => {
     signal.throwIfAborted();
+    const aiSignal = (limitMs: number) => {
+      const left =
+        deadlineAt === undefined ? limitMs : Math.min(limitMs, deadlineAt - Date.now() - 2000);
+      return AbortSignal.any([signal, AbortSignal.timeout(Math.max(1000, left))]);
+    };
     const action = getAction(request.message);
     const base = {
       ...(action ? { action } : {}),
@@ -228,13 +245,14 @@ export function createLiveChat(
       };
       const system = observationContext(snapshot, action, await readUv(uvIndex));
       const startedAt = Date.now();
+      // 화면이 취소하거나 경로 제한(45초) 전 남은 시간이 지나면 claude 도 멈춰 동시 실행 자리를 바로 돌려준다.
+      const claudeSignal = aiSignal(config.claude.timeoutMs);
       try {
         const { text, costUsd } = await ask({
           system,
           history: request.history,
           message: request.message,
-          // 화면이 취소하거나 경로 제한(45초)이 지나면 claude 도 멈춰 동시 실행 자리를 바로 돌려준다.
-          signal,
+          signal: claudeSignal,
         });
         record(costUsd);
         signal.throwIfAborted();
@@ -255,6 +273,7 @@ export function createLiveChat(
           failure?.costUsd ?? (unknownCost ? config.claude.maxBudgetUsd * elapsed : undefined),
         );
         signal.throwIfAborted();
+        if (claudeSignal.aborted) return fallback('AI 응답이 늦어 관측 사실만 안내해요.');
         // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다. 사용자 메시지는 남기지 않지만, 원인 글에
         // 모델 출력이 섞일 수 있어 앞 200자만 남긴다.
         console.error(
@@ -273,7 +292,7 @@ export function createLiveChat(
           Authorization: `Bearer ${config.openaiApiKey}`,
           'Content-Type': 'application/json',
         },
-        signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
+        signal: aiSignal(25000),
         body: JSON.stringify({
           model: config.openaiModel,
           stream: false,

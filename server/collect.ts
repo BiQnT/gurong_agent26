@@ -46,13 +46,14 @@ export type CollectSummary = {
 
 function choose(snapshot: LiveSnapshot | null, site: SiteLocation, recordedAt: string): Choice {
   if (!snapshot) return { reason: 'E-UM 관측 조회에 실패했어요.', label: 'E-UM 조회 실패' };
-  if (snapshot.status !== 'ok')
+  // 화면과 같은 기준: 1km 안의 최근 E-UM 관측 중 가장 가까운 장비, 없으면 1km 안의 기상청 AWS (ADR 0009).
+  const selected = attachSiteContext(snapshot, site).selected;
+  // E-UM 이 보관 자료뿐이어도 기상청 AWS 실시간 값이 골라졌으면 기록한다.
+  if (snapshot.status !== 'ok' && selected?.device.provider !== 'kma')
     return {
       reason: '실시간 조회에 실패해 보관된 과거 자료만 있어 기록하지 않았어요.',
       label: '실시간 자료 없음',
     };
-  // 화면과 같은 기준: 1km 안의 최근 관측 중 가장 가까운 장비. 없으면 다른 장비로 대신하지 않는다.
-  const selected = attachSiteContext(snapshot, site).selected;
   if (
     !selected ||
     selected.status !== 'current' ||

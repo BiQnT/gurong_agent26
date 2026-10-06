@@ -24,10 +24,12 @@ export function observationTime(value: string | null): string {
 }
 
 export function ObservationCard({ observation }: { observation: LiveObservation }) {
+  const kma = observation.device.provider === 'kma';
+  const label = kma ? '기상청 실제 관측 정보' : 'E-UM 실제 관측 정보';
   return (
-    <section className="assessment-card observation-card" aria-label="E-UM 실제 관측 정보">
+    <section className="assessment-card observation-card" aria-label={label}>
       <div className="assessment-title">
-        <span className="eyebrow">E-UM 실제 관측 정보</span>
+        <span className="eyebrow">{label}</span>
         <span className="grade-pill muted">
           {observation.status === 'current'
             ? '관측 기록'
@@ -114,11 +116,11 @@ export function ObservationCard({ observation }: { observation: LiveObservation 
         ))}
         <a
           className="source-link"
-          href="https://pohang-eum.kr/data/list/1"
+          href={kma ? 'https://apihub.kma.go.kr/' : 'https://pohang-eum.kr/data/list/1'}
           target="_blank"
           rel="noreferrer"
         >
-          E-UM 대기환경 데이터
+          {kma ? '기상청 API허브 AWS 매분자료' : 'E-UM 대기환경 데이터'}
           <ExternalLink size={12} />
         </a>
       </details>

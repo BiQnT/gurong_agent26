@@ -2464,3 +2464,11 @@ button:active:not(:disabled) {
     margin-top: 18px;
   }
 }
+
+/* 관측 카드 아래 기상청 강수·천문연 일출일몰 한 줄 */
+.weather-extra {
+  margin: 6px 2px 0;
+  color: #666;
+  font-size: 11px;
+  line-height: 1.6;
+}

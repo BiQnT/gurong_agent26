@@ -136,6 +136,6 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 
 - 이메일 확인·비밀번호 재설정 메일. 계정 복구는 `scripts/admin.ts` 로 한다.
 - 경보, 쿨다운, 적합 등급. 수집기는 관측과 결측을 기록만 한다.
-- 기상청 API허브(`KMA_AUTH_KEY`)·공공데이터포털(`DATA_GO_KR_KEY`) 호출. 설정에서 키를 읽기만 하며 `research/api-tests/` 에 호출 성공 기록이 없어 쓰는 기능이 없다.
+- 기상특보(B2), 초단기·단기예보. 특보는 API허브 활용신청이 필요하다 ([호출 기록](../../research/api-tests/2026-10-06-kma-apihub.md)). 기상청 보조 자료는 [chat-api.md](chat-api.md#기상청-보조).
 - 서버 쪽 대화 저장. 대화는 브라우저 저장소에 있다.
 - 데이터베이스 표 분리. 문서 하나를 한 행에 넣는다.
