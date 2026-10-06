@@ -9,6 +9,7 @@ import {
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
+import { createKmaSource } from './sources/kma.ts';
 import { createGeocoder, readGeocodeReverse, readGeocodeSearch, type Geocoder } from './geocode.ts';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { readdirSync } from 'node:fs';
@@ -146,7 +147,11 @@ export function createApiMiddleware(
   geocoder: Geocoder = createGeocoder(geocoderUserAgent),
 ): Connect.NextHandleFunction {
   const workspaceMiddleware = createWorkspaceMiddleware(workspace);
-  const observations = createObservationService(config);
+  const kma = createKmaSource(config);
+  const observations = createObservationService(config, fetch, kma);
+  // 덕장 위치의 비·눈, 강수량, 일출·일몰. 키가 없거나 실패하면 붙이지 않는다.
+  const siteWeather = async (site: { latitude: number; longitude: number }, signal: AbortSignal) =>
+    kma ? await kma.weather(site, signal).catch(() => null) : null;
   const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config));
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
@@ -248,19 +253,33 @@ export function createApiMiddleware(
             throw new BridgeError(400, 'INVALID_DEVICE', '관측기 ID가 올바르지 않아요.');
           const siteId = url.searchParams.get('siteId');
           const access = siteId ? await workspace.requireMember(request, siteId) : null;
-          const snapshot = await observations.snapshot(controller.signal, deviceId);
-          send(200, access ? attachSiteContext(snapshot, access.site, deviceId) : snapshot);
+          const [snapshot, weather] = await Promise.all([
+            observations.snapshot(controller.signal, deviceId),
+            access ? siteWeather(access.site, controller.signal) : null,
+          ]);
+          send(
+            200,
+            access
+              ? {
+                  ...attachSiteContext(snapshot, access.site, deviceId),
+                  ...(weather ? { weather } : {}),
+                }
+              : snapshot,
+          );
           return;
         }
         if (request.method !== 'POST')
           throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
         const input = readChatRequest(await readBody(request, controller.signal));
         const { site } = await workspace.requireMember(request, input.siteId, 'owner');
-        const snapshot = attachSiteContext(
-          await observations.snapshot(controller.signal, input.deviceId),
-          site,
-          input.deviceId,
-        );
+        const [observed, weather] = await Promise.all([
+          observations.snapshot(controller.signal, input.deviceId),
+          siteWeather(site, controller.signal),
+        ]);
+        const snapshot = {
+          ...attachSiteContext(observed, site, input.deviceId),
+          ...(weather ? { weather } : {}),
+        };
         send(200, await chat(input, snapshot, controller.signal));
       } catch (error) {
         if (controller.signal.aborted)

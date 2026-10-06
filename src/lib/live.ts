@@ -4,6 +4,8 @@ export type LiveDevice = {
   address: string;
   latitude: number;
   longitude: number;
+  /** 자료를 준 기관. 없으면 E-UM. 기상청 AWS 는 E-UM 관측기가 오래됐거나 이상할 때 대신 쓴다 */
+  provider?: 'eum' | 'kma';
 };
 
 export type LiveObservation = {
@@ -19,6 +21,16 @@ export type LiveObservation = {
   distanceM?: number | null;
 };
 
+/** 기상청·천문연 보조 자료 (덕장 위치 기준). 판정에는 쓰지 않고 안내·AI 설명 근거로만 쓴다 */
+export type SiteWeather = {
+  /** 기상청 초단기실황: 지금 비·눈이 오는지 */
+  precipitation: { type: string; rain1hMm: number | null; observedAt: string } | null;
+  /** 기상청 AWS 816 구룡포 강수량 */
+  rain: { last60mMm: number | null; todayMm: number | null; observedAt: string } | null;
+  /** 한국천문연구원 일출·일몰 (HH:MM) */
+  sun: { date: string; sunrise: string; sunset: string } | null;
+};
+
 export type LiveSnapshot = {
   fetchedAt: string;
   source: string;
@@ -32,6 +44,7 @@ export type LiveSnapshot = {
   error?: string;
   llm: { configured: boolean; model: string };
   site?: { id: string; name: string; latitude: number; longitude: number };
+  weather?: SiteWeather;
 };
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -76,7 +89,40 @@ function readDevice(value: unknown): LiveDevice {
     address: value.address,
     latitude: value.latitude,
     longitude: value.longitude,
+    ...(value.provider === 'kma' || value.provider === 'eum' ? { provider: value.provider } : {}),
   };
+}
+
+const mm = (value: unknown) => value === null || (finite(value) && value >= 0);
+
+/** 보조 자료는 형식이 맞는 부분만 남긴다. 없거나 틀려도 관측 응답 전체를 버리지 않는다. */
+function readWeather(value: unknown): SiteWeather | undefined {
+  if (!record(value)) return undefined;
+  const p = value.precipitation;
+  const r = value.rain;
+  const s = value.sun;
+  const precipitation =
+    record(p) && text(p.type) && mm(p.rain1hMm) && timestamp(p.observedAt)
+      ? { type: p.type, rain1hMm: p.rain1hMm as number | null, observedAt: p.observedAt }
+      : null;
+  const rain =
+    record(r) && mm(r.last60mMm) && mm(r.todayMm) && timestamp(r.observedAt)
+      ? {
+          last60mMm: r.last60mMm as number | null,
+          todayMm: r.todayMm as number | null,
+          observedAt: r.observedAt,
+        }
+      : null;
+  const clock = (item: unknown): item is string => text(item) && /^\d{2}:\d{2}$/.test(item);
+  const sun =
+    record(s) &&
+    text(s.date) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(s.date) &&
+    clock(s.sunrise) &&
+    clock(s.sunset)
+      ? { date: s.date, sunrise: s.sunrise, sunset: s.sunset }
+      : null;
+  return precipitation || rain || sun ? { precipitation, rain, sun } : undefined;
 }
 
 export function readLiveObservation(value: unknown): LiveObservation {
@@ -164,6 +210,7 @@ export function readLiveSnapshot(value: unknown): LiveSnapshot {
   if (selected && !devices.some((device) => device.id === selected.device.id)) {
     throw new Error('선택한 관측기를 목록에서 찾을 수 없어요.');
   }
+  const weather = readWeather(value.weather);
   return {
     fetchedAt: value.fetchedAt,
     source: value.source,
@@ -179,5 +226,6 @@ export function readLiveSnapshot(value: unknown): LiveSnapshot {
     ...(value.error === undefined ? {} : { error: value.error as string }),
     llm: { configured: value.llm.configured, model: value.llm.model },
     ...(site ? { site } : {}),
+    ...(weather ? { weather } : {}),
   };
 }
