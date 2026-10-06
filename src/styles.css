@@ -2369,17 +2369,27 @@ button:active:not(:disabled) {
     line-height: 16px;
     text-align: center;
   }
-  /* 키보드가 올라와 글을 쓰는 동안에는 탭을 숨겨 입력창 자리를 넓힌다. */
+  /* 화면 아래에 뜨는 안내가 탭을 가리지 않게 올린다. */
+  .app-shell .toast,
+  .app-shell .op-toast,
+  .app-shell .ws-toast {
+    bottom: calc(var(--tabbar-height) + 14px + env(safe-area-inset-bottom));
+  }
+  .app-shell .op-storage-warning {
+    bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  }
+  .jump-bottom {
+    bottom: calc(177px + var(--tabbar-height) + env(safe-area-inset-bottom));
+  }
+}
+/* 키보드가 올라와 화면이 낮아졌을 때만 글쓰는 동안 탭을 숨긴다. 보낸 뒤 키보드를 내리면 다시 보인다.
+   (iOS 는 키보드가 화면 높이를 바꾸지 않고 탭을 덮으므로 이 규칙이 필요 없다.) */
+@media (max-width: 900px) and (max-height: 560px) {
   .workspace:has(textarea:focus, input:focus) .mobile-tabbar {
     display: none;
   }
-  /* 화면 아래에 뜨는 안내가 탭을 가리지 않게 올린다. */
-  .app-shell .toast,
-  .app-shell .op-toast {
-    bottom: calc(var(--tabbar-height) + 14px + env(safe-area-inset-bottom));
-  }
-  .jump-bottom {
-    bottom: calc(177px + var(--tabbar-height));
+  .workspace:has(textarea:focus, input:focus) .jump-bottom {
+    bottom: 177px;
   }
 }
 
