@@ -1,5 +1,5 @@
 [Unit]
-Description=haepung (dev, 127.0.0.1:3001, Caddy 가 https :440 으로 연다)
+Description=haepung (dev, 127.0.0.1:3001, Caddy 가 https://dev.<도메인> 으로 연다)
 After=network-online.target
 Wants=network-online.target
 # 의존성이 아직 안 깔렸으면(bootstrap 첫 실행 전) 조용히 건너뛴다.

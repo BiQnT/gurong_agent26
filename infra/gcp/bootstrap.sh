@@ -176,8 +176,10 @@ PUBLIC_IP=${PUBLIC_IP:-$(curl -fsS --max-time 5 -H 'Metadata-Flavor: Google' \
   http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip || true)}
 [[ "$PUBLIC_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo '외부 IP 를 못 읽었다. PUBLIC_IP=<IP> 를 붙여 다시 실행한다'; exit 1; }
 DOMAIN="${PUBLIC_IP//./-}.sslip.io"
+# dev 는 같은 443 을 쓰고 이름으로 나눈다. GCP 방화벽은 80·443 만 열려 있으면 된다.
+DEV_DOMAIN="dev.$DOMAIN"
 echo "prod https://$DOMAIN"
-echo "dev  https://$DOMAIN:440"
+echo "dev  https://$DEV_DOMAIN"
 # 서비스가 읽는 주소 설정. 비밀이 아니라 /etc 에 둔다. 바뀐 서비스만 아래에서 다시 시작한다.
 origin_changed=false
 write_if_changed /etc/haepung/prod.env "# bootstrap.sh 가 만든 파일. 직접 고치지 않는다 (외부 IP 가 바뀌면 bootstrap 을 다시 실행).
@@ -185,9 +187,9 @@ HOST=127.0.0.1
 PORT=3000
 PUBLIC_ORIGINS=https://$DOMAIN" && origin_changed=true
 write_if_changed /etc/haepung/dev.env "# bootstrap.sh 가 만든 파일. 직접 고치지 않는다 (외부 IP 가 바뀌면 bootstrap 을 다시 실행).
-PUBLIC_ORIGINS=https://$DOMAIN:440
-DEV_ALLOWED_HOSTS=$DOMAIN
-DEV_HMR_CLIENT_PORT=440" && origin_changed=true
+PUBLIC_ORIGINS=https://$DEV_DOMAIN
+DEV_ALLOWED_HOSTS=$DEV_DOMAIN
+DEV_HMR_CLIENT_PORT=443" && origin_changed=true
 
 step 'systemd'
 install -m 644 "$ROOT"/dev/infra/gcp/systemd/*.service "$ROOT"/dev/infra/gcp/systemd/*.timer /etc/systemd/system/
@@ -218,8 +220,7 @@ if ! command -v caddy >/dev/null; then
   apt-get update -qq
   apt-get install -y -qq caddy >/dev/null
 fi
-# 80 은 https 로 넘기고, 443 은 prod, 440 은 dev(웹소켓 포함, Caddy 가 알아서 넘긴다).
-# 80 의 넘김을 직접 적는 이유: 443 과 440 이 같은 이름이면 자동 넘김이 어느 포트로 보낼지 정해지지 않는다.
+# 80 은 https 로 넘기고, 443 은 이름으로 prod 와 dev(웹소켓 포함, Caddy 가 알아서 넘긴다)를 나눈다.
 # 다른 사이트가 화면을 iframe 으로 감싸 덕장 주인의 버튼을 누르게 만드는 것(클릭재킹)을 막는다.
 caddyfile="# bootstrap.sh 가 만든 파일. 직접 고치지 않는다 (infra/gcp/bootstrap.sh).
 (no_framing) {
@@ -227,8 +228,8 @@ caddyfile="# bootstrap.sh 가 만든 파일. 직접 고치지 않는다 (infra/g
 	header Content-Security-Policy \"frame-ancestors 'none'\"
 }
 
-http://$DOMAIN {
-	redir https://$DOMAIN{uri} permanent
+http://$DOMAIN, http://$DEV_DOMAIN {
+	redir https://{host}{uri} permanent
 }
 
 $DOMAIN {
@@ -237,7 +238,7 @@ $DOMAIN {
 	reverse_proxy 127.0.0.1:3000
 }
 
-$DOMAIN:440 {
+$DEV_DOMAIN {
 	import no_framing
 	reverse_proxy 127.0.0.1:3001
 }"
@@ -260,10 +261,10 @@ systemctl is-active haepung-prod || echo 'haepung-prod 는 첫 배포 전이라 
 
 step '다음 할 일'
 cat <<EOF
-- GCP 방화벽에 tcp:80,443,440 이 열려 있어야 인증서 발급과 접속이 된다 (VM 안에서는 확인할 수 없다)
+- GCP 방화벽에 tcp:80,443 이 열려 있어야 인증서 발급과 접속이 된다 (VM 안에서는 확인할 수 없다)
 - prod 배포:      sudo haepung-deploy          (기본 origin/main. 옵션은 sudo haepung-deploy --list)
 - 비밀값:         sudoedit $ROOT/env/backend.env  후  sudo systemctl restart haepung-dev haepung-prod
 - dev 접속 암호:  sudo grep DEV_BASIC_AUTH $ROOT/env/backend.env
 - 팀원 그룹 반영:  각자 SSH 재접속
-- 주소: https://$DOMAIN (prod), https://$DOMAIN:440 (dev)
+- 주소: https://$DOMAIN (prod), https://$DEV_DOMAIN (dev)
 EOF

@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: '127.0.0.1',
-      // VM 의 dev 는 Caddy(https://<도메인>:440) 뒤에 있다. 그 도메인을 허용하고, 화면 자동 갱신 연결도 440 으로 받는다.
+      // VM 의 dev 는 Caddy(https://dev.<도메인>) 뒤에 있다. 그 이름을 허용하고, 화면 자동 갱신 연결도 Caddy 의 443 으로 받는다.
       ...(env.DEV_ALLOWED_HOSTS
         ? { allowedHosts: env.DEV_ALLOWED_HOSTS.split(',').map((h) => h.trim()) }
         : {}),

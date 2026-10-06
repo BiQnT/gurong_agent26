@@ -920,8 +920,8 @@ export function isLocalWorkspaceRequest(request: IncomingMessage): boolean {
     // Tunnel clients forward to localhost, so the direct peer stays local.
     if (remote && !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(remote)) return false;
     if (publicOrigins) {
-      // Caddy 뒤 공개 주소는 스킴·호스트·포트가 모두 같은 화면만 받는다. dev(:440)와 prod(:443)는
-      // 쿠키와 DB 를 같이 쓰므로, 호스트 이름이 같아도 서로의 화면에서 온 요청은 막는다.
+      // Caddy 뒤 공개 주소는 스킴·호스트·포트가 모두 같은 화면만 받는다. dev(dev.<도메인>)와 prod 는
+      // DB 를 같이 쓰므로, 같은 사이트(same-site)라도 서로의 화면에서 온 요청은 막는다.
       const origin = request.headers.origin;
       if (origin !== undefined && !publicOrigins.includes(origin)) return false;
       const site = request.headers['sec-fetch-site'];

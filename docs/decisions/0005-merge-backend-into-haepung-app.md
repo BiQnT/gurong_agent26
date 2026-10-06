@@ -1,7 +1,7 @@
 # 0005. 백엔드를 팀원의 해풍 앱 서버에 합치고 화면의 API 계약을 정본으로 둔다
 
 - **날짜**: 2026-10-04
-- **상태**: 확정
+- **상태**: 일부 대체됨 (→ 0007) · dev 주소(440 → dev.<도메인>:443)만 바뀌었다
 - **정한 사람**: 안동현
 - **관련**: [0002](0002-gcp-runtime-layout.md)·[0004](0004-dev-port-open-for-phone.md)를 대체하고 [0003](0003-claude-cli-wrapper.md)을 일부 대체한다, [docs/design/backend.md](../design/backend.md), [infra/gcp/README.md](../../infra/gcp/README.md)
 
