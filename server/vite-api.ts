@@ -291,6 +291,8 @@ const DEV_APP_PREFIXES = [
  */
 export function devAppFilesOnly(root: string): Connect.NextHandleFunction {
   const publicDir = resolve(root, 'public');
+  // /@fs/ 는 이 저장소의 node_modules 안만 준다 (경로 중간에 node_modules 가 있다고 통과시키지 않는다).
+  const modulesFs = `/@fs${resolve(root, 'node_modules').split(sep).join('/')}/`;
   let publicFiles = new Set<string>();
   try {
     publicFiles = new Set(
@@ -321,7 +323,7 @@ export function devAppFilesOnly(root: string): Connect.NextHandleFunction {
         path === '/index.html' ||
         publicFiles.has(path) ||
         DEV_APP_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
-        (path.startsWith('/@fs/') && path.includes('/node_modules/')));
+        path.startsWith(modulesFs));
     if (allowed) {
       next();
       return;

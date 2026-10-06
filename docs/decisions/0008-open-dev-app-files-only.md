@@ -15,7 +15,7 @@
 
 `DEV_OPEN=1` 이면 암호 없이 열되, 앞단에서 화면에 필요한 주소만 통과시키고 나머지는 404 로 끊는다.
 
-- 통과: `/`, `/index.html`, `/src/`, `/node_modules/`, `public/` 의 파일, Vite 내부(`/@vite/`, `/@react-refresh`, `/@id/__x00__`), `/api/`, `node_modules` 안을 가리키는 `/@fs/`
+- 통과: `/`, `/index.html`, `/src/`, `/node_modules/`, `public/` 의 파일, Vite 내부(`/@vite/`, `/@react-refresh`, `/@id/__x00__`), `/api/`, 이 저장소의 `node_modules` 안을 가리키는 `/@fs/`
 - 판단은 퍼센트 인코딩과 `../` 를 푼 경로로 한다 (`/src/%2e%2e/server/...` 차단)
 - VM 은 bootstrap 이 만드는 `/etc/haepung/dev.env` 에 `DEV_OPEN=1` 을 둔다
 
@@ -28,7 +28,7 @@ API 는 prod 와 같은 규칙(로그인, 덕장 권한, 허용 출처, 가입·
 
 ## 결과
 
-- 확인: 실제 Vite dev 서버로 앱이 불러오는 모듈 56개가 모두 200, 서버 코드·문서·설정 파일과 우회 주소 15개가 404 (`server/access.test.ts`).
+- 확인: 실제 Vite dev 서버로 앱이 불러오는 모듈 56개가 모두 200, 서버 코드·문서·설정 파일과 우회 주소 16개가 404 (`server/access.test.ts`). 별도 보안 검토(2026-10-06)에서 이중 인코딩, `;`, `?raw`, 절대 URL 요청 등으로도 저장소 파일을 읽지 못했다.
 - `src/` 의 화면 코드는 공개된다. prod 빌드에도 (압축된 형태로) 들어 있는 코드다.
-- Vite 화면 자동 갱신(웹소켓)은 Caddy 가 바로 넘기며 이 거름 단계를 거치지 않는다. 암호를 걸었을 때도 같았다.
+- Vite 화면 자동 갱신(웹소켓)은 Caddy 가 바로 넘기며 이 거름 단계를 거치지 않는다. 암호를 걸었을 때도 같았다. 웹소켓으로 모듈을 읽는 기능(`fetchModule`)은 Vite 가 화면 쪽에서 꺼 두어 파일은 읽히지 않고, 바뀐 파일 경로 정도만 보인다. Vite 를 올릴 때 이 점을 다시 확인한다.
 - 다시 잠그려면 bootstrap 에서 `DEV_OPEN=1` 을 빼고 머지 후 bootstrap 을 다시 돌린다. `DEV_BASIC_AUTH` 값은 VM 에 남아 있다.

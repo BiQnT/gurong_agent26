@@ -334,6 +334,7 @@ test('an open dev server serves only the app, never other repository files', asy
     assert.equal((await get(path)).status, 200, path);
   assert.equal((await get('/api/health')).status, 200);
   const root = process.cwd();
+  assert.equal((await get(`/@fs${root}/node_modules/react/package.json`)).status, 200);
   for (const path of [
     '/server/workspace.ts',
     '/docs/design/backend.md',
@@ -349,6 +350,7 @@ test('an open dev server serves only the app, never other repository files', asy
     '/src/..%2fserver/workspace.ts',
     `/@fs${root}/server/workspace.ts`,
     `/@fs${root}/node_modules/../server/workspace.ts`,
+    '/@fs/etc/node_modules/passwd',
     `/@id/${root}/server/workspace.ts`,
   ]) {
     const response = await get(path);
