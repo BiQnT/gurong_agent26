@@ -163,3 +163,37 @@ test('E-UM comes first within 1 km; the KMA AWS fills in only when no recent E-U
   assert.equal(differ.selected?.device.id, 'eum');
   assert.ok(differ.warnings.some((warning) => warning.includes('기온 12°C / 19°C')));
 });
+
+test('a selected device that is gone falls back to the normal preference, and an explicit AWS pick adds no fallback warning', () => {
+  const kmaDevice = {
+    ...observation('kma-aws-816', 36.002, 'current'),
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: 'AWS',
+      latitude: 36.002,
+      longitude: 129.5,
+      provider: 'kma' as const,
+    },
+  };
+  const gone = attachSiteContext(
+    snapshot([observation('far', 36.003, 'current'), observation('near', 36.001, 'current')]),
+    site,
+    'kma-aws-816',
+  );
+  assert.equal(gone.selected?.device.id, 'near');
+  const picked = attachSiteContext(
+    snapshot([observation('near', 36.001, 'current'), kmaDevice]),
+    site,
+    'kma-aws-816',
+  );
+  assert.equal(picked.selected?.device.id, 'kma-aws-816');
+  assert.ok(!picked.warnings.some((warning) => warning.includes('대신 보여드려요')));
+  // 모르는 기관은 화면 검증에서 거른다
+  assert.throws(() =>
+    readLiveSnapshot({
+      ...snapshot([kmaDevice]),
+      devices: [{ ...kmaDevice.device, provider: 'other' }],
+    }),
+  );
+});

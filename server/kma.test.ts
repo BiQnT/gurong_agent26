@@ -159,3 +159,63 @@ test('a stalled call is retried once, an HTTP refusal is not, and callers wait a
   assert.equal(await within(Promise.resolve(7), 50), 7);
   assert.equal(await within(Promise.reject(new Error('x')), 50), null);
 });
+
+test('the last row with values is used, impossible dates are rejected, and a selected AWS id survives a KMA outage', async () => {
+  const header = '#START7777\n';
+  const row = (stamp: string, ta: string, hm: string) =>
+    `${stamp}   816  311.0    2.0  333.0    2.9  312.8    2.4   ${ta}  -99.9    0.0    0.0    0.0    0.0   ${hm} 1011.2 1016.3   10.9\n`;
+  const body =
+    header +
+    row('202610062202', '13.4', '85.1') +
+    row('202610062203', '-99.9', '-99.9') +
+    '#7777END\n';
+  const read = readAwsMinute(body, OBSERVED, 30)!.observation;
+  assert.equal(read.observedAtRaw, '202610062202');
+  assert.equal(read.temperature, 13.4);
+  const impossible = readAwsMinute(
+    header + row('202602301200', '13.4', '85.1'),
+    OBSERVED,
+    30,
+  )!.observation;
+  assert.equal(impossible.status, 'invalid');
+  assert.equal(impossible.observedAt, null);
+  assert.ok(impossible.issues.some((issue) => issue.includes('시각을 확인할 수 없어요')));
+  const stale = readAwsMinute(
+    raw('kma-aws816-minute.txt'),
+    OBSERVED + 40 * 60_000,
+    30,
+  )!.observation;
+  assert.ok(stale.issues.some((issue) => issue.includes('40분 전')));
+
+  // 화면이 기상청 AWS 를 고른 채 물었는데 이번에 기상청을 못 받았으면 오류 대신 기본 선택
+  const { createObservationService } = await import('./eum.ts');
+  const service = createObservationService(
+    {
+      eumServiceKey: 'test-eum-secret',
+      openaiApiKey: '',
+      openaiModel: 'test',
+      llmBaseUrl: 'https://api.openai.com/v1',
+      timezoneOffset: '+09:00',
+      staleAfterMinutes: 30,
+      projectRoot: process.cwd(),
+    },
+    async (input) => {
+      const url = new URL(String(input));
+      const data = url.pathname.endsWith('/realtime')
+        ? [{ devId: 1, logDateTime: '2026-10-06 22:00:00', temp: 13, humi: 80, winsp: 1 }]
+        : [
+            {
+              id: 1,
+              nickname: '구룡포 관측기',
+              address: '구룡포',
+              latitude: 35.98,
+              longitude: 129.54,
+            },
+          ];
+      return Response.json({ id: '1', status: 'success', data });
+    },
+    { aws: async () => null, weather: async () => null },
+  );
+  const result = await service.snapshot(new AbortController().signal, 'kma-aws-816');
+  assert.equal(result.selected?.device.id, '1');
+});

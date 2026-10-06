@@ -80,7 +80,9 @@ function readDevice(value: unknown): LiveDevice {
     !finite(value.latitude) ||
     Math.abs(value.latitude) > 90 ||
     !finite(value.longitude) ||
-    Math.abs(value.longitude) > 180
+    Math.abs(value.longitude) > 180 ||
+    // 모르는 기관을 E-UM 으로 보이게 하지 않는다.
+    (value.provider !== undefined && value.provider !== 'eum' && value.provider !== 'kma')
   )
     throw new Error('관측기 정보를 확인할 수 없어요.');
   return {

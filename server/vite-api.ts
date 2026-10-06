@@ -150,8 +150,8 @@ export function createApiMiddleware(
   const kma = createKmaSource(config);
   const observations = createObservationService(config, fetch, kma);
   // 덕장 위치의 비·눈, 강수량, 일출·일몰. 키가 없거나 실패하면 붙이지 않는다.
-  const siteWeather = async (site: { latitude: number; longitude: number }, signal: AbortSignal) =>
-    kma ? await within(kma.weather(site, signal), KMA_WAIT_MS) : null;
+  const siteWeather = async (site: { latitude: number; longitude: number }) =>
+    kma ? await within(kma.weather(site), KMA_WAIT_MS) : null;
   const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config));
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
@@ -190,6 +190,7 @@ export function createApiMiddleware(
       return;
     }
     const controller = new AbortController();
+    const deadlineAt = Date.now() + 45000;
     const deadline = setTimeout(() => controller.abort(), 45000);
     const disconnect = () => {
       if (!response.writableEnded) controller.abort();
@@ -255,7 +256,7 @@ export function createApiMiddleware(
           const access = siteId ? await workspace.requireMember(request, siteId) : null;
           const [snapshot, weather] = await Promise.all([
             observations.snapshot(controller.signal, deviceId),
-            access ? siteWeather(access.site, controller.signal) : null,
+            access ? siteWeather(access.site) : null,
           ]);
           send(
             200,
@@ -274,13 +275,13 @@ export function createApiMiddleware(
         const { site } = await workspace.requireMember(request, input.siteId, 'owner');
         const [observed, weather] = await Promise.all([
           observations.snapshot(controller.signal, input.deviceId),
-          siteWeather(site, controller.signal),
+          siteWeather(site),
         ]);
         const snapshot = {
           ...attachSiteContext(observed, site, input.deviceId),
           ...(weather ? { weather } : {}),
         };
-        send(200, await chat(input, snapshot, controller.signal));
+        send(200, await chat(input, snapshot, controller.signal, deadlineAt));
       } catch (error) {
         if (controller.signal.aborted)
           send(504, {

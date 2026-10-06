@@ -2,7 +2,7 @@ import type { LiveDevice, LiveObservation, LiveSnapshot } from '../src/lib/live.
 import type { ClaudeConfig } from './claude-cli.ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createKmaSource, KMA_WAIT_MS, within, type KmaSource } from './sources/kma.ts';
+import { AWS_816, createKmaSource, KMA_WAIT_MS, within, type KmaSource } from './sources/kma.ts';
 
 const EUM_BASE = 'https://genix.pohang-eum.kr';
 const DEVICE_PATH = '/dpg/atmosphere/devices';
@@ -404,11 +404,13 @@ export function createObservationService(
     async snapshot(signal: AbortSignal, deviceId?: string): Promise<LiveSnapshot> {
       signal.throwIfAborted();
       // 기상청 AWS 는 E-UM 과 같이 불러 기다리는 시간을 늘리지 않는다. 실패하면 null 이다.
-      const awsPending = kma ? within(kma.aws(signal), KMA_WAIT_MS) : Promise.resolve(null);
+      const awsPending = kma ? within(kma.aws(), KMA_WAIT_MS) : Promise.resolve(null);
       const data = await readUpstream(signal);
       signal.throwIfAborted();
       const aws = await awsPending;
       const devices = aws ? [...data.devices, aws.device] : data.devices;
+      // 화면이 기상청 AWS 를 고른 채 묻는데 이번에 기상청을 못 받았으면 오류 대신 기본 선택을 쓴다.
+      if (deviceId === AWS_816.id && !aws) deviceId = undefined;
       if (deviceId && !devices.some((device) => device.id === deviceId)) {
         throw new BridgeError(
           400,

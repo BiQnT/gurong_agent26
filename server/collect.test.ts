@@ -473,3 +473,47 @@ test('when E-UM has no recent value near the site, the batch records the KMA AWS
   assert.equal(recorded.sourceDeviceName, '기상청 구룡포 AWS');
   assert.equal(recorded.temperature, 13.5);
 });
+
+test('when E-UM is down and only archived data exists, a current KMA AWS value near the site is still recorded', async (t) => {
+  const config: BridgeConfig = {
+    eumServiceKey: '',
+    openaiApiKey: '',
+    openaiModel: 'test',
+    llmBaseUrl: 'https://api.openai.com/v1',
+    timezoneOffset: '+09:00',
+    staleAfterMinutes: 30,
+    projectRoot: process.cwd(),
+  };
+  const aws: LiveObservation = {
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: '기상청 AWS 816',
+      latitude: SITE.latitude + 0.002,
+      longitude: SITE.longitude,
+      provider: 'kma',
+    },
+    temperature: 13.5,
+    humidity: 84.6,
+    windSpeed: 2.2,
+    observedAt: new Date(Date.now() - 60 * 1000).toISOString(),
+    observedAtRaw: '202610062215',
+    ageMinutes: 1,
+    status: 'current',
+    issues: [],
+  };
+  const f = await fixture(t);
+  const { operations } = await siteWithBatch(f);
+  // 키가 없어 E-UM 은 보관 자료(archived)만 준다.
+  const service = createObservationService(
+    config,
+    async () => {
+      throw new Error('E-UM 을 부르면 안 된다');
+    },
+    { aws: async () => aws, weather: async () => null },
+  );
+  const summary = await collectOnce({ workspace: f.workspace, observations: service });
+  assert.equal(summary.source, 'archived');
+  assert.deepEqual([summary.recorded, summary.missing], [1, 0]);
+  assert.equal((await operations()).data.batches[0].observations[0].sourceDeviceId, 'kma-aws-816');
+});

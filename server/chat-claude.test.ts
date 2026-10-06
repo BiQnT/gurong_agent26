@@ -6,7 +6,7 @@ import test, { after } from 'node:test';
 import Database from 'better-sqlite3';
 import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
 import { readChatReply } from '../src/lib/chat.ts';
-import { createLiveChat, type LiveChatRequest } from './chat.ts';
+import { createLiveChat, localExplanation, type LiveChatRequest } from './chat.ts';
 import { ClaudeCliError, type AgentAsk, type ClaudeFailure } from './claude-cli.ts';
 import type { BridgeConfig } from './eum.ts';
 import { cleanupFakes, makeFakeClaude, readFixture } from './fixtures/fake-claude.ts';
@@ -283,4 +283,47 @@ test('the OpenAI-compatible provider stays the default and never starts claude',
   assert.equal(fetched, 1);
   assert.equal(reply.provider, 'openai');
   assert.equal(fake.calls().length, 0);
+});
+
+test('the AI only gets the time left before the 45 s route deadline, then the local explanation', async () => {
+  const fake = makeFakeClaude({ sleepMs: 20000 }, { timeoutMs: 30000 });
+  const started = Date.now();
+  // 관측·자외선에 시간을 다 쓰고 3.5초만 남은 상황
+  const reply = await createLiveChat(bridge(fake.config))(
+    request,
+    snapshot,
+    live(),
+    Date.now() + 3500,
+  );
+  assert.equal(reply.provider, 'local');
+  assert.match(reply.providerNotice ?? '', /응답이 늦어/);
+  assert.ok(Date.now() - started < 8000);
+});
+
+test('the KMA fallback reason is told only when the server chose KMA because E-UM had nothing recent', () => {
+  const kmaObservation = {
+    ...observation,
+    device: {
+      ...observation.device,
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      provider: 'kma' as const,
+    },
+  };
+  const chosen = { ...snapshot, selected: kmaObservation, devices: [kmaObservation.device] };
+  assert.match(
+    localExplanation(
+      {
+        ...chosen,
+        warnings: [
+          '덕장 1km 안 E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS(약 690m) 관측값을 대신 보여드려요.',
+        ],
+      },
+      undefined,
+    ),
+    /E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS/,
+  );
+  const picked = localExplanation({ ...chosen, warnings: [] }, undefined);
+  assert.match(picked, /^기상청 구룡포 AWS 관측값을 확인했어요/);
+  assert.ok(!picked.includes('최근 값이 없어'));
 });

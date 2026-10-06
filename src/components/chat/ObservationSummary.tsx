@@ -126,7 +126,7 @@ function weatherLine(weather: SiteWeather | undefined): string | null {
     parts.push(
       weather.precipitation.type === '없음'
         ? `강수 없음 (${clock(weather.precipitation.observedAt)} 실황)`
-        : `${weather.precipitation.type} ${weather.precipitation.rain1hMm ?? 0}mm/시간 (${clock(weather.precipitation.observedAt)} 실황)`,
+        : `${weather.precipitation.type}${weather.precipitation.rain1hMm === null ? '' : ` ${weather.precipitation.rain1hMm}mm/시간`} (${clock(weather.precipitation.observedAt)} 실황)`,
     );
   if (weather.rain?.todayMm !== null && weather.rain?.todayMm !== undefined)
     parts.push(`오늘 강수 ${weather.rain.todayMm}mm`);

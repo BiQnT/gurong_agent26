@@ -22,10 +22,13 @@ export function attachSiteContext(
   // E-UM 우선. 1km 안에 최근 E-UM 값이 없을 때만 기상청 AWS 를 쓴다.
   const nearbyEum = nearby.filter((item) => !isKma(item));
   const nearbyKma = nearby.filter(isKma);
+  const explicit = explicitDeviceId
+    ? byDistance.find((item) => item.device.id === explicitDeviceId)
+    : undefined;
   const selected =
-    (explicitDeviceId
-      ? byDistance.find((item) => item.device.id === explicitDeviceId)
-      : (nearbyEum[0] ?? nearbyKma[0])) ??
+    explicit ??
+    nearbyEum[0] ??
+    nearbyKma[0] ??
     byDistance.find((item) => item.status !== 'invalid' && !isKma(item)) ??
     byDistance.find((item) => item.status !== 'invalid') ??
     byDistance[0] ??
@@ -37,7 +40,7 @@ export function attachSiteContext(
     warnings.push(
       '덕장 1km 이내에서 사용할 수 있는 최근 관측값을 찾지 못했어요. 관측 자료의 거리와 시각을 확인해 주세요.',
     );
-  else if (selected && isKma(selected) && !explicitDeviceId)
+  else if (selected && isKma(selected) && !explicit)
     warnings.push(
       `덕장 1km 안 E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS(약 ${selected.distanceM}m) 관측값을 대신 보여드려요.`,
     );

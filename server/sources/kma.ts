@@ -59,11 +59,8 @@ const PRECIPITATION: Record<string, string> = {
 };
 
 export type KmaSource = {
-  aws: (signal?: AbortSignal) => Promise<LiveObservation | null>;
-  weather: (
-    site: { latitude: number; longitude: number },
-    signal?: AbortSignal,
-  ) => Promise<SiteWeather | null>;
+  aws: () => Promise<LiveObservation | null>;
+  weather: (site: { latitude: number; longitude: number }) => Promise<SiteWeather | null>;
 };
 
 /** 기상청 격자 변환(A6, 람베르트 정각원추). 좌표 → 동네예보 격자. */
@@ -104,9 +101,12 @@ export function toKmaGrid(latitude: number, longitude: number): { nx: number; ny
 function kstIso(stamp: string): string | null {
   const match = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(stamp);
   if (!match) return null;
-  const iso = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:00+09:00`;
-  const parsed = Date.parse(iso);
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+  const parsed = Date.parse(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:00+09:00`);
+  if (!Number.isFinite(parsed)) return null;
+  // 2월 30일처럼 없는 날짜가 다음 달로 넘어가지 않게, 되돌린 값이 원문과 같은지 본다.
+  const back = new Date(parsed + 9 * 60 * 60 * 1000).toISOString();
+  if (back.slice(0, 16).replace(/\D/g, '') !== stamp) return null;
+  return new Date(parsed).toISOString();
 }
 
 /** KST 기준 날짜·시각 조각. */
@@ -131,15 +131,19 @@ export function readAwsMinute(
   now: number,
   staleAfterMinutes: number,
 ): { observation: LiveObservation; rain: SiteWeather['rain'] } | null {
-  const line = body
+  // YYMMDDHHMI STN WD1 WS1 WDS WSS WD10 WS10 TA RE RN-15m RN-60m RN-12H RN-DAY HM PA PS TD
+  const rows = body
     .split('\n')
     .map((row) => row.trim())
     .filter((row) => row && !row.startsWith('#'))
-    .at(-1);
-  if (!line) return null;
-  const column = line.split(/\s+/);
-  // YYMMDDHHMI STN WD1 WS1 WDS WSS WD10 WS10 TA RE RN-15m RN-60m RN-12H RN-DAY HM PA PS TD
-  if (column.length < 15 || column[1] !== '816') return null;
+    .map((row) => row.split(/\s+/))
+    .filter((column) => column.length >= 15 && column[1] === '816');
+  // 최근 몇 분을 받아 기온·습도가 있는 마지막 줄을 쓴다 (마지막 분이 비어 있을 수 있다).
+  const column =
+    rows.findLast(
+      (row) => measured(row[8], -50, 60) !== null && measured(row[14], -1, 100) !== null,
+    ) ?? rows.at(-1);
+  if (!column) return null;
   const observedAt = kstIso(column[0]);
   const temperature = measured(column[8], -50, 60);
   const humidity = measured(column[14], -1, 100);
@@ -152,12 +156,15 @@ export function readAwsMinute(
   const missing = temperature === null || humidity === null || windSpeed === null;
   const issues: string[] = [];
   if (missing) issues.push('기상청 AWS 의 필수 관측값(기온·습도·풍속) 중 빠진 값이 있어요.');
+  if (!observedAt) issues.push('기상청 AWS 관측 시각을 확인할 수 없어요.');
+  else if (ageMinutes === null) issues.push('기상청 AWS 관측 시각이 조회 시각보다 미래예요.');
   const status: LiveObservation['status'] =
     !observedAt || ageMinutes === null || missing
       ? 'invalid'
       : ageMinutes > staleAfterMinutes
         ? 'stale'
         : 'current';
+  if (status === 'stale') issues.push(`기상청 AWS 의 마지막 관측이 ${ageMinutes}분 전이에요.`);
   return {
     observation: {
       device: { ...AWS_816 },
@@ -274,10 +281,12 @@ export function createKmaSource(
 
   const awsMinute = () =>
     cached('aws', 60_000, 30_000, async () => {
-      // 방금 분은 아직 안 들어왔을 수 있어 1분 전을 끝으로 묻는다.
-      const at = kstParts(now() - 60_000);
+      // 방금 분은 아직 안 들어왔을 수 있어 최근 10분(1분 전까지)을 받아 마지막 정상 줄을 쓴다.
+      const from = kstParts(now() - 10 * 60_000);
+      const to = kstParts(now() - 60_000);
       const url = new URL(AWS_URL);
-      url.searchParams.set('tm2', `${at.date}${at.hour}${at.minute}`);
+      url.searchParams.set('tm1', `${from.date}${from.hour}${from.minute}`);
+      url.searchParams.set('tm2', `${to.date}${to.hour}${to.minute}`);
       url.searchParams.set('stn', '816');
       url.searchParams.set('disp', '0');
       url.searchParams.set('help', '0');
