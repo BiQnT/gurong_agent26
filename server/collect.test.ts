@@ -410,3 +410,66 @@ test('the collector command prints one line and does not call E-UM for an empty 
   );
   assert.ok(!(result.stdout + result.stderr).includes('test-collect-secret'));
 });
+
+test('when E-UM has no recent value near the site, the batch records the KMA AWS value', async (t) => {
+  const config: BridgeConfig = {
+    eumServiceKey: 'test-eum-secret',
+    openaiApiKey: '',
+    openaiModel: 'test',
+    llmBaseUrl: 'https://api.openai.com/v1',
+    timezoneOffset: '+09:00',
+    staleAfterMinutes: 30,
+    projectRoot: process.cwd(),
+  };
+  // E-UM 은 3시간 전 값만 준다 (오래된 관측).
+  const old = new Date(Date.now() - 3 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', ' ');
+  const awsAt = new Date(Date.now() - 60 * 1000).toISOString();
+  const aws: LiveObservation = {
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: '기상청 AWS 816',
+      latitude: SITE.latitude + 0.002,
+      longitude: SITE.longitude,
+      provider: 'kma',
+    },
+    temperature: 13.5,
+    humidity: 84.6,
+    windSpeed: 2.2,
+    observedAt: awsAt,
+    observedAtRaw: '202610062215',
+    ageMinutes: 1,
+    status: 'current',
+    issues: [],
+  };
+  const f = await fixture(t);
+  const { operations } = await siteWithBatch(f);
+  const service = createObservationService(
+    config,
+    async (input) => {
+      const url = new URL(String(input));
+      const data = url.pathname.endsWith('/realtime')
+        ? [{ devId: 1, logDateTime: old, temp: 22.7, humi: 57, winsp: 0.95 }]
+        : [
+            {
+              id: 1,
+              nickname: '구룡포 관측기',
+              address: '구룡포',
+              latitude: SITE.latitude,
+              longitude: SITE.longitude,
+            },
+          ];
+      return Response.json({ id: '1', status: 'success', data });
+    },
+    { aws: async () => aws, weather: async () => null },
+  );
+  const summary = await collectOnce({ workspace: f.workspace, observations: service });
+  assert.deepEqual([summary.recorded, summary.missing], [1, 0]);
+  const recorded = (await operations()).data.batches[0].observations[0];
+  assert.equal(recorded.sourceDeviceId, 'kma-aws-816');
+  assert.equal(recorded.sourceDeviceName, '기상청 구룡포 AWS');
+  assert.equal(recorded.temperature, 13.5);
+});
