@@ -1,0 +1,101 @@
+[
+  {
+    "place_id": 269817090,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 395533025,
+    "lat": "35.9886660",
+    "lon": "129.5507424",
+    "category": "highway",
+    "type": "secondary",
+    "place_rank": 26,
+    "importance": 0.05339371404592962,
+    "addresstype": "road",
+    "name": "구룡포길",
+    "display_name": "구룡포길, 약전, 구룡포읍, 남구, 포항시, 경상북도, 37932, 대한민국",
+    "address": {
+      "road": "구룡포길",
+      "hamlet": "약전",
+      "town": "구룡포읍",
+      "borough": "남구",
+      "city": "포항시",
+      "province": "경상북도",
+      "ISO3166-2-lvl4": "KR-47",
+      "postcode": "37932",
+      "country": "대한민국",
+      "country_code": "kr"
+    },
+    "boundingbox": [
+      "35.9858373",
+      "35.9905951",
+      "129.5479614",
+      "129.5542642"
+    ]
+  },
+  {
+    "place_id": 269779700,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1013424268,
+    "lat": "35.9916039",
+    "lon": "129.5586820",
+    "category": "highway",
+    "type": "tertiary",
+    "place_rank": 26,
+    "importance": 0.05339371404592962,
+    "addresstype": "road",
+    "name": "구룡포길",
+    "display_name": "구룡포길, 병막, 구룡포읍, 남구, 포항시, 경상북도, 37933, 대한민국",
+    "address": {
+      "road": "구룡포길",
+      "hamlet": "병막",
+      "town": "구룡포읍",
+      "borough": "남구",
+      "city": "포항시",
+      "province": "경상북도",
+      "ISO3166-2-lvl4": "KR-47",
+      "postcode": "37933",
+      "country": "대한민국",
+      "country_code": "kr"
+    },
+    "boundingbox": [
+      "35.9900694",
+      "35.9921626",
+      "129.5555145",
+      "129.5615004"
+    ]
+  },
+  {
+    "place_id": 269779823,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 532466580,
+    "lat": "35.9902437",
+    "lon": "129.5546819",
+    "category": "highway",
+    "type": "secondary",
+    "place_rank": 26,
+    "importance": 0.05339371404592962,
+    "addresstype": "road",
+    "name": "구룡포길",
+    "display_name": "구룡포길, 병막, 구룡포읍, 남구, 포항시, 경상북도, 37933, 대한민국",
+    "address": {
+      "road": "구룡포길",
+      "hamlet": "병막",
+      "town": "구룡포읍",
+      "borough": "남구",
+      "city": "포항시",
+      "province": "경상북도",
+      "ISO3166-2-lvl4": "KR-47",
+      "postcode": "37933",
+      "country": "대한민국",
+      "country_code": "kr"
+    },
+    "boundingbox": [
+      "35.9899305",
+      "35.9905951",
+      "129.5542642",
+      "129.5551267"
+    ]
+  }
+]

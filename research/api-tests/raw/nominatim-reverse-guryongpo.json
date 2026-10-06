@@ -1,0 +1,33 @@
+{
+  "place_id": 270627554,
+  "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+  "osm_type": "way",
+  "osm_id": 37413963,
+  "lat": "35.9812428",
+  "lon": "129.5401830",
+  "category": "highway",
+  "type": "secondary",
+  "place_rank": 26,
+  "importance": 0.05339371404592962,
+  "addresstype": "road",
+  "name": "호미로",
+  "display_name": "호미로, 병포, 구룡포읍, 남구, 포항시, 경상북도, 37936, 대한민국",
+  "address": {
+    "road": "호미로",
+    "hamlet": "병포",
+    "town": "구룡포읍",
+    "borough": "남구",
+    "city": "포항시",
+    "province": "경상북도",
+    "ISO3166-2-lvl4": "KR-47",
+    "postcode": "37936",
+    "country": "대한민국",
+    "country_code": "kr"
+  },
+  "boundingbox": [
+    "35.9805405",
+    "35.9822643",
+    "129.5363674",
+    "129.5450841"
+  ]
+}

@@ -11,6 +11,8 @@ export type Site = SiteInput & {
   language: MemberLanguage;
 };
 export type WorkspaceSession = { user: Account | null; sites: Site[] };
+/** 주소 검색 결과. 도로·마을 단위라 정확한 위치는 지도 핀으로 맞춘다. */
+export type GeocodeHit = { latitude: number; longitude: number; label: string };
 export type TeamMember = Account & { role: MemberRole; language: MemberLanguage; joinedAt: string };
 export type Invitation = {
   id: string;
@@ -147,6 +149,15 @@ export const workspaceApi = {
     request<OperationsEnvelope>(
       `${sitePath(id)}/guidance/${encodeURIComponent(guidanceId)}/replies/${encodeURIComponent(replyId)}/answer`,
       { method: 'POST', body: { text } },
+    ),
+  geocode: (query: string, signal?: AbortSignal) =>
+    request<{ results: GeocodeHit[] }>(`/geocode/search?q=${encodeURIComponent(query)}`, {
+      signal,
+    }),
+  reverseGeocode: (location: { latitude: number; longitude: number }, signal?: AbortSignal) =>
+    request<{ address: string | null }>(
+      `/geocode/reverse?lat=${location.latitude}&lng=${location.longitude}`,
+      { signal },
     ),
   reply: (id: string, guidanceId: string, kind: GuidanceReply['kind'], text?: string) =>
     request<OperationsEnvelope>(

@@ -9,12 +9,25 @@ import {
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
+import { createGeocoder, readGeocodeReverse, readGeocodeSearch, type Geocoder } from './geocode.ts';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { readdirSync } from 'node:fs';
 import { posix, relative, resolve, sep } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
-const API_PATHS = new Set(['/api/health', '/api/observations', '/api/chat']);
+const API_PATHS = new Set([
+  '/api/health',
+  '/api/observations',
+  '/api/chat',
+  '/api/geocode/search',
+  '/api/geocode/reverse',
+]);
+
+// Nominatim 이용 정책은 앱과 연락처를 User-Agent 로 알리게 한다. 공개 주소가 있으면 그것을 쓴다.
+function geocoderUserAgent() {
+  const origin = (process.env.PUBLIC_ORIGINS || '').split(',')[0]?.trim();
+  return `haepung-gwamegi/1.0 (+${origin || 'https://github.com/BiQnT/gurong_agent26'})`;
+}
 
 function normalizeEumServiceKey(value: string | undefined): string {
   const key = value?.trim() || '';
@@ -130,6 +143,7 @@ function readBody(request: Connect.IncomingMessage, signal: AbortSignal): Promis
 export function createApiMiddleware(
   config: BridgeConfig,
   workspace: WorkspaceService = createWorkspaceService(config),
+  geocoder: Geocoder = createGeocoder(geocoderUserAgent),
 ): Connect.NextHandleFunction {
   const workspaceMiddleware = createWorkspaceMiddleware(workspace);
   const observations = createObservationService(config);
@@ -209,6 +223,21 @@ export function createApiMiddleware(
             commit: process.env.GIT_COMMIT || null,
             schema,
           });
+          return;
+        }
+        if (url.pathname.startsWith('/api/geocode/')) {
+          if (request.method !== 'GET')
+            throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
+          // 외부 서비스를 대신 부르므로 로그인한 사람만 쓴다 (덕장 등록은 가입 뒤에 한다).
+          const { user } = await workspace.session(request);
+          if (!user) throw new BridgeError(401, 'AUTH_REQUIRED', '로그인한 뒤 이용해 주세요.');
+          if (url.pathname === '/api/geocode/search') {
+            const query = readGeocodeSearch(url.searchParams);
+            send(200, { results: await geocoder.search(query, controller.signal) });
+          } else {
+            const { latitude, longitude } = readGeocodeReverse(url.searchParams);
+            send(200, { address: await geocoder.reverse(latitude, longitude, controller.signal) });
+          }
           return;
         }
         if (url.pathname === '/api/observations') {
