@@ -419,7 +419,9 @@ export function forecastDays(
       humidity: stat(hours.map((hour) => hour.humidity)),
       windSpeed: stat(hours.map((hour) => hour.windSpeed)),
       maxPop: pops.length ? Math.max(...pops) : null,
-      precipitationHours: hours.filter((hour) => hour.precipitation !== '없음').length,
+      precipitationHours: hours.filter(
+        (hour) => hour.precipitation !== '없음' && hour.precipitation !== '알 수 없음',
+      ).length,
     };
   });
 }
@@ -591,22 +593,23 @@ export function readForecastOutlook(value: unknown): ForecastOutlook | null {
       GRADES.includes(hour.expectedGrade as string),
   );
   const daysValid =
-    value.days === undefined ||
-    (Array.isArray(value.days) &&
-      value.days.length <= 5 &&
-      value.days.every(
-        (day) =>
-          record(day) &&
-          date(day.date) &&
-          text(day.label) &&
-          validCounts(day.gradeHours) &&
-          finite(day.hours) &&
-          (day.bestWindow === null || text(day.bestWindow)) &&
-          validStat(day.temperature) &&
-          validStat(day.humidity) &&
-          validStat(day.windSpeed) &&
-          nullableNumber(day.maxPop) &&
-          finite(day.precipitationHours),
-      ));
+    (value.daysIssuedAt === undefined || instant(value.daysIssuedAt)) &&
+    (value.days === undefined ||
+      (Array.isArray(value.days) &&
+        value.days.length <= 5 &&
+        value.days.every(
+          (day) =>
+            record(day) &&
+            date(day.date) &&
+            text(day.label) &&
+            validCounts(day.gradeHours) &&
+            finite(day.hours) &&
+            (day.bestWindow === null || text(day.bestWindow)) &&
+            validStat(day.temperature) &&
+            validStat(day.humidity) &&
+            validStat(day.windSpeed) &&
+            nullableNumber(day.maxPop) &&
+            finite(day.precipitationHours),
+        )));
   return hoursValid && daysValid ? (value as ForecastOutlook) : null;
 }

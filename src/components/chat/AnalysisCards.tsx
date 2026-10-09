@@ -214,11 +214,17 @@ export function ForecastCard({ forecast }: { forecast: ForecastOutlook }) {
       </div>
       {forecast.days?.length ? (
         <>
+          {forecast.daysIssuedAt && (
+            <p className="analysis-note">
+              날짜별 예상 · 기상청 단기예보 {timeFormatter.format(new Date(forecast.daysIssuedAt))}{' '}
+              발표
+            </p>
+          )}
           <div className="grade-rows forecast-days">
             {forecast.days.map((day) => (
               <div className="grade-row" key={day.date}>
                 <span className="grade-row-label">{day.label}</span>
-                <GradeBar hours={day.gradeHours} span={day.hours} label={`${day.label} 예상`} />
+                <GradeBar hours={day.gradeHours} span={24} label={`${day.label} 예상`} />
                 <span className="grade-row-value">{day.gradeHours.적합}h</span>
                 <span className="forecast-day-note">
                   {day.bestWindow ? `가장 긴 적합 ${day.bestWindow}` : '적합 예상 없음'}

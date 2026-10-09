@@ -50,7 +50,8 @@ test('history asks one minute per sampled hour, remembers it, and keeps rain onl
     new AbortController().signal,
   );
   assert.equal(result?.sampleMinutes, 60);
-  assert.equal(result?.source, '기상청 구룡포 AWS 매시 관측');
+  assert.equal(result?.source, '기상청 구룡포 AWS 관측');
+  assert.equal(result?.unfetched, 0);
   assert.equal(result?.samples.length, 4);
   const three = result!.samples.find((sample) => sample.at === '2026-01-09T18:00:00.000Z')!;
   assert.deepEqual(three, {
@@ -93,37 +94,50 @@ test('long periods use sparse samples without rain, and HTTP errors give no hist
   );
 });
 
-test('the short-range forecast is read hour by hour from now on, with shower and probability', () => {
-  const item = (time: string, category: string, value: string) => ({
+test('the short-range forecast keeps hourly rows from now through the day after tomorrow', () => {
+  const item = (date: string, time: string, category: string, value: string) => ({
     baseDate: '20261009',
     baseTime: '1100',
     category,
-    fcstDate: '20261009',
+    fcstDate: date,
     fcstTime: time,
     fcstValue: value,
     nx: 105,
     ny: 94,
   });
+  const hour = (date: string, time: string, values: [string, string][]) =>
+    values.map(([category, value]) => item(date, time, category, value));
+  const normal: [string, string][] = [
+    ['TMP', '20'],
+    ['REH', '50'],
+    ['WSD', '3'],
+    ['PTY', '0'],
+    ['POP', '0'],
+  ];
   const payload = {
     response: {
       body: {
         items: {
           item: [
-            ...[
-              ['TMP', '24'],
-              ['REH', '55'],
-              ['WSD', '1.2'],
-              ['PTY', '0'],
-              ['POP', '0'],
-            ].map(([c, v]) => item('1100', c, v)),
-            ...[
+            ...hour('20261009', '1100', normal),
+            ...hour('20261009', '1200', [
               ['TMP', '23'],
               ['REH', '60'],
               ['WSD', '2.4'],
               ['PTY', '4'],
               ['POP', '60'],
               ['PCP', '1.0mm'],
-            ].map(([c, v]) => item('1200', c, v)),
+            ]),
+            ...hour('20261011', '2300', normal),
+            // 글피는 3시간 간격에 풍속이 부호라 쓰지 않는다.
+            ...hour('20261012', '0000', normal),
+            ...hour('20261012', '0300', [
+              ['TMP', '18'],
+              ['REH', '70'],
+              ['WSD', '1'],
+              ['PTY', '0'],
+              ['POP', '20'],
+            ]),
           ],
         },
       },
@@ -131,6 +145,7 @@ test('the short-range forecast is read hour by hour from now on, with shower and
   };
   const forecast = readVilageForecast(payload, Date.parse('2026-10-09T12:10:00+09:00'));
   assert.equal(forecast?.issuedAt, '2026-10-09T02:00:00.000Z');
+  // 12시 다음 칸이 이틀 뒤 23시라 1시간보다 벌어진 곳에서 끊긴다.
   assert.deepEqual(forecast?.hours, [
     {
       at: '2026-10-09T03:00:00.000Z',
@@ -141,6 +156,27 @@ test('the short-range forecast is read hour by hour from now on, with shower and
       pop: 60,
     },
   ]);
+  const continuous = readVilageForecast(
+    {
+      response: {
+        body: {
+          items: {
+            item: Array.from({ length: 72 }, (_, h) => {
+              const time = Date.parse('2026-10-09T00:00:00+09:00') + h * 3_600_000;
+              const kst = new Date(time + 9 * 3_600_000).toISOString();
+              return hour(kst.slice(0, 10).replaceAll('-', ''), `${kst.slice(11, 13)}00`, normal);
+            })
+              .flat()
+              .concat(hour('20261012', '0000', normal)),
+          },
+        },
+      },
+    },
+    Date.parse('2026-10-09T12:10:00+09:00'),
+  );
+  // 오늘 12시부터 모레 23시까지 60시간, 글피 00시는 뺀다.
+  assert.equal(continuous?.hours.length, 60);
+  assert.equal(continuous?.hours.at(-1)?.at, '2026-10-11T14:00:00.000Z');
   assert.equal(readVilageForecast({ response: {} }, 0), null);
   // 02시 발표 전 새벽에는 전날 23시 발표를 쓴다.
   assert.deepEqual(vilageBase(Date.parse('2026-10-09T01:00:00+09:00')), {
@@ -166,8 +202,9 @@ test('the short-range forecast is fetched once per release for the site grid', a
     Date.parse('2026-10-09T12:00:00+09:00'),
   )!;
   const site = { latitude: 35.9812, longitude: 129.5402 };
+  // 이번 발표가 비어 있으면 직전 발표를 한 번 더 묻는다. 결과는 발표마다 기억한다.
   assert.equal(await forecast(site), null);
   await forecast(site);
-  assert.equal(calls, 1);
+  assert.equal(calls, 2);
   assert.equal(createKmaShortForecast({}), undefined);
 });

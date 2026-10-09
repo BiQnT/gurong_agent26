@@ -53,26 +53,29 @@ export function hourlyStamps(
   return stamps;
 }
 
-async function fetchText(
-  fetcher: typeof fetch,
-  url: URL,
-  signal: AbortSignal,
-): Promise<string | null> {
+type Fetched = { ok: true; body: string } | { ok: false };
+
+/**
+ * 한 번 더 불러 볼 수 있는 실패(멈춤·끊김·5xx·429)와 확실한 실패를 가르지 않고 모두 { ok: false } 로 돌려준다.
+ * 호출한 쪽은 이것을 "못 받음"으로, 200 인데 줄이 없는 것은 "자료 없음"으로 센다.
+ */
+async function fetchText(fetcher: typeof fetch, url: URL, signal: AbortSignal): Promise<Fetched> {
   for (let attempt = 1; attempt <= 2; attempt++) {
-    if (signal.aborted) return null;
+    if (signal.aborted) return { ok: false };
     try {
       const response = await fetcher(url, {
         redirect: 'error',
         signal: AbortSignal.any([signal, AbortSignal.timeout(ATTEMPT_TIMEOUT_MS)]),
       });
-      // 권한 없음 같은 HTTP 오류는 다시 불러도 같다.
-      if (!response.ok) return null;
-      return await response.text();
+      // 5xx·429 는 잠시 뒤 나아질 수 있어 한 번 더 부르고, 권한 없음 같은 4xx 는 바로 끝낸다.
+      if (response.status >= 500 || response.status === 429) continue;
+      if (!response.ok) return { ok: false };
+      return { ok: true, body: await response.text() };
     } catch {
       // 멈추거나 끊긴 경우만 한 번 더 부른다. 오류 글에 키가 든 URL 이 섞일 수 있어 넘기지 않는다.
     }
   }
-  return null;
+  return { ok: false };
 }
 
 /** 구룡포 AWS 816 과거 관측. 키가 없으면 undefined (그때 과거 분석은 배치 기록만 쓴다). */
@@ -88,8 +91,26 @@ export function createKmaHistory(
     if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
     cache.set(stamp, sample);
   };
+  // 기간 비교처럼 조회가 겹쳐도 API허브에 동시에 보내는 요청은 서버 전체에서 CONCURRENCY 개까지다.
+  let active = 0;
+  const waiting: (() => void)[] = [];
+  async function limited<T>(work: () => Promise<T>): Promise<T> {
+    if (active >= CONCURRENCY) await new Promise<void>((resolve) => waiting.push(resolve));
+    active += 1;
+    try {
+      return await work();
+    } finally {
+      active -= 1;
+      waiting.shift()?.();
+    }
+  }
 
-  async function sampleAt(stamp: string, stepHours: number, signal: AbortSignal) {
+  /** 정각 한 시각의 관측. 받았으면 표본, 200 인데 줄이 없으면 'empty', 못 받았으면 'failed'. */
+  async function sampleAt(
+    stamp: string,
+    stepHours: number,
+    signal: AbortSignal,
+  ): Promise<HistorySample | 'empty' | 'failed'> {
     const hit = cache.get(stamp);
     if (hit) return stepHours === 1 ? hit : { ...hit, rainMm: null };
     const url = new URL(AWS_URL);
@@ -102,9 +123,10 @@ export function createKmaHistory(
       authKey: key,
     }))
       url.searchParams.set(name, value);
-    const body = await fetchText(fetcher, url, signal);
-    const row = body ? readAwsRows(body)[0] : undefined;
-    if (!row) return null;
+    const fetched = await limited(() => fetchText(fetcher, url, signal));
+    if (!fetched.ok) return 'failed';
+    const row = readAwsRows(fetched.body)[0];
+    if (!row) return 'empty';
     // RN-60m 은 그 정각까지 1시간 강수량이다. 1시간 간격일 때만 그 시간의 강수로 쓴다.
     const sample: HistorySample = {
       at: row.at,
@@ -120,7 +142,8 @@ export function createKmaHistory(
   return async (range, signal): Promise<WeatherHistory | null> => {
     const days = Math.round((kstMidnight(range.to) - kstMidnight(range.from)) / 86_400_000) + 1;
     const stepHours = sampleStepHours(days);
-    const stamps = hourlyStamps(range, stepHours, now());
+    const at = now();
+    const stamps = hourlyStamps(range, stepHours, at);
     const budget = AbortSignal.any([signal, AbortSignal.timeout(BUDGET_MS)]);
     const samples: HistorySample[] = [];
     let next = 0;
@@ -128,9 +151,9 @@ export function createKmaHistory(
     const worker = async () => {
       while (next < stamps.length && !budget.aborted) {
         const sample = await sampleAt(stamps[next++], stepHours, budget);
-        if (sample) samples.push(sample);
-        // 시간이 다 돼서 못 받은 것은 자료가 없는 것과 다르다.
-        else if (budget.aborted) unfetched += 1;
+        // 못 받은 것(멈춤·오류·시간 초과)은 자료가 없는 것과 다르다. 기억하지 않아 다시 물으면 다시 받는다.
+        if (sample === 'failed') unfetched += 1;
+        else if (sample !== 'empty') samples.push(sample);
       }
     };
     await Promise.all(Array.from({ length: Math.min(CONCURRENCY, stamps.length) }, worker));
@@ -140,14 +163,14 @@ export function createKmaHistory(
       samples,
       requested: stamps.length,
       unfetched,
-      source:
-        stepHours === 1
-          ? '기상청 구룡포 AWS 매시 관측'
-          : `기상청 구룡포 AWS ${stepHours}시간 간격 관측`,
+      // 간격은 출처 이름에 넣지 않는다 (간격만 다른 두 기간을 "출처가 다르다"며 비교하지 못하게 된다).
+      source: '기상청 구룡포 AWS 관측',
       station: AWS_816.name,
       latitude: AWS_816.latitude,
       longitude: AWS_816.longitude,
       sampleMinutes: stepHours * 60,
+      // 아직 들어오지 않은 최근 시각은 결측으로 세지 않게, 자료가 있는 마지막 시각을 알린다.
+      until: at - SETTLE_MS,
     };
   };
 }
@@ -177,19 +200,30 @@ export function readVilageForecast(payload: unknown, now: number): ShortForecast
       : null;
   };
   const hourStart = now - (now % 3_600_000);
-  const hours = [...byTime.entries()]
+  // 발표일·다음 날·모레까지만 1시간 간격이고 풍속이 숫자다. 글피부터는 3시간 간격에 풍속이 부호로 와서
+  // (2024-11-28 기상청 개편) 같은 규칙으로 읽을 수 없으므로 쓰지 않는다.
+  const baseDay = Date.parse(
+    `${String(rows[0].baseDate).slice(0, 4)}-${String(rows[0].baseDate).slice(4, 6)}-${String(rows[0].baseDate).slice(6, 8)}T00:00:00+09:00`,
+  );
+  const lastHour = baseDay + 3 * 86_400_000;
+  const ordered = [...byTime.entries()]
     .map(([key, values]) => ({ at: kstIso(key), values }))
     .filter((entry): entry is { at: string; values: Record<string, string> } => entry.at !== null)
-    .filter((entry) => Date.parse(entry.at) >= hourStart)
-    .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
-    .map(({ at, values }) => ({
-      at,
-      temperature: number(values.TMP, -50, 60),
-      humidity: number(values.REH, 0, 100),
-      windSpeed: number(values.WSD, 0, 100),
-      precipitation: PRECIPITATION[values.PTY ?? ''] ?? '알 수 없음',
-      pop: number(values.POP, 0, 100),
-    }));
+    .filter((entry) => Date.parse(entry.at) >= hourStart && Date.parse(entry.at) < lastHour)
+    .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+  // 혹시 1시간보다 벌어진 곳이 있으면 거기서 끊는다.
+  const gap = ordered.findIndex(
+    (entry, index) =>
+      index > 0 && Date.parse(entry.at) - Date.parse(ordered[index - 1].at) > 3_600_000,
+  );
+  const hours = (gap === -1 ? ordered : ordered.slice(0, gap)).map(({ at, values }) => ({
+    at,
+    temperature: number(values.TMP, -50, 60),
+    humidity: number(values.REH, 0, 100),
+    windSpeed: number(values.WSD, 0, 100),
+    precipitation: PRECIPITATION[values.PTY ?? ''] ?? '알 수 없음',
+    pop: number(values.POP, 0, 100),
+  }));
   return hours.length ? { issuedAt, hours } : null;
 }
 
@@ -230,13 +264,23 @@ export function createKmaShortForecast(
       authKey: key,
     }))
       url.searchParams.set(name, value);
-    const value = fetchText(fetcher, url, AbortSignal.timeout(10_000)).then((body) => {
-      if (!body) return null;
+    const read = async (target: URL) => {
+      const fetched = await fetchText(fetcher, target, AbortSignal.timeout(10_000));
+      if (!fetched.ok) return null;
       try {
-        return readVilageForecast(JSON.parse(body), now());
+        return readVilageForecast(JSON.parse(fetched.body), now());
       } catch {
         return null;
       }
+    };
+    // 발표가 늦게 올라오면 직전 발표(3시간 전)를 쓴다.
+    const value = read(url).then(async (result) => {
+      if (result) return result;
+      const previous = vilageBase(now() - 3 * 3_600_000);
+      const fallback = new URL(url);
+      fallback.searchParams.set('base_date', previous.date);
+      fallback.searchParams.set('base_time', previous.time);
+      return read(fallback);
     });
     // 성공은 30분, 실패는 2분 기억한다.
     const entry = { until: now() + 30 * 60_000, value };

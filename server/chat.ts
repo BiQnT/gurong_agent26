@@ -504,6 +504,11 @@ export function createLiveChat(
       ...(options.shortForecast && snapshot.site
         ? { shortForecast: () => options.shortForecast!(site) }
         : {}),
+      // 도구는 claude 가 멈추기 전에 끝나야 한다 (경로 제한과 claude 시간 제한 중 이른 쪽).
+      deadlineAt: Math.min(
+        deadlineAt === undefined ? Infinity : deadlineAt - STOP_MARGIN_MS,
+        Date.now() + (config.claude?.timeoutMs ?? 25_000),
+      ),
       now,
     });
     const tool = (name: string) => tools.find((item) => item.name === name)!;

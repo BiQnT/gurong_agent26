@@ -27,6 +27,8 @@ export type WeatherHistory = {
   /** 받으려던 시각 수와, 그중 시간 안에 받지 못한 수 (자료가 없는 것과 다르다) */
   requested?: number;
   unfetched?: number;
+  /** 자료가 들어와 있을 마지막 시각(ms). 그 뒤는 결측으로 세지 않는다 */
+  until?: number;
   source: string;
   station: string;
   latitude: number;
@@ -48,6 +50,8 @@ export type ToolContext = {
   history?: WeatherHistorySource;
   /** 기상청 단기예보(약 3일). 없으면 예보 도구는 초단기예보(6시간)만 쓴다 */
   shortForecast?: () => Promise<ShortForecast | null>;
+  /** 이 질문의 도구가 끝나야 하는 시각(ms). 과거 조회가 AI 답할 시간을 다 쓰지 않게 한다 */
+  deadlineAt?: number;
   now: () => number;
 };
 
@@ -264,8 +268,15 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
     signal: AbortSignal,
   ): Promise<{ summary: HistorySummary; note?: string }> {
     const now = context.now();
+    // AI 가 결과를 읽고 답할 시간(20초)은 남긴다. 기간 비교는 두 조회가 같은 시간을 나눠 쓴다.
+    const budgetMs =
+      context.deadlineAt === undefined
+        ? 25_000
+        : Math.max(2_000, Math.min(25_000, context.deadlineAt - now - 20_000));
     const external = context.history
-      ? await context.history(range, signal).catch(() => null)
+      ? await context
+          .history(range, AbortSignal.any([signal, AbortSignal.timeout(budgetMs)]))
+          .catch(() => null)
       : null;
     if (external?.samples.length) {
       const notes: string[] = [];
@@ -285,7 +296,7 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
           station: external.station,
           distanceM: Math.round(distanceMeters(site, external)),
           sampleMinutes: external.sampleMinutes,
-          now,
+          now: external.until ?? now,
         }),
         ...(notes.length ? { note: notes.join(' ') } : {}),
       };
@@ -484,6 +495,11 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
         if (!outlook) throw new ToolNotice('기상청 예보를 받지 못했어요.');
         return {
           content: {
+            ...(outlook.days
+              ? {}
+              : {
+                  note: '단기예보(날짜별)를 받지 못해 가까운 몇 시간 예보만 있어요. 내일 이후는 예보 자료가 없다고 말해요.',
+                }),
             ...outlook,
             issuedAt: kst(outlook.issuedAt),
             ...(outlook.daysIssuedAt ? { daysIssuedAt: kst(outlook.daysIssuedAt) } : {}),
