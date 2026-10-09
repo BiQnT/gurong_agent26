@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { useFrame } from "../timeline";
 import { Chapter } from "../components/Chapter";
 import { Spotlight, Typing } from "../components/Overlays";
 import { Packet } from "../components/Packet";
@@ -10,7 +11,7 @@ import { mix, progress, track } from "../motion";
 import { DESK, FIELD, PHONE, SPOT } from "../shots";
 import { COLOR, FONT } from "../theme";
 
-// 42~57.6초: 운영자(데스크톱, 한국어)와 근로자(휴대폰, 베트남어)가 안내·질문·답변을 주고받는다.
+// 설계 42~57.6초: 운영자(데스크톱, 한국어)와 근로자(휴대폰, 베트남어)가 안내·질문·답변을 주고받는다.
 // 받는 쪽 화면이 커지고, 주고받는 내용은 칩이 되어 두 화면 사이를 날아간다.
 
 const BEZEL = 12;
@@ -62,7 +63,7 @@ const Label: React.FC<{ x: number; y: number; role: string; language: string }> 
 );
 
 export const Exchange: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const focus = track(frame, { f: 0 }, [
     [96, 126, { f: 1 }],
     [226, 256, { f: 0 }],

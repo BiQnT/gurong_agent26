@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { useFrame } from "../timeline";
 import { easeInOut, progress } from "../motion";
 import { Sfx } from "./Sfx";
 import { Words } from "./Words";
@@ -14,7 +15,7 @@ export const Chapter: React.FC<{
   children: React.ReactNode;
   enterBlur?: boolean;
 }> = ({ title, out, children, enterBlur = true }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const blurIn = enterBlur ? progress(frame, 0, 10, easeInOut) : 1;
   const blurOut = progress(frame, out - 2, out + 14, easeInOut);
   const amount = blurIn * (1 - blurOut);

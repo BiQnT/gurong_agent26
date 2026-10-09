@@ -1,5 +1,5 @@
 import type React from "react";
-import { useCurrentFrame } from "remotion";
+import { useFrame } from "../timeline";
 import { easeInOut, progress } from "../motion";
 import { COLOR, FONT } from "../theme";
 
@@ -18,7 +18,7 @@ export const Words: React.FC<{
   stagger?: number;
   style?: React.CSSProperties;
 }> = ({ text, start, exit, size = 92, color = COLOR.ink, weight = 700, font = FONT.serif, stagger = 4, style }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const words = text.split(" ");
   return (
     <div

@@ -1,5 +1,6 @@
 import type React from "react";
-import { interpolate, useCurrentFrame } from "remotion";
+import { interpolate } from "remotion";
+import { useFrame } from "../timeline";
 import { easeOut, progress, track } from "../motion";
 import { useZoom } from "./Stage";
 
@@ -12,7 +13,7 @@ export const Cursor: React.FC<{
   clicks: number[];
   show: readonly [number, number];
 }> = ({ start, moves, clicks, show }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const zoom = useZoom();
   const { x, y } = track(frame, start, moves);
   const opacity = Math.min(progress(frame, show[0], show[0] + 8), 1 - progress(frame, show[1] - 8, show[1]));
@@ -68,7 +69,7 @@ export const Cursor: React.FC<{
 
 /** 휴대폰 화면을 손가락으로 누른 자리 */
 export const Taps: React.FC<{ taps: ReadonlyArray<{ at: number; x: number; y: number }> }> = ({ taps }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const zoom = useZoom();
   return (
     <>

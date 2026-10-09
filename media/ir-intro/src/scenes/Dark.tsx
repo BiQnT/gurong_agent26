@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { useFrame } from "../timeline";
 import { Words } from "../components/Words";
 import { Wind } from "../components/Wind";
 import { progress } from "../motion";
@@ -8,7 +9,7 @@ import { COLOR } from "../theme";
 // 어두운 장면 셋: 여는 말, 문제, 한 줄 정리. 바람 줄기 위에 큰 글씨만 둔다.
 
 const Night: React.FC<{ children: React.ReactNode; fadeFrom?: string }> = ({ children, fadeFrom }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const cover = fadeFrom ? 1 - progress(frame, 0, 14) : 0;
   return (
     <AbsoluteFill style={{ background: COLOR.night }}>
@@ -25,7 +26,7 @@ const Center: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </AbsoluteFill>
 );
 
-/** 0~8초: 구룡포의 겨울, 그리고 질문 하나 */
+/** 설계 0~8초: 구룡포의 겨울, 그리고 질문 하나 */
 export const ColdOpen: React.FC = () => (
   <Night fadeFrom="#000">
     <Center>
@@ -41,7 +42,7 @@ export const ColdOpen: React.FC = () => (
 
 const PROBLEMS = ["날씨 앱은 동네 날씨만 알려 주고,", "널지 말지는 여전히 감에 맡기고,", "외국인 근로자에겐 말이 닿지 않습니다."];
 
-/** 8~14.4초: 지금의 문제 세 가지 */
+/** 설계 8~14.4초: 지금의 문제 세 가지 */
 export const Problem: React.FC = () => (
   <Night>
     {PROBLEMS.map((line, index) => (
@@ -52,7 +53,7 @@ export const Problem: React.FC = () => (
   </Night>
 );
 
-/** 67.2~72초: 한 줄 정리 */
+/** 설계 67.2~72초: 한 줄 정리 */
 export const Statement: React.FC = () => (
   <Night fadeFrom={COLOR.paper}>
     <Center>

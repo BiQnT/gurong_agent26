@@ -8,7 +8,7 @@ import { End, Intro } from "./scenes/Light";
 import { from, length, SCENES } from "./timeline";
 import { COLOR } from "./theme";
 
-// 해풍 IR 소개 영상 2판 (78초). 장면 시각은 timeline.ts, 계획은 PLAN.md.
+// 해풍 IR 소개 영상 2판 (97.5초, 설계의 0.8배 속도). 장면 시각은 timeline.ts, 계획은 PLAN.md.
 
 const PARTS: Array<[keyof typeof SCENES, string, React.FC]> = [
   ["coldOpen", "1 여는 말", ColdOpen],

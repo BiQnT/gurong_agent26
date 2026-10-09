@@ -1,5 +1,5 @@
 import type React from "react";
-import { useCurrentFrame } from "remotion";
+import { useFrame } from "../timeline";
 import { easeInOut, progress } from "../motion";
 import { COLOR, FONT } from "../theme";
 
@@ -8,7 +8,7 @@ const SUN = "M20 15a6 6 0 0 1 12 0";
 
 /** 앱의 해풍 로고 (앱 src/components/BrandMark.tsx 와 같은 SVG). start 부터 선이 그려진다. */
 export const BrandMark: React.FC<{ size: number; start: number }> = ({ size, start }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const box = progress(frame, start, start + 16);
   const waves = progress(frame, start + 6, start + 30, easeInOut);
   const sun = progress(frame, start + 18, start + 34, easeInOut);
@@ -56,7 +56,7 @@ export const Lockup: React.FC<{ start: number; tagline?: string; taglineStart?: 
   tagline,
   taglineStart = start + 40,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const name = progress(frame, start + 14, start + 36);
   const line = tagline ? progress(frame, taglineStart, taglineStart + 22) : 0;
   return (

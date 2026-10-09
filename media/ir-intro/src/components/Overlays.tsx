@@ -1,5 +1,6 @@
 import type React from "react";
-import { Img, interpolate, useCurrentFrame } from "remotion";
+import { Img, interpolate } from "remotion";
+import { useFrame } from "../timeline";
 import { easeInOut, progress } from "../motion";
 import { shot, type Field, type Rect } from "../shots";
 import { useZoom } from "./Stage";
@@ -19,7 +20,7 @@ export const Typing: React.FC<{
   end: number;
   until: number;
 }> = ({ field, typed, imageSize, chars, show, start, end, until }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const zoom = useZoom();
   if (frame < show || frame >= until) return null;
   const count = Math.floor(
@@ -80,7 +81,7 @@ export const Spotlight: React.FC<{
   radius?: number;
   dim?: number;
 }> = ({ rect, show, hide, radius = 14, dim = 0.5 }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const zoom = useZoom();
   const on = Math.min(progress(frame, show, show + 12), 1 - progress(frame, hide - 10, hide));
   if (on <= 0) return null;
@@ -109,7 +110,7 @@ export const Wipe: React.FC<{ rect: Rect; start: number; end: number; background
   end,
   background = "#ffffff",
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   if (frame < start || frame >= end) return null;
   const p = progress(frame, start, end, easeInOut);
   return (
@@ -134,7 +135,7 @@ export const Patch: React.FC<{
   show: number;
   until: number;
 }> = ({ rect, from, imageSize, show, until }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   if (frame < show || frame >= until) return null;
   return (
     <div style={{ position: "absolute", left: rect.x, top: rect.y, width: rect.w, height: rect.h, overflow: "hidden" }}>

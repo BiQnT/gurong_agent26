@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, random, useCurrentFrame } from "remotion";
+import { AbsoluteFill, random } from "remotion";
+import { useFrame } from "../timeline";
 
 /** 어두운 장면에 흐르는 가는 바람 줄기 */
 export const Wind: React.FC<{ count?: number; opacity?: number; color?: string }> = ({
@@ -7,7 +8,7 @@ export const Wind: React.FC<{ count?: number; opacity?: number; color?: string }
   opacity = 1,
   color = "255,255,255",
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   return (
     <AbsoluteFill style={{ opacity }}>
       {Array.from({ length: count }, (_, i) => {

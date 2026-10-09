@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { useFrame } from "../timeline";
 import { Lockup } from "../components/BrandMark";
 import { Spotlight } from "../components/Overlays";
 import { Sfx } from "../components/Sfx";
@@ -11,7 +12,7 @@ import { COLOR } from "../theme";
 
 /** 어둠 가운데에서 미색 원이 퍼져 나온다 */
 const Dawn: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const radius = progress(frame, 0, 26, easeOut) * 1200;
   return (
     <AbsoluteFill style={{ background: COLOR.night }}>
@@ -20,9 +21,9 @@ const Dawn: React.FC = () => {
   );
 };
 
-/** 14.4~24초: 로고, 그리고 앱 전체 화면. 왼쪽 메뉴의 네 기능을 박자마다 하나씩 짚는다. */
+/** 설계 14.4~24초: 로고, 그리고 앱 전체 화면. 왼쪽 메뉴의 네 기능을 박자마다 하나씩 짚는다. */
 export const Intro: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const leave = progress(frame, 132, 160, easeInOut);
   const rise = progress(frame, 138, 186, easeOut);
   const pose = track(frame, { x: 720, y: 450, z: 1 }, [
@@ -75,9 +76,9 @@ export const Intro: React.FC = () => {
   );
 };
 
-/** 72~78초: 맺음 */
+/** 설계 72~78초: 맺음 */
 export const End: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const radius = progress(frame, 0, 24, easeOut) * 1200;
   return (
     <AbsoluteFill style={{ background: COLOR.night }}>

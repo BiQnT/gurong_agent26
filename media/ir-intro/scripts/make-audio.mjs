@@ -1,7 +1,8 @@
 // 영상 음악과 효과음을 직접 합성해 public/audio/*.wav 로 쓴다 (외부 음원 없음, 저작권 문제 없음).
 //   node scripts/make-audio.mjs
-// 음악 구성은 src/timeline.ts 의 장면 시각과 맞춘다 (100BPM, 화음 하나 4.8초): 0~14.4초 어두운 도입(패드·성긴 음),
-// 14.4초 로고와 함께 본편(아르페지오·부드러운 킥), 67.2~72초 쉼(패드와 성긴 음), 72초 마지막 화음.
+// 음악 구성은 src/timeline.ts 의 장면 시각과 맞춘다. 영상이 설계의 0.8배 속도라 음악도 80BPM, 화음 하나 6초:
+// 0~18초 어두운 도입(패드·성긴 음), 18초 로고와 함께 본편(아르페지오·부드러운 킥), 84~90초 쉼(패드와 성긴 음),
+// 90초 마지막 화음. 아래 시각은 모두 설계 시각 × STRETCH 이다.
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const SR = 44100;
@@ -89,15 +90,17 @@ function reverb(input, offset) {
 }
 
 // ── 음악 ──
-const LENGTH = 78;
+/** 설계 시각(timeline.ts 의 SCENES) → 실제 초. timeline.ts 의 1 / SPEED 와 같다. */
+const STRETCH = 1.25;
+const LENGTH = 78 * STRETCH;
 const N = SR * LENGTH;
 const dryL = new Float32Array(N);
 const dryR = new Float32Array(N);
 const sendL = new Float32Array(N);
 const sendR = new Float32Array(N);
-const MAIN = 14.4;
-const BREAK = [67.2, 72];
-const BEAT = 0.6;
+const MAIN = 14.4 * STRETCH;
+const BREAK = [67.2 * STRETCH, 72 * STRETCH];
+const BEAT = 0.6 * STRETCH;
 
 function add(t, values, gain, pan = 0, send = 0.3) {
   const start = Math.round(t * SR);
@@ -191,7 +194,7 @@ const CHORDS = [
   [43, 50, 54, 57, 59], // Gmaj9
   [45, 52, 54, 59, 61], // A6/9
 ];
-const SPAN = 4.8;
+const SPAN = BEAT * 8;
 const ARP = [0, 2, 1, 3, 2, 4, 3, 1];
 
 for (let start = 0, k = 0; start < LENGTH - 4; start += SPAN, k++) {
@@ -204,10 +207,10 @@ for (let start = 0, k = 0; start < LENGTH - 4; start += SPAN, k++) {
     add(start, pad(note, ending ? LENGTH - start - 3 : SPAN), quiet ? 0.055 : 0.035, index % 2 ? 0.35 : -0.35, 0.5);
   if (ending) break;
   if (quiet) {
-    // 도입·쉼: 반박자마다가 아니라 1.2초에 한 음, 높은 음역
-    for (let b = 0; b < SPAN / 1.2; b++) {
+    // 도입·쉼: 반박자마다가 아니라 두 박에 한 음, 높은 음역
+    for (let b = 0; b < 4; b++) {
       const note = chord[ARP[(b + k) % ARP.length]] + 24;
-      add(start + b * 1.2 + 0.3, pluck(note, 2.6), 0.08, b % 2 ? 0.4 : -0.4, 0.6);
+      add(start + b * BEAT * 2 + 0.3, pluck(note, 2.6), 0.08, b % 2 ? 0.4 : -0.4, 0.6);
     }
     continue;
   }
@@ -222,11 +225,11 @@ for (let start = 0, k = 0; start < LENGTH - 4; start += SPAN, k++) {
   }
 }
 // 로고가 뜰 때의 첫 박과 그 앞의 상승음, 마지막 화음
-add(MAIN - 2.4, riser(2.4), 0.09, 0, 0.4);
+add(MAIN - BEAT * 4, riser(BEAT * 4), 0.09, 0, 0.4);
 for (const note of CHORDS[0]) add(MAIN, pluck(note + 12, 3), 0.07, 0, 0.6);
 add(MAIN, kick(), 0.5, 0, 0.05);
 add(MAIN, sub(50, 2.4), 0.2, 0, 0);
-add(BREAK[1] - 2, riser(2), 0.06, 0, 0.4);
+add(BREAK[1] - BEAT * 3, riser(BEAT * 3), 0.06, 0, 0.4);
 for (const note of CHORDS[0]) add(BREAK[1], pluck(note + 12, 4.5), 0.08, 0, 0.7);
 add(BREAK[1], sub(50, 4), 0.2, 0, 0);
 

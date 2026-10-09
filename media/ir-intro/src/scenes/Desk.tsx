@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { useFrame } from "../timeline";
 import { Chapter } from "../components/Chapter";
 import { Patch, Spotlight, Typing, Wipe } from "../components/Overlays";
 import { Cursor } from "../components/Pointer";
@@ -33,9 +34,9 @@ const SendSound: React.FC<{ at: number }> = ({ at }) => (
   </>
 );
 
-/** 24~33.6초: 말 한마디로 건조 기록이 시작된다 */
+/** 설계 24~33.6초: 말 한마디로 건조 기록이 시작된다 */
 export const Record: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const pose = track(frame, HOME, [
     [36, 60, COMPOSER],
     [102, 122, CHAT],
@@ -94,9 +95,9 @@ export const Record: React.FC = () => {
   );
 };
 
-/** 33.6~42초: 지금 널어도 되는지, 실제 관측과 근거로 */
+/** 설계 33.6~42초: 지금 널어도 되는지, 실제 관측과 근거로 */
 export const Now: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const pose = track(frame, { x: 850, y: 470, z: 1.22 }, [
     [12, 30, HOME],
     [36, 56, COMPOSER],
@@ -146,9 +147,9 @@ export const Now: React.FC = () => {
   );
 };
 
-/** 57.6~67.2초: 내일 예보, 그리고 지난 겨울 분석 */
+/** 설계 57.6~67.2초: 내일 예보, 그리고 지난 겨울 분석 */
 export const Insight: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   const pose = track(frame, HOME, [
     [34, 50, COMPOSER],
     [66, 80, CHAT],

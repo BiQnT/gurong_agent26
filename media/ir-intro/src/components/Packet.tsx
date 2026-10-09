@@ -1,5 +1,6 @@
 import type React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { useFrame } from "../timeline";
 import { easeInOut, easeOut, progress } from "../motion";
 import { COLOR, FONT } from "../theme";
 
@@ -26,7 +27,7 @@ export const Packet: React.FC<{
   icon: keyof typeof ICON;
   arc?: number;
 }> = ({ start, end, from, to, label, labelTo, icon, arc = 180 }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   if (frame < start || frame > end + 18) return null;
   const t = progress(frame, start, end, easeInOut);
   const control = { x: (from.x + to.x) / 2, y: Math.min(from.y, to.y) - arc };

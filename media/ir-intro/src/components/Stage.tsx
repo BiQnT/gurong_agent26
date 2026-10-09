@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import type React from "react";
-import { AbsoluteFill, Img, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, interpolate } from "remotion";
+import { useFrame } from "../timeline";
 import { shot } from "../shots";
 
 /** 카메라: 세계 좌표 (x, y) 를 화면 가운데에 두고 z 배로 본다. z 는 세계 1px 이 화면 몇 px 인지. */
@@ -57,7 +58,7 @@ export const AppScreen: React.FC<{
   shadow?: boolean;
   children?: React.ReactNode;
 }> = ({ states, width, height, radius = 14, shadow = true, children }) => {
-  const frame = useCurrentFrame();
+  const frame = useFrame();
   let current = 0;
   states.forEach(([at], index) => {
     if (frame >= at) current = index;
