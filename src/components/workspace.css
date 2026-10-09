@@ -630,7 +630,8 @@
 }
 .ws-location-map {
   width: 100%;
-  height: 235px;
+  /* 노트북에서도 덕장 주변을 넉넉히 보도록 화면 높이에 맞춰 키운다. */
+  height: clamp(320px, 50vh, 480px);
   z-index: 1;
   background: #ebebeb;
 }
@@ -689,6 +690,28 @@
   font-size: 10px;
   white-space: nowrap;
   pointer-events: none;
+}
+.ws-map-wheel-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 450;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  color: #ffffff;
+  background: #262626d9;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* 휠이 없는 터치 화면은 두 손가락으로 확대하므로 안내를 숨긴다. */
+@media (hover: none) {
+  .ws-map-wheel-hint {
+    display: none;
+  }
 }
 .ws-location-result {
   display: flex;
@@ -1721,7 +1744,7 @@
     padding-top: 0;
   }
   .ws-location-map {
-    height: 270px;
+    height: 300px;
   }
   .ws-location-result {
     font-size: 11px;
