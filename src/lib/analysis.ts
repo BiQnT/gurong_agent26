@@ -23,6 +23,8 @@ export type HistorySample = {
   windSpeed: number | null;
   /** 그 구간의 강수량(mm). 자료에 강수가 없으면 null */
   rainMm: number | null;
+  /** 비·눈 여부를 따로 아는 경우 (예보의 강수형태). 없으면 rainMm 으로 본다 */
+  raining?: boolean;
 };
 
 export type HistoryRow = {
@@ -75,10 +77,43 @@ export type HistorySummary = {
   summary: string;
 };
 
+/** 기상청 단기예보(3일) 한 시간 (server/sources/kma-history.ts 가 읽는다). */
+export type ShortForecastHour = {
+  at: string;
+  temperature: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  precipitation: string;
+  /** 강수확률(%) */
+  pop: number | null;
+};
+export type ShortForecast = { issuedAt: string; hours: ShortForecastHour[] };
+
+/** 단기예보를 날짜별로 묶은 예상 (KST). */
+export type ForecastDay = {
+  date: string;
+  label: string;
+  /** 예보 시간 중 등급별 시간 수 (예상) */
+  gradeHours: GradeCounts;
+  /** 그날 예보가 있는 시간 수 */
+  hours: number;
+  bestWindow: string | null;
+  temperature: Stat;
+  humidity: Stat;
+  windSpeed: Stat;
+  maxPop: number | null;
+  /** 비·눈 예보가 있는 시간 수 */
+  precipitationHours: number;
+};
+
 export type ForecastOutlook = {
   kind: 'forecast';
   source: string;
   issuedAt: string;
+  /** 단기예보(3일)를 날짜별로 묶은 예상. 단기예보를 받지 못했으면 없다 */
+  days?: ForecastDay[];
+  /** 단기예보 발표 시각 */
+  daysIssuedAt?: string;
   hours: {
     at: string;
     temperature: number | null;
@@ -157,7 +192,7 @@ export function gradeSample(
       temperature,
       humidity,
       windSpeed,
-      raining: finite(sample.rainMm) && sample.rainMm > 0,
+      raining: sample.raining ?? (finite(sample.rainMm) && sample.rainMm > 0),
     },
     t,
   ).grade;
@@ -320,54 +355,135 @@ export function summarizeHistory(
   };
 }
 
-/** 초단기예보 시간마다 같은 규칙 함수로 예상 등급을 매긴다. 현재 등급은 바꾸지 않는다. */
-export function forecastOutlook(
-  forecast: NonNullable<SiteWeather['forecast']>,
+type ForecastHour = {
+  at: string;
+  temperature: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  precipitation: string;
+};
+
+/** 예보 한 시간에 같은 규칙 함수로 예상 등급을 매긴다. 값이 빠졌거나 저온이면 판정 불가. */
+function expectedGrade(hour: ForecastHour, t: DryingThresholds): DryingGrade {
+  const known =
+    finite(hour.temperature) &&
+    finite(hour.humidity) &&
+    finite(hour.windSpeed) &&
+    hour.precipitation !== '알 수 없음' &&
+    hour.temperature >= t.minTemperature;
+  return known
+    ? gradeConditions(
+        {
+          temperature: hour.temperature as number,
+          humidity: hour.humidity as number,
+          windSpeed: hour.windSpeed as number,
+          raining: hour.precipitation !== '없음',
+        },
+        t,
+      ).grade
+    : '판정 불가';
+}
+
+/** 단기예보를 KST 날짜별로 묶는다: 예상 등급 시간, 가장 긴 적합 구간, 기온·습도·풍속, 강수확률. */
+export function forecastDays(
+  short: ShortForecast,
   t: DryingThresholds = DRYING_THRESHOLDS,
-): ForecastOutlook {
-  const hours = forecast.hours.map((hour) => {
-    const known =
-      finite(hour.temperature) &&
-      finite(hour.humidity) &&
-      finite(hour.windSpeed) &&
-      hour.precipitation !== '알 수 없음' &&
-      hour.temperature >= t.minTemperature;
-    const expectedGrade: DryingGrade = known
-      ? gradeConditions(
-          {
-            temperature: hour.temperature as number,
-            humidity: hour.humidity as number,
-            windSpeed: hour.windSpeed as number,
-            raining: hour.precipitation !== '없음',
-          },
-          t,
-        ).grade
-      : '판정 불가';
-    return { ...hour, expectedGrade };
+): ForecastDay[] {
+  const byDate = new Map<string, ShortForecastHour[]>();
+  for (const hour of short.hours) {
+    const date = kstDate(hour.at);
+    byDate.set(date, [...(byDate.get(date) ?? []), hour]);
+  }
+  return [...byDate.entries()].map(([date, hours]) => {
+    const counts = emptyCounts();
+    for (const hour of hours) {
+      const grade = expectedGrade(hour, t);
+      counts[grade === '판정 불가' ? '제외' : grade] += 1;
+    }
+    const samples: HistorySample[] = hours.map((hour) => ({
+      at: hour.at,
+      temperature: hour.temperature,
+      humidity: hour.humidity,
+      windSpeed: hour.windSpeed,
+      rainMm: null,
+      raining: hour.precipitation !== '없음',
+    }));
+    const pops = hours.map((hour) => hour.pop).filter(finite);
+    return {
+      date,
+      label: shortDate(date),
+      gradeHours: counts,
+      hours: hours.length,
+      bestWindow: bestWindow(samples, 60, t),
+      temperature: stat(hours.map((hour) => hour.temperature)),
+      humidity: stat(hours.map((hour) => hour.humidity)),
+      windSpeed: stat(hours.map((hour) => hour.windSpeed)),
+      maxPop: pops.length ? Math.max(...pops) : null,
+      precipitationHours: hours.filter((hour) => hour.precipitation !== '없음').length,
+    };
   });
-  const good = hours
-    .filter((hour) => hour.expectedGrade === '적합')
-    .map((hour) => kst(hour.at).slice(6, 11));
-  const bad = hours
-    .filter((hour) => hour.expectedGrade === '부적합')
-    .map((hour) => kst(hour.at).slice(6, 11));
-  const summary =
-    `기상청 초단기예보(${kst(forecast.issuedAt)} 발표) ${hours.length}시간 기준 예상 등급: ` +
-    hours.map((hour) => `${kst(hour.at).slice(6, 11)} ${hour.expectedGrade}`).join(', ') +
+}
+
+/**
+ * 예보 시간마다 같은 규칙 함수로 예상 등급을 매긴다. 현재 등급은 바꾸지 않는다.
+ * 가까운 몇 시간은 초단기예보(없으면 단기예보 앞 6시간), 3일은 단기예보를 날짜별로 묶어 준다.
+ */
+export function forecastOutlook(
+  input: { ultra?: SiteWeather['forecast'] | null; short?: ShortForecast | null },
+  t: DryingThresholds = DRYING_THRESHOLDS,
+): ForecastOutlook | null {
+  const near = input.ultra?.hours.length
+    ? { source: '기상청 초단기예보', issuedAt: input.ultra.issuedAt, hours: input.ultra.hours }
+    : input.short?.hours.length
+      ? {
+          source: '기상청 단기예보',
+          issuedAt: input.short.issuedAt,
+          hours: input.short.hours.slice(0, 6),
+        }
+      : null;
+  if (!near) return null;
+  const hours = near.hours.map(({ at, temperature, humidity, windSpeed, precipitation }) => ({
+    at,
+    temperature,
+    humidity,
+    windSpeed,
+    precipitation,
+    expectedGrade: expectedGrade({ at, temperature, humidity, windSpeed, precipitation }, t),
+  }));
+  const days = input.short?.hours.length ? forecastDays(input.short, t) : undefined;
+  const clock = (value: string) => kst(value).slice(6, 11);
+  const good = hours.filter((hour) => hour.expectedGrade === '적합').map((hour) => clock(hour.at));
+  const bad = hours.filter((hour) => hour.expectedGrade === '부적합');
+  const nearText =
+    `${near.source}(${kst(near.issuedAt)} 발표) 앞으로 ${hours.length}시간: ` +
+    hours.map((hour) => `${clock(hour.at)} ${hour.expectedGrade}`).join(', ') +
     '. ' +
     (good.length
       ? `적합 예상 시각은 ${good.join(', ')}이에요.`
       : bad.length === hours.length
-        ? '예보 시간 내내 부적합으로 예상돼요.'
-        : '적합으로 예상되는 시각은 없어요.') +
-    ' 예보로 매긴 예상이라 현재 판정과 다를 수 있어요.';
+        ? '이 시간 내내 부적합으로 예상돼요.'
+        : '적합으로 예상되는 시각은 없어요.');
+  const daysText = days?.length
+    ? ' 날짜별(기상청 단기예보): ' +
+      days
+        .map(
+          (day) =>
+            `${day.label} 적합 ${day.gradeHours.적합}시간·주의 ${day.gradeHours.주의}시간·부적합 ${day.gradeHours.부적합}시간` +
+            `${day.bestWindow ? `(가장 긴 적합 ${day.bestWindow})` : ''}` +
+            `${day.maxPop === null ? '' : `, 강수확률 최고 ${day.maxPop}%`}`,
+        )
+        .join(' / ') +
+      '.'
+    : '';
   return {
     kind: 'forecast',
-    source: '기상청 초단기예보',
-    issuedAt: forecast.issuedAt,
+    source:
+      days && near.source !== '기상청 단기예보' ? `${near.source}·기상청 단기예보` : near.source,
+    issuedAt: near.issuedAt,
+    ...(days ? { days, daysIssuedAt: input.short!.issuedAt } : {}),
     hours,
     thresholds: t.version,
-    summary,
+    summary: `${nearText}${daysText} 예보로 매긴 예상이라 현재 판정과 다를 수 있어요.`,
   };
 }
 
@@ -474,5 +590,23 @@ export function readForecastOutlook(value: unknown): ForecastOutlook | null {
       text(hour.precipitation) &&
       GRADES.includes(hour.expectedGrade as string),
   );
-  return hoursValid ? (value as ForecastOutlook) : null;
+  const daysValid =
+    value.days === undefined ||
+    (Array.isArray(value.days) &&
+      value.days.length <= 5 &&
+      value.days.every(
+        (day) =>
+          record(day) &&
+          date(day.date) &&
+          text(day.label) &&
+          validCounts(day.gradeHours) &&
+          finite(day.hours) &&
+          (day.bestWindow === null || text(day.bestWindow)) &&
+          validStat(day.temperature) &&
+          validStat(day.humidity) &&
+          validStat(day.windSpeed) &&
+          nullableNumber(day.maxPop) &&
+          finite(day.precipitationHours),
+      ));
+  return hoursValid && daysValid ? (value as ForecastOutlook) : null;
 }

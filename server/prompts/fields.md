@@ -25,3 +25,4 @@
   - 작업 완료 예상 시각은 이 자료로 알 수 없습니다.
 - get_forecast_outlook
   - expectedGrade 는 예보값에 같은 규칙을 적용한 예상 등급입니다. "예상"이라고 말합니다.
+  - hours 는 가까운 몇 시간, days 는 단기예보를 날짜별로 묶은 것입니다 (gradeHours 는 예상 시간 수, bestWindow 는 가장 긴 적합 구간, maxPop 은 그날 가장 높은 강수확률). 날짜를 물으면 days 로 답합니다.

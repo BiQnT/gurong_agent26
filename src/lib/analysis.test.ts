@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  forecastDays,
   forecastOutlook,
   gradeSample,
   kstDate,
@@ -8,6 +9,7 @@ import {
   readHistorySummary,
   summarizeHistory,
   type HistorySample,
+  type ShortForecastHour,
 } from './analysis.ts';
 
 // 2026-01-10 KST 하루를 시간자료로 만든다. 값은 손으로 정한 것이라 기대값을 직접 셀 수 있다.
@@ -116,40 +118,89 @@ test('long periods are grouped by week, samples outside the range are dropped, a
 
 test('forecast hours get an expected grade with the same rules, unknown values stay unrated', () => {
   const outlook = forecastOutlook({
-    issuedAt: '2026-01-10T03:30:00.000Z',
-    hours: [
-      {
-        at: '2026-01-10T04:00:00.000Z',
-        temperature: 4,
-        humidity: 50,
-        windSpeed: 3,
-        precipitation: '없음',
-        rain: null,
-      },
-      {
-        at: '2026-01-10T05:00:00.000Z',
-        temperature: 4,
-        humidity: 50,
-        windSpeed: 3,
-        precipitation: '비',
-        rain: '1mm',
-      },
-      {
-        at: '2026-01-10T06:00:00.000Z',
-        temperature: null,
-        humidity: 50,
-        windSpeed: 3,
-        precipitation: '없음',
-        rain: null,
-      },
-    ],
-  });
+    ultra: {
+      issuedAt: '2026-01-10T03:30:00.000Z',
+      hours: [
+        {
+          at: '2026-01-10T04:00:00.000Z',
+          temperature: 4,
+          humidity: 50,
+          windSpeed: 3,
+          precipitation: '없음',
+          rain: null,
+        },
+        {
+          at: '2026-01-10T05:00:00.000Z',
+          temperature: 4,
+          humidity: 50,
+          windSpeed: 3,
+          precipitation: '비',
+          rain: '1mm',
+        },
+        {
+          at: '2026-01-10T06:00:00.000Z',
+          temperature: null,
+          humidity: 50,
+          windSpeed: 3,
+          precipitation: '없음',
+          rain: null,
+        },
+      ],
+    },
+  })!;
   assert.deepEqual(
     outlook.hours.map((h) => h.expectedGrade),
     ['적합', '부적합', '판정 불가'],
   );
+  assert.equal(outlook.days, undefined);
   assert.match(outlook.summary, /적합 예상 시각은 13:00/);
   assert.match(outlook.summary, /현재 판정과 다를 수 있어요/);
   assert.ok(readForecastOutlook(outlook));
   assert.equal(readForecastOutlook({ ...outlook, hours: [{ at: 'x' }] }), null);
+  assert.equal(forecastOutlook({}), null);
+});
+
+test('the 3-day forecast is grouped by KST day with expected grade hours and the longest window', () => {
+  // 2026-01-11 KST: 0~5시 습함(주의), 6~11시 적합(6시간), 12시 비(부적합), 13~23시 적합(11시간)
+  const hour = (h: number, values: Partial<ShortForecastHour> = {}): ShortForecastHour => ({
+    at: new Date(Date.parse('2026-01-11T00:00:00+09:00') + h * 3_600_000).toISOString(),
+    temperature: 5,
+    humidity: 50,
+    windSpeed: 3,
+    precipitation: '없음',
+    pop: 10,
+    ...values,
+  });
+  const short = {
+    issuedAt: '2026-01-10T23:00:00.000Z',
+    hours: [
+      ...Array.from({ length: 6 }, (_, h) => hour(h, { humidity: 70 })),
+      ...Array.from({ length: 6 }, (_, h) => hour(6 + h)),
+      hour(12, { precipitation: '비', pop: 60 }),
+      ...Array.from({ length: 11 }, (_, h) => hour(13 + h)),
+      hour(24, { temperature: null }),
+    ],
+  };
+  const days = forecastDays(short);
+  assert.deepEqual(
+    days.map((day) => [day.date, day.hours]),
+    [
+      ['2026-01-11', 24],
+      ['2026-01-12', 1],
+    ],
+  );
+  assert.deepEqual(days[0].gradeHours, { 적합: 17, 주의: 6, 부적합: 1, 제외: 0 });
+  assert.equal(days[0].bestWindow, '13~24시');
+  assert.equal(days[0].maxPop, 60);
+  assert.equal(days[0].precipitationHours, 1);
+  assert.deepEqual(days[1].gradeHours, { 적합: 0, 주의: 0, 부적합: 0, 제외: 1 });
+  // 초단기예보가 없으면 단기예보 앞 6시간을 가까운 시간으로 쓴다.
+  const outlook = forecastOutlook({ short })!;
+  assert.equal(outlook.hours.length, 6);
+  assert.equal(outlook.source, '기상청 단기예보');
+  assert.match(
+    outlook.summary,
+    /01\.11 적합 17시간·주의 6시간·부적합 1시간\(가장 긴 적합 13~24시\), 강수확률 최고 60%/,
+  );
+  assert.ok(readForecastOutlook(JSON.parse(JSON.stringify(outlook))));
 });

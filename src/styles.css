@@ -2703,3 +2703,14 @@ button:active:not(:disabled) {
     grid-column: 1 / -1;
   }
 }
+
+/* 예보 카드: 날짜별 예상 막대 아래에 가장 긴 적합 구간과 강수확률 */
+.forecast-days {
+  margin-top: 14px;
+}
+.forecast-day-note {
+  grid-column: 2 / -1;
+  margin-top: -2px;
+  font-size: 12px;
+  color: #666666;
+}

@@ -11,6 +11,7 @@ import { attachSiteContext } from './site-observations.ts';
 import { withAssessment } from './assessment.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
 import { createKmaSource, KMA_WAIT_MS, within } from './sources/kma.ts';
+import { createKmaHistory, createKmaShortForecast } from './sources/kma-history.ts';
 import { createGeocoder, readGeocodeReverse, readGeocodeSearch, type Geocoder } from './geocode.ts';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { readdirSync } from 'node:fs';
@@ -155,7 +156,11 @@ export function createApiMiddleware(
   // 덕장 위치의 비·눈, 강수량, 일출·일몰. 키가 없거나 실패하면 붙이지 않는다.
   const siteWeather = async (site: { latitude: number; longitude: number }) =>
     kma ? await within(kma.weather(site), KMA_WAIT_MS) : null;
-  const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config));
+  // 과거 기간·3일 예보는 기상청 키가 있을 때만 붙는다 (없으면 배치 기록·초단기예보만).
+  const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config), {
+    history: createKmaHistory(config),
+    shortForecast: createKmaShortForecast(config),
+  });
   return (request, response, next) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
     const send = (status: number, payload: unknown) => {

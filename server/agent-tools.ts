@@ -7,6 +7,7 @@ import {
   type ForecastOutlook,
   type HistorySample,
   type HistorySummary,
+  type ShortForecast,
 } from '../src/lib/analysis.ts';
 import { describeThresholds, gradeIs, kst } from '../src/lib/drying.ts';
 import { distanceMeters } from '../src/lib/geo.ts';
@@ -23,6 +24,9 @@ import { ToolNotice, type ToolDefinition } from './tool-server.ts';
 /** 외부 과거 관측 (기상청 AWS 등). 없거나 실패하면 null 이고, 그때는 우리 DB 배치 표본을 쓴다. */
 export type WeatherHistory = {
   samples: HistorySample[];
+  /** 받으려던 시각 수와, 그중 시간 안에 받지 못한 수 (자료가 없는 것과 다르다) */
+  requested?: number;
+  unfetched?: number;
   source: string;
   station: string;
   latitude: number;
@@ -42,6 +46,8 @@ export type ToolContext = {
   team: () => Promise<Team>;
   operations: () => Promise<OperationsData | null>;
   history?: WeatherHistorySource;
+  /** 기상청 단기예보(약 3일). 없으면 예보 도구는 초단기예보(6시간)만 쓴다 */
+  shortForecast?: () => Promise<ShortForecast | null>;
   now: () => number;
 };
 
@@ -261,7 +267,16 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
     const external = context.history
       ? await context.history(range, signal).catch(() => null)
       : null;
-    if (external?.samples.length)
+    if (external?.samples.length) {
+      const notes: string[] = [];
+      if (external.unfetched)
+        notes.push(
+          `기상청 응답이 늦어 ${external.requested}개 시각 중 ${external.unfetched}개를 이번에 받지 못했어요. 그 시각은 자료가 없는 게 아니라 못 받은 것이라 결측률에 들어가 있고, 다시 물으면 더 채워질 수 있어요.`,
+        );
+      if (external.sampleMinutes > 60)
+        notes.push(
+          `기간이 길어 ${external.sampleMinutes / 60}시간마다 정각 값으로 셈한 추정이에요. 등급별 시간은 표본 하나를 ${external.sampleMinutes / 60}시간으로 쳤고, 이 간격에서는 강수를 등급에 넣지 않았어요.`,
+        );
       return {
         summary: summarizeHistory({
           samples: external.samples,
@@ -272,7 +287,9 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
           sampleMinutes: external.sampleMinutes,
           now,
         }),
+        ...(notes.length ? { note: notes.join(' ') } : {}),
       };
+    }
     const operations = await context.operations();
     return {
       summary: summarizeHistory({
@@ -457,16 +474,19 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
     {
       name: TOOL_NAMES.forecast,
       description:
-        '기상청 초단기예보(앞으로 약 6시간) 시간마다 같은 규칙 함수로 매긴 예상 널기 등급과 예보 기온·습도·풍속·강수. "언제 널면 좋아?", "오후에 비 와?", "이따가 회수해야 해?" 같은 질문에 부른다. 예상 등급은 현재 등급이 아니다.',
+        '기상청 예보로 매긴 예상 널기 등급. 가까운 몇 시간(초단기예보)은 시간마다, 약 3일(단기예보)은 날짜별로 적합·주의·부적합 예상 시간, 그날 가장 긴 적합 구간, 기온·습도·풍속, 강수확률을 준다. "언제 널면 좋아?", "내일 널어도 돼?", "오후에 비 와?", "이따 회수해야 해?" 같은 질문에 부른다. 예상 등급은 현재 등급이 아니다.',
       inputSchema: noInput,
       run: async () => {
-        const forecast = snapshot.weather?.forecast;
-        if (!forecast?.hours.length) throw new ToolNotice('기상청 예보를 받지 못했어요.');
-        const outlook = forecastOutlook(forecast);
+        const short = context.shortForecast
+          ? await context.shortForecast().catch(() => null)
+          : null;
+        const outlook = forecastOutlook({ ultra: snapshot.weather?.forecast, short });
+        if (!outlook) throw new ToolNotice('기상청 예보를 받지 못했어요.');
         return {
           content: {
             ...outlook,
             issuedAt: kst(outlook.issuedAt),
+            ...(outlook.daysIssuedAt ? { daysIssuedAt: kst(outlook.daysIssuedAt) } : {}),
             hours: outlook.hours.map((hour) => ({ ...hour, at: kst(hour.at) })),
           },
           card: { kind: 'forecast', data: outlook } satisfies ToolCard,

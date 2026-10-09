@@ -6,7 +6,7 @@ import {
   kst,
   type DryingGrade,
 } from '../src/lib/drying.ts';
-import type { HistorySummary } from '../src/lib/analysis.ts';
+import type { HistorySummary, ShortForecast } from '../src/lib/analysis.ts';
 import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
 import type { OperationsData } from '../src/lib/operations.ts';
 import type { Team } from '../src/lib/workspace.ts';
@@ -321,6 +321,8 @@ export type LiveChatOptions = {
   toolServer?: ToolServer;
   /** 기상청 등 외부 과거 관측. 없으면 과거 분석은 배치 기록만 쓴다 */
   history?: WeatherHistorySource;
+  /** 덕장 위치의 기상청 단기예보(약 3일). 없으면 예보는 초단기예보(6시간)만 */
+  shortForecast?: (site: { latitude: number; longitude: number }) => Promise<ShortForecast | null>;
   now?: () => number;
 };
 
@@ -499,6 +501,9 @@ export function createLiveChat(
         }),
       operations: data.operations ?? (async () => null),
       history: options.history,
+      ...(options.shortForecast && snapshot.site
+        ? { shortForecast: () => options.shortForecast!(site) }
+        : {}),
       now,
     });
     const tool = (name: string) => tools.find((item) => item.name === name)!;
