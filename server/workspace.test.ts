@@ -297,6 +297,55 @@ test('new passwords need 8 to 128 characters with a letter and a digit, older on
   );
 });
 
+test('signup stores the NFC password and login tries the raw input first, then NFC', async (t) => {
+  const f = await fixture(t);
+  const nfc = '덕장비밀번호2026';
+  const nfd = nfc.normalize('NFD');
+  assert.notEqual(nfc, nfd);
+  // NFC 저장 전에 자모로 나뉜(NFD) 비밀번호 그대로 가입한 계정
+  const salt = 'fedcba9876543210fedcba9876543210';
+  await writeFile(
+    f.dataFile,
+    JSON.stringify({
+      version: 1,
+      users: [
+        {
+          id: 'raw-nfd-user',
+          name: 'Raw',
+          email: 'raw@example.test',
+          salt,
+          passwordHash: await passwordHash(nfd, salt),
+          createdAt: '2026-10-01T00:00:00.000Z',
+        },
+      ],
+      sites: [],
+      memberships: [],
+      sessions: [],
+      invitations: [],
+      operations: [],
+    }),
+  );
+  const login = async (email: string, password: string) =>
+    (await f.agent().call('/auth/login', 'POST', { email, password })).status;
+  const signup = (name: string, password: string) =>
+    f.agent().call('/auth/signup', 'POST', { ...credentials(name), password });
+  assert.equal((await signup('Decomposed', nfd)).status, 200);
+  assert.equal(await login('decomposed@example.test', nfc), 200);
+  assert.equal(await login('decomposed@example.test', nfd), 200);
+  assert.equal((await signup('Composed', nfc)).status, 200);
+  assert.equal(await login('composed@example.test', nfd), 200);
+  assert.equal(await login('composed@example.test', nfc), 200);
+  assert.equal(await login('raw@example.test', nfd), 200);
+  assert.equal(await login('composed@example.test', '덕장비밀번호2027'), 401);
+  const stored = JSON.parse(await readFile(f.dataFile, 'utf8')) as {
+    users: { id: string; passwordHash: string }[];
+  };
+  assert.equal(
+    stored.users.find((user) => user.id === 'raw-nfd-user')?.passwordHash,
+    await passwordHash(nfd, salt),
+  );
+});
+
 test('site registration validates coordinates and every owner route enforces site membership', async (t) => {
   const f = await fixture(t);
   const owner = f.agent();

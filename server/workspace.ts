@@ -339,7 +339,8 @@ function readCredentials(value: unknown, signup = false) {
   if (signup && !isStrongPassword(value.password)) fail(400, 'WEAK_PASSWORD', PASSWORD_RULE);
   return {
     email: value.email.trim().toLowerCase(),
-    password: value.password,
+    // 가입은 NFC 로 맞춰 저장한다. 같은 한글도 기기에 따라 자모를 나눠(NFD) 보낼 수 있다.
+    password: signup ? value.password.normalize('NFC') : value.password,
     name: signup ? (value.name as string).trim() : '',
   };
 }
@@ -567,14 +568,23 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
       const attemptKey = `${clientAddress(request)} ${input.email}`;
       countLoginAttempt(attemptKey);
       const candidate = await dbStore.read((db) => db.users.find((u) => u.email === input.email));
-      const derived = await passwordHash(
-        input.password,
-        candidate?.salt || '00000000000000000000000000000000',
-      );
-      if (
-        !candidate ||
-        !timingSafeEqual(Buffer.from(derived, 'hex'), Buffer.from(candidate.passwordHash, 'hex'))
-      )
+      // 계정이 없어도 같은 횟수로 해시를 계산해 응답 시간으로 가입 여부가 드러나지 않게 한다.
+      const verify = async (password: string) => {
+        const derived = await passwordHash(
+          password,
+          candidate?.salt || '00000000000000000000000000000000',
+        );
+        return (
+          !!candidate &&
+          timingSafeEqual(Buffer.from(derived, 'hex'), Buffer.from(candidate.passwordHash, 'hex'))
+        );
+      };
+      // NFC 저장 전에 가입한 계정은 입력 그대로 저장돼 있으므로 그대로 먼저 맞추고, 다음에 NFC 로 맞춘다.
+      const normalized = input.password.normalize('NFC');
+      const matched =
+        (await verify(input.password)) ||
+        (normalized !== input.password && (await verify(normalized)));
+      if (!candidate || !matched)
         fail(401, 'LOGIN_FAILED', '이메일 또는 비밀번호가 올바르지 않아요.');
       loginAttempts.delete(attemptKey);
       const result = await dbStore.write((db) => {
