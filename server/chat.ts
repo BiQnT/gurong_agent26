@@ -98,6 +98,17 @@ export function getAction(message: string): ChatReply['action'] {
   return undefined;
 }
 
+/** "꽁치 300마리 널었어"에서 원물과 마리 수를 읽어 시작 창에 미리 채운다. AI 가 아니라 이 규칙만 쓴다. */
+export function startPrefill(message: string): ChatReply['prefill'] {
+  const fish = /꽁치/.test(message) ? '꽁치' : /청어/.test(message) ? '청어' : undefined;
+  const count = /(\d[\d,]*)\s*마리/.exec(message)?.[1].replaceAll(',', '');
+  const quantity =
+    count && Number(count) > 0 && Number(count) <= 1_000_000 ? Number(count) : undefined;
+  return fish || quantity
+    ? { ...(fish ? { fish } : {}), ...(quantity ? { quantity } : {}) }
+    : undefined;
+}
+
 /** 서버가 E-UM 대신 기상청 AWS 를 고른 경우 (사용자가 직접 고른 것과 구분한다). */
 const kmaFallback = (snapshot: LiveSnapshot) =>
   snapshot.selected?.device.provider === 'kma' &&
@@ -437,8 +448,10 @@ export function createLiveChat(
     };
     const { tools, cards } = createAgentTools(context);
     const runtime = { now: now(), siteName: site.name, siteRegistered: Boolean(snapshot.site) };
+    const prefill = action === 'start-batch' ? startPrefill(request.message) : undefined;
     const base = {
       ...(action ? { action } : {}),
+      ...(prefill ? { prefill } : {}),
       sourceFetchedAt: snapshot.fetchedAt,
     };
     const allowedNumbers = (extra: unknown[]) => [

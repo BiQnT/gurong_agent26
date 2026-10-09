@@ -309,7 +309,8 @@ function OwnerWorkspace({
   function actionFor(reply: ChatReply) {
     if (reply.action === 'start-batch') {
       navigate('batches');
-      operations.openStart();
+      if (reply.prefill) operations.openStartWith(reply.prefill);
+      else operations.openStart();
     }
     if (reply.action === 'end-batch') {
       navigate('batches');

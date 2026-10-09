@@ -22,6 +22,7 @@ import {
   GUIDANCE_FACTS,
   GUIDANCE_TEMPLATES,
   type Batch,
+  type StartPrefill,
 } from '../../lib/operations';
 import { evaluateBatch, kst } from '../../lib/drying';
 import {
@@ -151,10 +152,10 @@ function Dialog({
   );
 }
 
-function StartDialog({ operations }: ViewProps) {
+function StartDialog({ operations, prefill }: ViewProps & { prefill?: StartPrefill }) {
   const [name, setName] = useState('');
-  const [fish, setFish] = useState<'꽁치' | '청어'>('꽁치');
-  const [quantity, setQuantity] = useState('');
+  const [fish, setFish] = useState<'꽁치' | '청어'>(prefill?.fish ?? '꽁치');
+  const [quantity, setQuantity] = useState(prefill?.quantity ? String(prefill.quantity) : '');
   const [note, setNote] = useState('');
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -644,7 +645,9 @@ export function OperationsDialogs({ operations }: ViewProps) {
   return createPortal(
     <>
       <AnimatePresence mode="wait">
-        {dialog?.type === 'start' && <StartDialog key="start" operations={operations} />}
+        {dialog?.type === 'start' && (
+          <StartDialog key="start" operations={operations} prefill={dialog.prefill} />
+        )}
         {dialog?.type === 'end' && batch && (
           <EndDialog key={`end-${batch.id}`} operations={operations} batch={batch} />
         )}

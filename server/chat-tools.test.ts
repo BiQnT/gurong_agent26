@@ -431,3 +431,22 @@ test('two periods are compared item by item, and an unusable period is reported 
   assert.equal(reply.provider, 'claude');
   assert.equal(reply.history?.length, 2);
 });
+
+test('a start message pre-fills fish and count for the start dialog, read by a fixed rule', async () => {
+  const { startPrefill } = await import('./chat.ts');
+  assert.deepEqual(startPrefill('방금 꽁치 1,200마리 널었어'), { fish: '꽁치', quantity: 1200 });
+  assert.deepEqual(startPrefill('청어 널었어'), { fish: '청어' });
+  assert.equal(startPrefill('널었어'), undefined);
+  const reply = await chat(toolAsk([], '확인 버튼을 눌러 기록해 주세요.'))(
+    request('방금 꽁치 300마리 널었어'),
+    graded,
+    live(),
+    undefined,
+    data,
+  );
+  assert.equal(reply.action, 'start-batch');
+  assert.deepEqual(readChatReply(JSON.parse(JSON.stringify(reply))).prefill, {
+    fish: '꽁치',
+    quantity: 300,
+  });
+});

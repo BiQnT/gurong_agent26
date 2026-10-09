@@ -85,8 +85,10 @@ export type Guidance = {
   replies: GuidanceReply[];
 };
 export type OperationsData = { batches: Batch[]; guidance: Guidance[] };
+/** 채팅에서 "꽁치 300마리 널었어"처럼 말한 값을 시작 창에 미리 채운다. 저장은 사람이 확인한 뒤에만 한다. */
+export type StartPrefill = { fish?: Batch['fish']; quantity?: number };
 export type OperationsDialog =
-  | { type: 'start' }
+  | { type: 'start'; prefill?: StartPrefill }
   | { type: 'guidance'; facts: GuidanceFacts }
   | { type: 'end' | 'cancel' | 'report'; batchId: string }
   | null;
@@ -1141,6 +1143,7 @@ export function useOperations(
     scope,
     canManage,
     openStart: () => open({ type: 'start' }),
+    openStartWith: (prefill: StartPrefill) => open({ type: 'start', prefill }),
     openEnd: (batchId?: string) => {
       const id = batchId ?? activeBatch?.id;
       if (id) open({ type: 'end', batchId: id });

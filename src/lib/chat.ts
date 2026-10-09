@@ -30,6 +30,8 @@ export type ChatReply = {
   providerNotice?: string;
   sourceFetchedAt?: string;
   action?: 'start-batch' | 'end-batch' | 'guidance';
+  /** 시작 창에 미리 채울 값 (질문에서 코드가 읽은 원물·마리 수) */
+  prefill?: { fish?: '꽁치' | '청어'; quantity?: number };
   suggestions: string[];
 };
 
@@ -349,6 +351,14 @@ function optionalCards(value: Record<string, unknown>): Partial<ChatReply> {
     if (batches.length) cards.batches = batches;
   }
   if (isStringArray(value.sources)) cards.sources = value.sources.slice(0, 6);
+  if (isObject(value.prefill)) {
+    const { fish, quantity } = value.prefill;
+    const prefill: NonNullable<ChatReply['prefill']> = {};
+    if (fish === '꽁치' || fish === '청어') prefill.fish = fish;
+    if (typeof quantity === 'number' && Number.isSafeInteger(quantity) && quantity > 0)
+      prefill.quantity = quantity;
+    if (prefill.fish || prefill.quantity) cards.prefill = prefill;
+  }
   return cards;
 }
 
