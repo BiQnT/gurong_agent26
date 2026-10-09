@@ -1231,7 +1231,7 @@ button:active:not(:disabled) {
   justify-content: center;
   border-radius: 8px;
   padding: 10px 14px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 .button-primary {
