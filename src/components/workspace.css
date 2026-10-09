@@ -1113,6 +1113,41 @@
   gap: 6px;
   flex-shrink: 0;
 }
+.ws-invite-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-bottom: 14px;
+}
+.ws-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ws-filter-row button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 6px 11px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #666666;
+  font-size: 13px;
+}
+.ws-filter-row button span {
+  font-size: 12px;
+  opacity: 0.8;
+}
+.ws-filter-row button:hover {
+  background: #f5f5f5;
+}
+.ws-filter-row button.is-selected {
+  background: #f5f5f5;
+  border-color: #e5e5e5;
+  color: #404040;
+  font-weight: 550;
+}
 .ws-invitations-empty {
   display: flex;
   align-items: center;

@@ -30,6 +30,20 @@ import { SiteSetup } from './SiteSetup';
 import { BusyIcon, Dialog, errorMessage, FormError, languageName, shortDate } from './shared';
 
 type Removal = { type: 'member'; member: TeamMember } | { type: 'invite'; invitation: Invitation };
+type StatusFilter = 'all' | Invitation['status'];
+type LanguageFilter = 'all' | MemberLanguage;
+const statusFilters: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: '전체' },
+  { value: 'pending', label: '대기' },
+  { value: 'accepted', label: '수락' },
+  { value: 'revoked', label: '취소' },
+  { value: 'expired', label: '만료' },
+];
+const languageFilters: { value: LanguageFilter; label: string }[] = [
+  { value: 'all', label: '모든 언어' },
+  { value: 'ko', label: '한국어' },
+  { value: 'vi', label: '베트남어' },
+];
 const invitationLabels: Record<Invitation['status'], string> = {
   pending: '초대 대기',
   accepted: '참여 완료',
@@ -75,6 +89,8 @@ export function TeamView({
   const [notice, setNotice] = useState<string | null>(null);
   const [linkBusyId, setLinkBusyId] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [languageFilter, setLanguageFilter] = useState<LanguageFilter>('all');
   const pending = useRef(false);
   const fetchVersion = useRef(0);
   const linkInput = useRef<HTMLInputElement>(null);
@@ -102,6 +118,8 @@ export function TeamView({
     setEditOpen(false);
     setRemoval(null);
     setListError(null);
+    setStatusFilter('all');
+    setLanguageFilter('all');
     void refresh();
     return () => {
       fetchVersion.current += 1;
@@ -232,6 +250,15 @@ export function TeamView({
   const workers = team?.members.filter((member) => member.role === 'worker') ?? [];
   const pendingInvites =
     team?.invitations.filter((item) => invitationStatus(item) === 'pending') ?? [];
+  // 초대가 많아지면 상태·언어로 거른다. 각 칸의 개수는 다른 쪽 필터를 적용한 수다.
+  const statusMatches = (item: Invitation, value: StatusFilter) =>
+    value === 'all' || invitationStatus(item) === value;
+  const languageMatches = (item: Invitation, value: LanguageFilter) =>
+    value === 'all' || item.language === value;
+  const visibleInvites =
+    team?.invitations.filter(
+      (item) => statusMatches(item, statusFilter) && languageMatches(item, languageFilter),
+    ) ?? [];
 
   return (
     <motion.section
@@ -382,9 +409,55 @@ export function TeamView({
             <Link2 size={18} />
           </div>
           <FormError>{listError}</FormError>
-          {team.invitations.length ? (
+          {team.invitations.length > 0 && (
+            <div className="ws-invite-filters">
+              <div className="ws-filter-row" role="group" aria-label="초대 상태로 거르기">
+                {statusFilters.map((option) => (
+                  <button
+                    key={option.value}
+                    aria-pressed={statusFilter === option.value}
+                    className={statusFilter === option.value ? 'is-selected' : ''}
+                    onClick={() => setStatusFilter(option.value)}
+                  >
+                    {option.label}
+                    <span>
+                      {
+                        team.invitations.filter(
+                          (item) =>
+                            statusMatches(item, option.value) &&
+                            languageMatches(item, languageFilter),
+                        ).length
+                      }
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <div className="ws-filter-row" role="group" aria-label="안내 언어로 거르기">
+                {languageFilters.map((option) => (
+                  <button
+                    key={option.value}
+                    aria-pressed={languageFilter === option.value}
+                    className={languageFilter === option.value ? 'is-selected' : ''}
+                    onClick={() => setLanguageFilter(option.value)}
+                  >
+                    {option.label}
+                    <span>
+                      {
+                        team.invitations.filter(
+                          (item) =>
+                            languageMatches(item, option.value) &&
+                            statusMatches(item, statusFilter),
+                        ).length
+                      }
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {visibleInvites.length ? (
             <ul className="ws-invitation-list" aria-label="동료 초대 내역">
-              {team.invitations.map((invitation) => {
+              {visibleInvites.map((invitation) => {
                 const status = invitationStatus(invitation);
                 return (
                   <li className="ws-invitation" key={invitation.id}>
@@ -431,6 +504,20 @@ export function TeamView({
                 );
               })}
             </ul>
+          ) : team.invitations.length ? (
+            <div className="ws-invitations-empty">
+              <MoreHorizontal size={22} />
+              <span>조건에 맞는 초대가 없어요.</span>
+              <button
+                className="ws-text-button"
+                onClick={() => {
+                  setStatusFilter('all');
+                  setLanguageFilter('all');
+                }}
+              >
+                필터 해제
+              </button>
+            </div>
           ) : (
             <div className="ws-invitations-empty">
               <MoreHorizontal size={22} />
