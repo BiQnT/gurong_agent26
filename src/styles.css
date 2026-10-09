@@ -132,7 +132,9 @@ button:active:not(:disabled) {
     width 0.25s,
     transform 0.25s,
     padding 0.25s;
-  overflow: hidden;
+  /* 낮은 화면에서는 아래 덕장·계정 영역을 자르지 않고 사이드바 전체를 스크롤한다. */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .sidebar-brand {
   display: flex;
@@ -279,7 +281,8 @@ button:active:not(:disabled) {
   font-size: 13px;
 }
 .chat-history {
-  min-height: 60px;
+  /* 남는 높이를 채우고 안에서 스크롤한다. 공간이 모자라도 대화 세 줄 정도는 보이게 둔다. */
+  min-height: 132px;
   flex: 1;
   overflow: auto;
   padding-bottom: 16px;
@@ -357,6 +360,7 @@ button:active:not(:disabled) {
 }
 .sidebar-bottom {
   margin-top: auto;
+  padding-bottom: 14px;
 }
 .site-card {
   display: flex;
@@ -447,6 +451,33 @@ button:active:not(:disabled) {
   padding-left: 0;
   padding-right: 0;
   border: 0;
+}
+/* 노트북처럼 낮은 화면에서는 사이드바 여백을 줄여 최근 대화와 아래 영역이 함께 보이게 한다. */
+@media (max-height: 820px) {
+  .sidebar {
+    padding-top: 20px;
+  }
+  .sidebar-brand {
+    padding-bottom: 18px;
+  }
+  .sidebar > .nav-caption {
+    margin: 18px 0 8px;
+  }
+  .main-nav {
+    gap: 3px;
+  }
+  .main-nav > button {
+    height: 40px;
+  }
+  .history-heading {
+    margin-top: 16px;
+  }
+  .sidebar-help {
+    margin: 10px 0;
+  }
+  .profile-row {
+    padding: 12px 5px 10px;
+  }
 }
 .workspace {
   display: flex;
