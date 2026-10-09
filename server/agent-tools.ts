@@ -17,7 +17,7 @@ import { batchHistorySamples, digestBatches } from './assessment.ts';
 import type { UvReading } from './sources/eum-uv.ts';
 import type { ToolDefinition } from './tool-server.ts';
 
-// AI 도우미가 부르는 읽기 전용 도구 (ADR 0011). 모두 한 덕장 범위이고, 숫자는 코드가 계산한다.
+// AI 도우미가 부르는 읽기 전용 도구 6개 (ADR 0011). 모두 한 덕장 범위이고, 숫자는 코드가 계산한다.
 // 도구 결과의 summary 는 코드가 만든 문장이라, AI 답이 검사에 걸리면 이 문장으로 대신 답한다.
 
 /** 외부 과거 관측 (기상청 AWS 등). 없거나 실패하면 null 이고, 그때는 우리 DB 배치 표본을 쓴다. */
@@ -60,6 +60,7 @@ export const TOOL_NAMES = {
   site: 'get_site_overview',
   batches: 'get_batches',
   history: 'get_weather_history',
+  compare: 'compare_periods',
   forecast: 'get_forecast_outlook',
 } as const;
 
@@ -145,6 +146,80 @@ const batchForModel = (batch: BatchDigest) => ({
   firstUnsuitableAt: batch.firstUnsuitableAt ? kst(batch.firstUnsuitableAt) : null,
 });
 
+/** 비교할 수 없는 조건 (신청서 US-4: 값을 추정하지 않고 비교 불가와 원인을 준다). */
+const MAX_COMPARE_MISSING = 50;
+const diff = (target: number | null, base: number | null) =>
+  target === null || base === null ? null : Math.round((target - base) * 10) / 10;
+
+/** 두 기간 요약의 항목별 차이 (비교 - 기준). 항목을 합친 점수는 만들지 않는다. */
+export function compareHistory(
+  base: HistorySummary,
+  target: HistorySummary,
+  notes: (string | undefined)[] = [],
+) {
+  const period = (item: HistorySummary) => `${item.from}~${item.to}`;
+  const reasons: string[] = [];
+  for (const [label, item] of [
+    ['기준', base],
+    ['비교', target],
+  ] as const) {
+    const rated =
+      item.totals.gradeHours.적합 + item.totals.gradeHours.주의 + item.totals.gradeHours.부적합;
+    if (!rated) reasons.push(`${label} 기간(${period(item)})에 판정할 자료가 없어요.`);
+    else if (item.missingRate > MAX_COMPARE_MISSING)
+      reasons.push(`${label} 기간(${period(item)})의 결측이 ${item.missingRate}%로 많아요.`);
+  }
+  if (base.source !== target.source || base.station !== target.station)
+    reasons.push(`두 기간의 자료 출처가 달라요 (${base.station} · ${target.station}).`);
+  const side = (item: HistorySummary) => ({
+    period: period(item),
+    source: item.source,
+    station: item.station,
+    distanceM: item.distanceM,
+    missingRate: item.missingRate,
+    temperatureMean: item.totals.temperature.mean,
+    humidityMean: item.totals.humidity.mean,
+    windSpeedMean: item.totals.windSpeed.mean,
+    rainMm: item.rainKnown ? (item.totals.rainMm ?? 0) : null,
+    suitableHours: item.totals.gradeHours.적합,
+    suitableShare: item.totals.percentages.적합,
+  });
+  const a = side(base);
+  const b = side(target);
+  if (reasons.length)
+    return {
+      summary: `비교 불가: ${reasons.join(' ')}`,
+      comparable: false,
+      reasons,
+      base: a,
+      target: b,
+      differences: null,
+      notes: notes.filter(Boolean),
+    };
+  const differences = {
+    temperatureMean: diff(b.temperatureMean, a.temperatureMean),
+    humidityMean: diff(b.humidityMean, a.humidityMean),
+    windSpeedMean: diff(b.windSpeedMean, a.windSpeedMean),
+    rainMm: diff(b.rainMm, a.rainMm),
+    suitableHours: diff(b.suitableHours, a.suitableHours),
+    suitableShare: diff(b.suitableShare, a.suitableShare),
+  };
+  const signed = (value: number | null, unit: string) =>
+    value === null ? '알 수 없음' : `${value > 0 ? '+' : ''}${value}${unit}`;
+  return {
+    summary:
+      `${a.period} 대비 ${b.period}: 평균 기온 ${signed(differences.temperatureMean, '°C')}, ` +
+      `평균 습도 ${signed(differences.humidityMean, '%p')}, 평균 풍속 ${signed(differences.windSpeedMean, 'm/s')}, ` +
+      `적합 비율 ${a.suitableShare}% → ${b.suitableShare}% (${signed(differences.suitableShare, '%p')}).`,
+    comparable: true,
+    reasons,
+    base: a,
+    target: b,
+    differences,
+    notes: notes.filter(Boolean),
+  };
+}
+
 /** 도구 목록과, 성공한 도구가 채우는 카드 목록을 만든다. 채팅 요청 하나에 한 번 만든다. */
 export function createAgentTools(context: ToolContext): {
   tools: ToolDefinition[];
@@ -152,6 +227,45 @@ export function createAgentTools(context: ToolContext): {
 } {
   const { snapshot, site } = context;
   const cards: ToolCard[] = [];
+
+  /** 기간 요약. 외부 과거 관측이 있으면 그것을, 없으면 이 덕장의 배치 기록을 쓴다. */
+  async function historyFor(
+    range: { from: string; to: string },
+    signal: AbortSignal,
+  ): Promise<{ summary: HistorySummary; note?: string }> {
+    const now = context.now();
+    const external = context.history
+      ? await context.history(range, signal).catch(() => null)
+      : null;
+    if (external?.samples.length)
+      return {
+        summary: summarizeHistory({
+          samples: external.samples,
+          ...range,
+          source: external.source,
+          station: external.station,
+          distanceM: Math.round(distanceMeters(site, external)),
+          sampleMinutes: external.sampleMinutes,
+          now,
+        }),
+      };
+    const operations = await context.operations();
+    return {
+      summary: summarizeHistory({
+        samples: operations ? batchHistorySamples(operations) : [],
+        ...range,
+        source: '해풍 배치 기록(30분 수집)',
+        station: '덕장 1km 안 관측기',
+        distanceM: null,
+        sampleMinutes: 30,
+        now,
+      }),
+      note: context.history
+        ? '외부 과거 관측을 받지 못해 이 덕장의 배치 기록만 썼어요. 배치가 진행 중일 때만 쌓인 자료라 비어 있는 시간이 많을 수 있어요.'
+        : '이 덕장의 배치 기록만 썼어요. 배치가 진행 중일 때만 쌓인 자료라 비어 있는 시간이 많을 수 있어요.',
+    };
+  }
+
   const tools: ToolDefinition[] = [
     {
       name: TOOL_NAMES.current,
@@ -255,7 +369,7 @@ export function createAgentTools(context: ToolContext): {
     },
     {
       name: TOOL_NAMES.history,
-      description: `과거 기간(from~to, KST 날짜)의 덕장 주변 관측을 일 단위(31일 이하) 또는 주 단위로 요약: 기온·습도·풍속 평균·최저·최고, 강수량, 규칙 함수로 매긴 적합·주의·부적합 시간, 그날 가장 긴 적합 구간, 결측률, 자료 출처와 덕장까지 거리. 한 번에 ${MAX_HISTORY_DAYS}일까지. "지난주/어제/작년 12월 날씨·건조 조건 분석", 두 기간 비교(두 번 부른다)에 쓴다. 오늘 이후는 조회할 수 없다.`,
+      description: `과거 기간(from~to, KST 날짜)의 덕장 주변 관측을 일 단위(31일 이하) 또는 주 단위로 요약: 기온·습도·풍속 평균·최저·최고, 강수량, 규칙 함수로 매긴 적합·주의·부적합 시간, 그날 가장 긴 적합 구간, 결측률, 자료 출처와 덕장까지 거리. 한 번에 ${MAX_HISTORY_DAYS}일까지. "지난주/어제/작년 12월 날씨·건조 조건 분석"에 쓴다. 두 기간 비교는 compare_periods 를 쓴다. 오늘 이후는 조회할 수 없다.`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -266,41 +380,37 @@ export function createAgentTools(context: ToolContext): {
         additionalProperties: false,
       },
       run: async (input, signal) => {
-        const now = context.now();
-        const range = readRange(input, now);
-        const external = context.history
-          ? await context.history(range, signal).catch(() => null)
-          : null;
-        if (external?.samples.length) {
-          const summary = summarizeHistory({
-            samples: external.samples,
-            ...range,
-            source: external.source,
-            station: external.station,
-            distanceM: Math.round(distanceMeters(site, external)),
-            sampleMinutes: external.sampleMinutes,
-            now,
-          });
-          cards.push({ kind: 'history', data: summary });
-          return summary;
-        }
-        const operations = await context.operations();
-        const summary = summarizeHistory({
-          samples: operations ? batchHistorySamples(operations) : [],
-          ...range,
-          source: '해풍 배치 기록(30분 수집)',
-          station: '덕장 1km 안 관측기',
-          distanceM: null,
-          sampleMinutes: 30,
-          now,
-        });
+        const { summary, note } = await historyFor(readRange(input, context.now()), signal);
         cards.push({ kind: 'history', data: summary });
-        return {
-          ...summary,
-          note: context.history
-            ? '외부 과거 관측을 받지 못해 이 덕장의 배치 기록만 썼어요. 배치가 진행 중일 때만 쌓인 자료라 비어 있는 시간이 많을 수 있어요.'
-            : '이 덕장의 배치 기록만 썼어요. 배치가 진행 중일 때만 쌓인 자료라 비어 있는 시간이 많을 수 있어요.',
-        };
+        return note ? { ...summary, note } : summary;
+      },
+    },
+    {
+      name: TOOL_NAMES.compare,
+      description:
+        '두 과거 기간(기준 base, 비교 target)을 같은 방법으로 요약하고 항목별 차이(비교 - 기준)를 계산한다: 평균 기온·습도·풍속, 강수량, 적합 시간과 적합 비율. 합친 점수는 없다. 자료가 비거나 결측이 많거나 출처가 다르면 비교 불가와 이유를 준다. "작년 이맘때와 비교", "이번 주랑 지난주 비교"에 쓴다.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          base_from: { type: 'string', description: '기준 기간 시작 YYYY-MM-DD (KST)' },
+          base_to: { type: 'string', description: '기준 기간 끝 YYYY-MM-DD (KST, 포함)' },
+          target_from: { type: 'string', description: '비교 기간 시작 YYYY-MM-DD (KST)' },
+          target_to: { type: 'string', description: '비교 기간 끝 YYYY-MM-DD (KST, 포함)' },
+        },
+        required: ['base_from', 'base_to', 'target_from', 'target_to'],
+        additionalProperties: false,
+      },
+      run: async (input, signal) => {
+        const now = context.now();
+        const baseRange = readRange({ from: input.base_from, to: input.base_to }, now);
+        const targetRange = readRange({ from: input.target_from, to: input.target_to }, now);
+        const [base, target] = await Promise.all([
+          historyFor(baseRange, signal),
+          historyFor(targetRange, signal),
+        ]);
+        cards.push({ kind: 'history', data: base.summary });
+        cards.push({ kind: 'history', data: target.summary });
+        return compareHistory(base.summary, target.summary, [base.note, target.note]);
       },
     },
     {

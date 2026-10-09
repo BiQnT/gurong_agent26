@@ -363,3 +363,71 @@ test('without the AI, a team question gets the team summary and no drying card',
   assert.equal(other.assessment, undefined);
   assert.match(other.content, /AI가 답하지 못해/);
 });
+
+test('two periods are compared item by item, and an unusable period is reported as not comparable', async () => {
+  const day = (date: string, humidity: number) =>
+    Array.from({ length: 24 }, (_, h) => ({
+      at: new Date(Date.parse(`${date}T00:00:00+09:00`) + h * 3_600_000).toISOString(),
+      temperature: 6,
+      humidity,
+      windSpeed: 3,
+      rainMm: 0,
+    }));
+  const history = async (range: { from: string; to: string }) =>
+    range.from === '2026-10-01'
+      ? null
+      : {
+          samples: range.from.startsWith('2025') ? day('2025-10-08', 70) : day('2026-10-08', 50),
+          source: '기상청 구룡포 AWS 시간자료',
+          station: '기상청 구룡포 AWS',
+          latitude: 35.9831,
+          longitude: 129.5475,
+          sampleMinutes: 60,
+        };
+  const seen: Parameters<typeof toolAsk>[2] = {};
+  const reply = await chat(
+    toolAsk(
+      [
+        [
+          'compare_periods',
+          {
+            base_from: '2025-10-08',
+            base_to: '2025-10-08',
+            target_from: '2026-10-08',
+            target_to: '2026-10-08',
+          },
+        ],
+        [
+          'compare_periods',
+          {
+            base_from: '2026-10-01',
+            base_to: '2026-10-01',
+            target_from: '2026-10-08',
+            target_to: '2026-10-08',
+          },
+        ],
+      ],
+      '작년 같은 날보다 습도가 20%p 낮아 적합 비율이 100%p 높았어요.',
+      seen,
+    ),
+    { history },
+  )(request('작년 이맘때와 비교해줘'), graded, live(), undefined, data);
+  const [compared, blocked] = seen.results!.map((item) => item.result as Record<string, unknown>);
+  assert.equal(compared.comparable, true);
+  assert.deepEqual(compared.differences, {
+    temperatureMean: 0,
+    humidityMean: -20,
+    windSpeedMean: 0,
+    rainMm: 0,
+    suitableHours: 24,
+    suitableShare: 100,
+  });
+  assert.match(String(compared.summary), /적합 비율 0% → 100% \(\+100%p\)/);
+  // 기준 기간에 외부 자료가 없어 배치 기록으로 요약했고, 출처가 달라 비교하지 않는다.
+  assert.equal(blocked.comparable, false);
+  assert.equal(blocked.differences, null);
+  assert.match(String(blocked.summary), /^비교 불가: /);
+  // 도구가 계산한 차이만 쓴 답은 통과하고, 카드는 마지막 두 기간 요약이다.
+  assert.equal(reply.provider, 'claude');
+  assert.equal(reply.history?.length, 2);
+});

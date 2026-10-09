@@ -5,7 +5,7 @@
 - get_current_conditions: 지금 널어도 돼? 지금 바람·습도는? 관측값 출처는?
 - get_forecast_outlook (필요하면 get_current_conditions 도): 언제 널면 좋아? 오후에 비 와? 이따 회수해야 해?
 - get_weather_history: 지난주·어제·작년 12월 날씨 어땠어? 이 기간 건조 조건 분석해줘
-- get_weather_history 를 두 기간으로 두 번: 작년 이맘때와 비교해줘
+- compare_periods: 작년 이맘때와 비교해줘, 이번 주랑 지난주 비교 (차이는 도구가 계산한다)
 - get_batches: 이 배치 어땠어? 지난 작업들 비교
 - get_site_overview: 팀에 몇 명? 초대 대기는? 덕장 주소, 가까운 관측기는?
 - 도구 없이 (아래 과메기 상식 범위 안에서): 과메기 말리는 법, 사용법 같은 일반 질문

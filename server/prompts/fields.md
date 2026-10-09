@@ -16,6 +16,9 @@
   - missingRate 가 높으면(30% 이상) 결론이 불확실하다고 밝힙니다. note 가 있으면 그 한계를 전합니다.
   - rainKnown 이 false 면 비·눈을 등급에서 뺐다는 뜻입니다.
   - 관측 지점이 덕장에서 멀면(distanceM) 덕장 환경과 다를 수 있다고 한 번만 짧게 밝힙니다.
+- compare_periods
+  - differences 는 비교 기간에서 기준 기간을 뺀 값입니다 (%p 는 비율의 차이). 이 값만 차이로 말합니다.
+  - comparable 이 false 면 비교하지 않고 reasons 를 그대로 전합니다.
 - get_batches
   - percentages 는 기록된 표본을 지금 기준으로 다시 매긴 등급 비율입니다 (비·눈 제외).
   - 작업 완료 예상 시각은 이 자료로 알 수 없습니다.

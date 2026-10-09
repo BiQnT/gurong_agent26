@@ -58,7 +58,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 
 `LLM_PROVIDER` 가 `claude` 이면 claude CLI, 그 밖에는 OpenAI 호환 HTTP API(기본)다. 기본 지시는 [server/prompts/](../../server/prompts/)의 md 파일(페르소나·규칙·도구 쓰는 법·자료 읽는 법·과메기 상식)이고 서버가 시작할 때 읽는다. 판정·등급·숫자는 코드가 정하고 모델은 설명만 쓴다 ([0010](../decisions/0010-drying-grade-rules.md), [0011](../decisions/0011-assistant-reads-with-tools.md)).
 
-- **claude**: 이 덕장의 읽기 전용 도구 5개(`server/agent-tools.ts`)를 부를 수 있다. 서버는 AI 가 실제로 부른 도구로 화면 카드를 정한다. 도구 목록과 카드는 [채팅 요청·응답](chat-api.md#채팅-요청응답).
+- **claude**: 이 덕장의 읽기 전용 도구 6개(`server/agent-tools.ts`)를 부를 수 있다. 서버는 AI 가 실제로 부른 도구로 화면 카드를 정한다. 도구 목록과 카드는 [채팅 요청·응답](chat-api.md#채팅-요청응답).
 - **OpenAI 호환**: 도구 없이, 같은 지시문과 서버가 미리 담은 자료(현재 관측·덕장·배치·예보)로 답한다. 과거 기간 분석은 하지 않는다.
 - 답은 내보내기 전에 검사한다(`server/answer-checks.ts`). 현재 시점 문장의 등급이 규칙과 다르거나 현재 관측을 보지 않고 널어도 된다고 하면 규칙 문장으로, 측정 숫자가 도구 결과·기준·지시문·대화에 없으면 도구가 만든 요약으로 바꾸고 `provider: local` 과 `providerNotice` 를 붙인다. 호출이 실패해도 같은 대체 답을 준다. 대체 답은 질문이 지금 날씨를 묻지 않으면 등급을 꺼내지 않는다.
 

@@ -293,11 +293,14 @@ const ASKS_CONDITIONS =
 /** 다른 때를 다루는 도구 (과거·예보·배치). 이 도구를 함께 부른 답은 과거형 문장을 현재로 보지 않는다. */
 const OTHER_TIME_TOOLS = new Set<string>([
   TOOL_NAMES.history,
+  TOOL_NAMES.compare,
   TOOL_NAMES.forecast,
   TOOL_NAMES.batches,
 ]);
 
 function suggestionsFor(used: Set<string>): string[] {
+  if (used.has(TOOL_NAMES.compare))
+    return ['지난 7일 건조 조건 분석해줘', '지금 널어도 될까?', '진행 중인 배치 어때?'];
   if (used.has(TOOL_NAMES.history))
     return ['작년 같은 기간과 비교해줘', '지금 널어도 될까?', '앞으로 몇 시간 예보는?'];
   if (used.has(TOOL_NAMES.batches))

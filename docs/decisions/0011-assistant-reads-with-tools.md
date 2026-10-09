@@ -17,7 +17,7 @@
 
 ## 결정
 
-- claude CLI 에 **이 덕장 범위의 읽기 전용 도구 5개**를 준다: 현재 상태(`get_current_conditions`), 덕장·팀(`get_site_overview`), 배치 기록(`get_batches`), 과거 기간(`get_weather_history`), 예보 예상 등급(`get_forecast_outlook`). 도구는 코드가 계산한 결과만 돌려준다. AI 는 어떤 도구를 부를지 고르고 설명만 쓴다.
+- claude CLI 에 **이 덕장 범위의 읽기 전용 도구 6개**를 준다: 현재 상태(`get_current_conditions`), 덕장·팀(`get_site_overview`), 배치 기록(`get_batches`), 과거 기간(`get_weather_history`), 기간 비교(`compare_periods`, 신청서 US-4 의 항목별 편차와 비교 불가 처리), 예보 예상 등급(`get_forecast_outlook`). 도구는 코드가 계산한 결과만 돌려준다. AI 는 어떤 도구를 부를지 고르고 설명만 쓴다.
 - 도구는 서버 프로세스 안에서 127.0.0.1 임의 포트로 여는 MCP(Streamable HTTP, JSON 응답) 엔드포인트로 준다. 채팅 요청마다 일회용 토큰을 만들고 요청이 끝나면 지운다. 토큰은 claude 의 환경변수로만 넘긴다. 내장 도구는 지금처럼 모두 끈다.
 - **화면 카드는 AI 가 실제로 부른 도구로 정한다.** 현재 상태 도구를 불렀을 때만 판정 카드가 붙는다. 의도를 정규식으로 추측하지 않는다 (AI 를 못 쓸 때의 대체 답만 예외).
 - 판정 카드와 관측 카드를 하나로 합치고, 카드를 답 문장 위에 둔다 (QA A·C).
