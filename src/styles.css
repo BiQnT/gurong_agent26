@@ -1023,7 +1023,7 @@ button:active:not(:disabled) {
   color: #404040;
   border-radius: 15px 15px 3px 15px;
   padding: 12px 17px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .assistant-byline {
   display: flex;
@@ -1049,8 +1049,8 @@ button:active:not(:disabled) {
   font-size: 11px;
 }
 .message.assistant > .message-body {
-  font-size: 13px;
-  line-height: 1.95;
+  font-size: 15px;
+  line-height: 1.85;
   color: #404040;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -1089,6 +1089,14 @@ button:active:not(:disabled) {
 .grade-pill.caution {
   background: #fff6df;
   color: #8a5a00;
+}
+.grade-pill.good {
+  background: #e7f4ec;
+  color: #1f6b3a;
+}
+.grade-pill.bad {
+  background: #fbe5e2;
+  color: #8a2e22;
 }
 .grade-pill.muted {
   background: #ededed;
@@ -1958,17 +1966,17 @@ button:active:not(:disabled) {
     margin-bottom: 24px;
   }
   .message.user .message-body {
-    font-size: 13px;
+    font-size: 15px;
     padding: 11px 14px;
   }
   .message.assistant > .message-body {
-    font-size: 13px;
+    font-size: 15px;
   }
   .assessment-card {
     padding: 17px 15px;
   }
   .assessment-card > h3 {
-    font-size: 14px;
+    font-size: 15px;
   }
   .assessment-metrics > div {
     padding: 0 12px;
@@ -2489,4 +2497,209 @@ button:active:not(:disabled) {
 .weather-judgment {
   color: #404040;
   font-weight: 500;
+}
+
+/* AI 답 위의 카드 묶음 (현재 환경 → 예보 → 기간 요약 → 배치, 그 아래 답 문장) */
+.reply-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.reply-cards > .assessment-card {
+  margin-top: 0;
+}
+.reply-cards .assessment-card > h3 {
+  font-size: 16px;
+}
+.reply-cards .assessment-reasons p {
+  font-size: 13px;
+}
+.conditions-where {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 12px 2px 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #525252;
+}
+.conditions-where > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: #666666;
+}
+.reply-sources {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #666666;
+}
+.analysis-note {
+  margin: 12px 0 4px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #666666;
+}
+/* 등급 막대: 적합·주의·부적합·제외 순서, 칸 사이 2px 틈. 색만으로 구분하지 않게 범례 글자와 표를 함께 둔다 */
+.grade-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 16px 0 8px;
+  font-size: 12px;
+  color: #525252;
+}
+.grade-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.grade-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.grade-swatch.good,
+.grade-bar > .good {
+  background: #3d8c5c;
+}
+.grade-swatch.caution,
+.grade-bar > .caution {
+  background: #d9a23f;
+}
+.grade-swatch.bad,
+.grade-bar > .bad {
+  background: #c4513b;
+}
+.grade-swatch.none,
+.grade-bar > .none {
+  background: #c9c9c9;
+}
+.grade-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.grade-row {
+  display: grid;
+  grid-template-columns: 76px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #525252;
+}
+.grade-row-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.grade-bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  border-radius: 4px;
+  background: #f2f2f2;
+  overflow: hidden;
+}
+.grade-bar > i {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+}
+.grade-bar > i:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.grade-bar > i:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.batch-digests .grade-bar {
+  margin: 8px 0 0;
+}
+.analysis-table-wrap {
+  overflow-x: auto;
+}
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  color: #404040;
+  font-variant-numeric: tabular-nums;
+}
+.analysis-table th,
+.analysis-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #ededed;
+  text-align: right;
+  white-space: nowrap;
+}
+.analysis-table th:first-child,
+.analysis-table td:first-child {
+  text-align: left;
+}
+.analysis-table th {
+  color: #666666;
+  font-weight: 500;
+}
+.forecast-hours {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.forecast-hours > li {
+  display: grid;
+  grid-template-columns: 52px auto 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #404040;
+}
+.forecast-time {
+  font-variant-numeric: tabular-nums;
+  color: #525252;
+}
+.forecast-values {
+  color: #525252;
+  font-size: 12px;
+}
+.batch-digests {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.batch-digests > li {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ededed;
+}
+.batch-digests > li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.batch-digest-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.batch-digests p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #525252;
+}
+@media (max-width: 640px) {
+  .grade-row {
+    grid-template-columns: 62px 1fr 34px;
+  }
+  .forecast-hours > li {
+    grid-template-columns: 46px auto;
+  }
+  .forecast-values {
+    grid-column: 1 / -1;
+  }
 }

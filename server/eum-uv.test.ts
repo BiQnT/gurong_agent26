@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createLiveChat } from './chat.ts';
-import type { AgentAsk } from './claude-cli.ts';
+import { contextOf, toolAsk } from './test-helpers/tool-ask.ts';
 import type { BridgeConfig } from './eum.ts';
 import { createUvIndexSource, readUvIndex, uvStage, type UvReading } from './sources/eum-uv.ts';
 import type { LiveSnapshot } from '../src/lib/live.ts';
@@ -139,8 +139,7 @@ const config: BridgeConfig = {
   projectRoot: process.cwd(),
 };
 const request = { message: '오늘 작업할 때 주의할 점은?', siteId: 'site-1', history: [] };
-const context = (system: string) =>
-  JSON.parse(system.split('OBSERVATION_CONTEXT\n')[1]) as Record<string, unknown>;
+const context = (system: string) => contextOf(system).current as Record<string, unknown>;
 
 async function openaiSystem(uvIndex?: () => Promise<UvReading | null>): Promise<string> {
   let system = '';
@@ -158,7 +157,7 @@ async function openaiSystem(uvIndex?: () => Promise<UvReading | null>): Promise<
   return system;
 }
 
-test('chat grounding carries the UV reading in OBSERVATION_CONTEXT, or null when it is unavailable', async () => {
+test('the current-conditions grounding carries the UV reading, or null when it is unavailable', async () => {
   const reading: UvReading = {
     uvIndex: 7.4,
     observedAt: '2026-10-04T02:59:05.000Z',
@@ -172,7 +171,7 @@ test('chat grounding carries the UV reading in OBSERVATION_CONTEXT, or null when
     stage: '높음',
     observedAt: '10.04 11:59 KST',
   });
-  assert.match(withUv, /uv는 E-UM 자외선 측정값/);
+  assert.match(withUv, /uv 는 근로자의 햇빛 노출 조언에만/);
 
   // 실제 E-UM 조회가 실패하는 소스
   const failing = createUvIndexSource(config, async () => new Response('', { status: 502 }));
@@ -187,12 +186,8 @@ test('chat grounding carries the UV reading in OBSERVATION_CONTEXT, or null when
     null,
   );
 
-  // claude 경로도 같은 근거를 받는다.
-  let claudeSystem = '';
-  const ask: AgentAsk = async ({ system }) => {
-    claudeSystem = system;
-    return { text: '확인했어요.', costUsd: 0 };
-  };
+  // claude 경로는 현재 관측 도구를 부를 때 같은 값을 받는다.
+  const seen: Parameters<typeof toolAsk>[2] = {};
   const reply = await createLiveChat(
     {
       ...config,
@@ -208,10 +203,10 @@ test('chat grounding carries the UV reading in OBSERVATION_CONTEXT, or null when
       },
     },
     undefined,
-    ask,
+    toolAsk([['get_current_conditions']], '확인했어요.', seen),
     async () => reading,
   )(request, snapshot, new AbortController().signal);
   assert.equal(reply.provider, 'claude');
-  assert.equal(claudeSystem, withUv);
-  assert.ok(!claudeSystem.includes(config.eumServiceKey));
+  assert.deepEqual((seen.results![0].result as Record<string, unknown>).uv, context(withUv).uv);
+  assert.ok(!seen.system!.includes(config.eumServiceKey));
 });

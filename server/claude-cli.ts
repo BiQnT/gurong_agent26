@@ -2,16 +2,25 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
 // 채팅 설명을 claude CLI(`claude -p`)로 만든다. 메시지 하나 = 프로세스 하나.
-// 서버가 확보한 관측 근거를 시스템 프롬프트로 넘기고, claude 는 도구 없이 설명만 쓴다.
+// 내장 도구(Bash·Read 등)는 모두 끄고, 서버가 루프백으로 여는 읽기 전용 도구(server/tool-server.ts)만 허용한다.
+// claude 는 어떤 자료를 볼지 고르고 설명만 쓴다. 숫자와 등급은 도구(코드)가 계산한다 (ADR 0011).
 // 다른 CLI 에이전트(codex 등)를 붙일 때도 같은 모양(AgentAsk)으로 만든다.
 
 export type AgentMessage = { role: 'user' | 'assistant'; content: string };
+/** 이 요청에서 쓸 수 있는 도구 서버 (MCP Streamable HTTP). 토큰은 환경변수로만 넘긴다. */
+export type AgentTools = { url: string; token: string };
 export type AgentAsk = (input: {
   system: string;
   history: AgentMessage[];
   message: string;
   signal: AbortSignal;
+  tools?: AgentTools;
 }) => Promise<{ text: string; costUsd?: number }>;
+
+/** MCP 서버 이름. claude 안에서 도구는 `mcp__haepung__<도구>` 로 보인다. */
+export const TOOL_SERVER_NAME = 'haepung';
+/** 도구 토큰을 담는 환경변수. 인자로 넘기면 같은 VM 의 프로세스 목록(ps)에 보인다. */
+export const TOOL_TOKEN_ENV = 'HAEPUNG_TOOL_TOKEN';
 
 export type ClaudeConfig = {
   bin: string;
@@ -43,14 +52,19 @@ export class ClaudeCliError extends Error {
   }
 }
 
-export function buildClaudeArgs(config: ClaudeConfig, system: string): string[] {
+export function buildClaudeArgs(
+  config: ClaudeConfig,
+  system: string,
+  tools?: Pick<AgentTools, 'url'>,
+): string[] {
   const args = [
     '-p',
     '--output-format',
     'json',
-    // 공개 서버라 내장 도구(Bash·Read·Write·WebFetch 등)와 MCP 를 모두 끈다.
+    // 공개 서버라 내장 도구(Bash·Read·Write·WebFetch 등)를 모두 끈다.
     '--tools',
     '',
+    // 서버 계정에 설정된 MCP 는 읽지 않는다. 아래 --mcp-config 로 준 우리 도구 서버만 쓴다.
     '--strict-mcp-config',
     // 채팅으로 /model, /config 같은 Claude Code 명령이 실행되지 않게 한다.
     '--disable-slash-commands',
@@ -67,6 +81,20 @@ export function buildClaudeArgs(config: ClaudeConfig, system: string): string[] 
   if (config.authMode === 'api_key') args.push('--bare');
   if (config.model) args.push('--model', config.model);
   if (config.effort) args.push('--effort', config.effort);
+  if (tools) {
+    const mcp = {
+      mcpServers: {
+        [TOOL_SERVER_NAME]: {
+          type: 'http',
+          url: tools.url,
+          // claude 가 자식 환경변수에서 풀어 쓴다.
+          headers: { Authorization: `Bearer \${${TOOL_TOKEN_ENV}}` },
+        },
+      },
+    };
+    // 이 서버의 도구만 묻지 않고 쓰게 한다 (-p 에서는 허용되지 않은 도구가 거절된다).
+    args.push('--mcp-config', JSON.stringify(mcp), '--allowedTools', `mcp__${TOOL_SERVER_NAME}`);
+  }
   return args;
 }
 
@@ -86,6 +114,7 @@ const PASS_THROUGH = [
 export function claudeEnv(
   config: ClaudeConfig,
   source: NodeJS.ProcessEnv = process.env,
+  toolToken?: string,
 ): Record<string, string> {
   const env: Record<string, string> = {
     DISABLE_AUTOUPDATER: '1',
@@ -97,6 +126,7 @@ export function claudeEnv(
     const value = source[name];
     if (value) env[name] = value;
   }
+  if (toolToken) env[TOOL_TOKEN_ENV] = toolToken;
   return env;
 }
 
@@ -173,7 +203,7 @@ export function readClaudeResult(stdout: string): { text: string; costUsd?: numb
 let running = 0;
 
 export function createClaudeAgent(config: ClaudeConfig): AgentAsk {
-  return async ({ system, history, message, signal }) => {
+  return async ({ system, history, message, signal, tools }) => {
     signal.throwIfAborted();
     if (running >= config.maxConcurrency)
       throw new ClaudeCliError('busy', `동시에 ${config.maxConcurrency}개까지만 처리한다`);
@@ -184,9 +214,9 @@ export function createClaudeAgent(config: ClaudeConfig): AgentAsk {
         mkdirSync(config.workdir, { recursive: true });
         // cwd 는 빈 작업 폴더다. 저장소 안에서 띄우면 저장소의 CLAUDE.md 를 읽어 버린다.
         // detached: 자식이 만든 하위 프로세스까지 프로세스 그룹으로 한꺼번에 끝내려는 것이다.
-        child = spawn(config.bin, buildClaudeArgs(config, system), {
+        child = spawn(config.bin, buildClaudeArgs(config, system, tools), {
           cwd: config.workdir,
-          env: claudeEnv(config) as NodeJS.ProcessEnv,
+          env: claudeEnv(config, process.env, tools?.token) as NodeJS.ProcessEnv,
           stdio: ['pipe', 'pipe', 'pipe'],
           detached: true,
         });

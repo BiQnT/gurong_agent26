@@ -4,6 +4,7 @@ import { distanceMeters } from '../src/lib/geo.ts';
 import { readLiveSnapshot, type LiveObservation, type LiveSnapshot } from '../src/lib/live.ts';
 import { attachSiteContext } from './site-observations.ts';
 import { createLiveChat } from './chat.ts';
+import { contextOf } from './test-helpers/tool-ask.ts';
 
 const site = { id: 'site-test', name: '테스트 덕장', latitude: 36, longitude: 129.5 };
 function observation(
@@ -77,10 +78,7 @@ test('model receives computed distance and registration status without private s
   let context: Record<string, unknown> = {};
   const fakeFetch: typeof fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body));
-    context = JSON.parse(body.messages[0].content.split('OBSERVATION_CONTEXT\n')[1]) as Record<
-      string,
-      unknown
-    >;
+    context = contextOf(body.messages[0].content) as Record<string, unknown>;
     assert.equal(body.stream, false);
     assert.equal(body.max_tokens, 600);
     return Response.json({
@@ -112,12 +110,13 @@ test('model receives computed distance and registration status without private s
     new AbortController().signal,
   );
   assert.equal(result.provider, 'openai');
-  assert.equal(context.siteRegistered, true);
-  assert.equal((context.observation as { distanceM: number }).distanceM, 111);
-  assert.equal(context.site, undefined);
-  assert.equal(context.siteCoordinates, undefined);
+  const current = context.current as Record<string, unknown>;
+  assert.equal((current.observation as { distanceM: number }).distanceM, 111);
+  // 덕장·관측기 좌표는 가지 않는다 (덕장 정보에는 이름·주소, 관측기는 이름·거리만).
+  assert.ok(!JSON.stringify(context).includes('latitude'));
+  assert.ok(!JSON.stringify(context).includes('36.001'));
   // 판정은 경로에서 규칙 함수가 붙인다. 여기서는 붙이지 않았으므로 null 이다.
-  assert.equal(context.assessment, null);
+  assert.equal(current.assessment, null);
 });
 
 test('E-UM comes first within 1 km; the KMA AWS fills in only when no recent E-UM value is near', () => {

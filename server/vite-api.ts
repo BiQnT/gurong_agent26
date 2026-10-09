@@ -8,7 +8,7 @@ import {
   type WorkspaceService,
 } from './workspace.ts';
 import { attachSiteContext } from './site-observations.ts';
-import { summarizeBatches, withAssessment } from './assessment.ts';
+import { withAssessment } from './assessment.ts';
 import { createUvIndexSource } from './sources/eum-uv.ts';
 import { createKmaSource, KMA_WAIT_MS, within } from './sources/kma.ts';
 import { createGeocoder, readGeocodeReverse, readGeocodeSearch, type Geocoder } from './geocode.ts';
@@ -17,6 +17,8 @@ import { readdirSync } from 'node:fs';
 import { posix, relative, resolve, sep } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
+/** 채팅 경로 전체 제한. 관측을 기다린 만큼 AI 시간이 줄어든다 (chat.ts 의 deadlineAt). */
+export const CHAT_LIMIT_MS = 90000;
 const API_PATHS = new Set([
   '/api/health',
   '/api/observations',
@@ -66,7 +68,7 @@ export function readBridgeConfig(env: Record<string, string>, projectRoot: strin
       model: env.AGENT_MODEL?.trim() || undefined,
       effort: env.AGENT_EFFORT?.trim() || undefined,
       maxBudgetUsd: positive(env, 'AGENT_MAX_BUDGET_USD', 0.5),
-      timeoutMs: positive(env, 'AGENT_TIMEOUT_MS', 40000),
+      timeoutMs: positive(env, 'AGENT_TIMEOUT_MS', 75000),
       maxConcurrency: positive(env, 'AGENT_MAX_CONCURRENCY', 4),
       dailyBudgetUsd: positive(env, 'AGENT_DAILY_BUDGET_USD', 10),
     },
@@ -191,8 +193,10 @@ export function createApiMiddleware(
       return;
     }
     const controller = new AbortController();
-    const deadlineAt = Date.now() + 45000;
-    const deadline = setTimeout(() => controller.abort(), 45000);
+    // 채팅은 AI 가 도구를 몇 번 부를 수 있어 더 길게 둔다 (claude 기본 75초 + 관측 조회).
+    const limitMs = url.pathname === '/api/chat' ? CHAT_LIMIT_MS : 45000;
+    const deadlineAt = Date.now() + limitMs;
+    const deadline = setTimeout(() => controller.abort(), limitMs);
     const disconnect = () => {
       if (!response.writableEnded) controller.abort();
     };
@@ -274,18 +278,27 @@ export function createApiMiddleware(
           throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
         const input = readChatRequest(await readBody(request, controller.signal));
         const { site } = await workspace.requireMember(request, input.siteId, 'owner');
-        const [observed, weather, operations] = await Promise.all([
+        const [observed, weather] = await Promise.all([
           observations.snapshot(controller.signal, input.deviceId),
           siteWeather(site),
-          // 배치 평가는 AI 설명 근거일 뿐이라 읽지 못해도 답변은 한다.
-          workspace.operations(request, site.id).catch(() => null),
         ]);
         const snapshot = withAssessment({
           ...attachSiteContext(observed, site, input.deviceId),
           ...(weather ? { weather } : {}),
         });
-        const batches = operations ? summarizeBatches(operations.data) : [];
-        send(200, await chat(input, snapshot, controller.signal, deadlineAt, batches));
+        // 덕장·팀·배치는 AI 가 그 도구를 부를 때만 읽는다. 읽지 못해도 답변은 한다.
+        send(
+          200,
+          await chat(input, snapshot, controller.signal, deadlineAt, {
+            site,
+            team: () => workspace.team(request, site.id),
+            operations: () =>
+              workspace.operations(request, site.id).then(
+                (envelope) => envelope.data,
+                () => null,
+              ),
+          }),
+        );
       } catch (error) {
         if (controller.signal.aborted)
           send(504, {

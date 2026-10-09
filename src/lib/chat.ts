@@ -1,3 +1,11 @@
+import {
+  readBatchDigest,
+  readForecastOutlook,
+  readHistorySummary,
+  type BatchDigest,
+  type ForecastOutlook,
+  type HistorySummary,
+} from './analysis.ts';
 import { readAssessment, type Assessment } from './drying.ts';
 import { readLiveObservation, type LiveObservation } from './live.ts';
 
@@ -7,8 +15,17 @@ export type { Assessment } from './drying.ts';
 
 export type ChatReply = {
   content: string;
+  /** 현재 건조 환경 카드 (AI 가 현재 관측을 봤을 때만) */
   assessment?: Assessment;
   observation?: LiveObservation;
+  /** 과거 기간 요약 카드 (최대 2개, 비교할 때 두 개) */
+  history?: HistorySummary[];
+  /** 예보 예상 등급 카드 */
+  forecast?: ForecastOutlook;
+  /** 배치 기록 카드 */
+  batches?: BatchDigest[];
+  /** 답이 본 자료 한 줄씩 (화면의 "근거" 줄) */
+  sources?: string[];
   provider?: 'openai' | 'compatible' | 'claude' | 'local';
   providerNotice?: string;
   sourceFetchedAt?: string;
@@ -308,7 +325,31 @@ export function readChatReply(value: unknown): ChatReply {
       : {}),
     ...(assessment ? { assessment } : {}),
     ...(value.action === undefined ? {} : { action: value.action as ChatReply['action'] }),
+    ...optionalCards(value),
   };
+}
+
+/** 카드 자료는 형식이 맞는 것만 남긴다. 틀린 카드 때문에 답 전체를 버리지 않는다. */
+function optionalCards(value: Record<string, unknown>): Partial<ChatReply> {
+  const cards: Partial<ChatReply> = {};
+  if (Array.isArray(value.history)) {
+    const history = value.history
+      .slice(0, 2)
+      .map(readHistorySummary)
+      .filter((item): item is HistorySummary => item !== null);
+    if (history.length) cards.history = history;
+  }
+  const forecast = value.forecast === undefined ? null : readForecastOutlook(value.forecast);
+  if (forecast) cards.forecast = forecast;
+  if (Array.isArray(value.batches)) {
+    const batches = value.batches
+      .slice(0, 10)
+      .map(readBatchDigest)
+      .filter((item): item is BatchDigest => item !== null);
+    if (batches.length) cards.batches = batches;
+  }
+  if (isStringArray(value.sources)) cards.sources = value.sources.slice(0, 6);
+  return cards;
 }
 
 const HTTP_STEPS = [

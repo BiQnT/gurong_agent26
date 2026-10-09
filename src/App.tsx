@@ -15,15 +15,17 @@ import {
   RotateCcw,
   Settings2,
   ShieldCheck,
+  Square,
+  Volume2,
   Wind,
   X,
 } from 'lucide-react';
 import { type ChatReply } from './lib/chat';
 import { useLiveObservations } from './hooks/useLiveObservations';
-import { ObservationCard, observationTime } from './components/chat/ObservationCard';
+import { observationTime } from './components/chat/ConditionsCard';
 import { useChat } from './hooks/useChat';
 import { BrandMark } from './components/BrandMark';
-import { AssessmentCard } from './components/chat/AssessmentCard';
+import { ReplyCards } from './components/chat/ReplyCards';
 import { ThinkingPanel } from './components/chat/ThinkingPanel';
 import { Welcome } from './components/chat/Welcome';
 import { Composer } from './components/chat/Composer';
@@ -111,6 +113,7 @@ function OwnerWorkspace({
   const [helpOpen, setHelpOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [atBottom, setAtBottom] = useState(true);
   const {
     conversations,
@@ -247,6 +250,28 @@ function OwnerWorkspace({
       setToast('복사할 수 없습니다. 텍스트를 직접 선택해 주세요.');
     }
   }
+  /** 답을 브라우저 내장 음성(한국어)으로 읽는다. 서버나 비용 없이 기기에서만 동작한다 (QA C). */
+  function readAloud(content: string, messageId: string) {
+    const speech = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
+    if (!speech || typeof SpeechSynthesisUtterance === 'undefined') {
+      setToast('이 브라우저는 읽어 주기를 지원하지 않아요.');
+      return;
+    }
+    speech.cancel();
+    if (speakingId === messageId) {
+      setSpeakingId(null);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(content);
+    utterance.lang = 'ko-KR';
+    const voice = speech.getVoices().find((item) => item.lang.toLowerCase().startsWith('ko'));
+    if (voice) utterance.voice = voice;
+    utterance.onend = () => setSpeakingId((current) => (current === messageId ? null : current));
+    utterance.onerror = utterance.onend;
+    setSpeakingId(messageId);
+    speech.speak(utterance);
+  }
+  useEffect(() => () => window.speechSynthesis?.cancel(), []);
   function openSettings() {
     setSettingsOpen(true);
   }
@@ -459,27 +484,33 @@ function OwnerWorkspace({
                             <span>덕장 AI 파트너</span>
                           </div>
                         )}
-                        <div className="message-body">{message.content}</div>
-                        {message.reply?.assessment && (
-                          <AssessmentCard
-                            assessment={message.reply.assessment}
-                            isDemo={false}
+                        {message.reply && (
+                          <ReplyCards
+                            reply={message.reply}
                             onStart={() => {
                               navigate('batches');
                               operations.openStart();
                             }}
                             onGuide={() => {
                               navigate('guidance');
-                              operations.openGuidanceFromAssessment(
-                                message.reply!.assessment!,
-                                message.reply?.observation ?? live.selected,
-                              );
+                              if (message.reply!.assessment)
+                                operations.openGuidanceFromAssessment(
+                                  message.reply!.assessment,
+                                  message.reply!.observation ?? live.selected,
+                                );
+                              else
+                                operations.openGuidanceFromObservation(
+                                  message.reply!.observation ?? live.selected,
+                                );
                             }}
                           />
                         )}
-                        {message.reply?.observation && (
-                          <ObservationCard observation={message.reply.observation} />
-                        )}
+                        <div className="message-body">{message.content}</div>
+                        {message.reply?.sources?.length ? (
+                          <p className="reply-sources">
+                            근거 · {message.reply.sources.join(' · ')}
+                          </p>
+                        ) : null}
                         {message.reply?.providerNotice && (
                           <p className="provider-notice">{message.reply.providerNotice}</p>
                         )}
@@ -514,6 +545,20 @@ function OwnerWorkspace({
                               onClick={() => void copyAnswer(message.content, message.id)}
                             >
                               {copiedId === message.id ? <Check size={14} /> : <Copy size={14} />}
+                            </button>
+                            <button
+                              className="icon-button"
+                              aria-label={
+                                speakingId === message.id ? '읽기 멈추기' : '답변 읽어 주기'
+                              }
+                              title={speakingId === message.id ? '읽기 멈추기' : '답변 읽어 주기'}
+                              onClick={() => readAloud(message.content, message.id)}
+                            >
+                              {speakingId === message.id ? (
+                                <Square size={13} />
+                              ) : (
+                                <Volume2 size={14} />
+                              )}
                             </button>
                             {index === (activeChat?.messages.length ?? 0) - 1 && !isLoading && (
                               <button

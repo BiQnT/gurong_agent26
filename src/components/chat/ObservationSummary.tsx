@@ -1,7 +1,7 @@
 import { ChevronRight, Droplets, MapPin, RefreshCw, Thermometer, Wind } from 'lucide-react';
 import type { LiveObservation, LiveSnapshot, SiteWeather } from '../../lib/live';
 import { assessDrying } from '../../lib/drying';
-import { observationTime } from './ObservationCard';
+import { observationTime } from './ConditionsCard';
 
 type Props = {
   snapshot: LiveSnapshot | null;

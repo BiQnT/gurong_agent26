@@ -1,10 +1,36 @@
 import type { ChatReply, ChatRequest } from '../src/lib/chat.ts';
-import { describeThresholds, kst, type DryingGrade } from '../src/lib/drying.ts';
+import {
+  describeThresholds,
+  DRYING_THRESHOLDS,
+  gradeIs,
+  kst,
+  type DryingGrade,
+} from '../src/lib/drying.ts';
 import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
+import type { OperationsData } from '../src/lib/operations.ts';
+import type { Team } from '../src/lib/workspace.ts';
+import {
+  createAgentTools,
+  TOOL_NAMES,
+  type ToolCard,
+  type ToolContext,
+  type WeatherHistorySource,
+} from './agent-tools.ts';
+import { collectNumbers, currentSentences, ungroundedNumbers } from './answer-checks.ts';
 import { BridgeError, object, type BridgeConfig } from './eum.ts';
 import { ClaudeCliError, createClaudeAgent, type AgentAsk } from './claude-cli.ts';
+import { contextSystemPrompt, PROMPT_TEXT, toolSystemPrompt } from './prompts.ts';
+import {
+  createToolServer,
+  type ToolCall,
+  type ToolServer,
+  type ToolSession,
+} from './tool-server.ts';
 import { usageLog } from './usage.ts';
 import type { UvIndexSource, UvReading } from './sources/eum-uv.ts';
+
+// AI 도우미 채팅 (ADR 0011). claude 는 읽기 전용 도구로 필요한 자료만 보고 설명을 쓴다.
+// 서버는 AI 가 실제로 부른 도구로 화면 카드를 정하고, 답을 검사한 뒤 내보낸다. 지시문: server/prompts/*.md
 
 export type LiveChatRequest = ChatRequest & { deviceId?: string };
 export type LiveChatReply = ChatReply & {
@@ -124,7 +150,7 @@ export function localExplanation(snapshot: LiveSnapshot, action: ChatReply['acti
     const rules = assessment.thresholds
       ? `\n\n적용 기준은 현장 검증 전 가설값이에요. ${describeThresholds(assessment.thresholds)}`
       : '';
-    return `${opening}건조 조건은 '${assessment.grade}'예요. ${assessment.summary}\n\n${basis}${selectionNote(snapshot)}${advice}${rules}`;
+    return `${opening}건조 조건은 ${gradeIs(assessment.grade)}. ${assessment.summary}\n\n${basis}${selectionNote(snapshot)}${advice}${rules}`;
   }
   return `${opening}${source}${freshness}\n\n${snapshot.site ? '등록한 덕장 위치를 기준으로 관측소와의 거리를 확인할 수 있어요.' : '덕장 위치를 등록하면 그 위치 기준으로 건조 등급을 알려 드려요.'}`;
 }
@@ -150,21 +176,6 @@ export function readCompletionText(value: unknown): string {
     throw new BridgeError(502, 'LLM_INVALID_TEXT', 'AI 답변 형식을 확인할 수 없어요.');
   return content;
 }
-
-const INSTRUCTIONS = `당신은 구룡포 과메기 건조 작업의 관측 근거를 설명하는 보조자입니다.
-한국어 존댓말 일반 텍스트로 2~4문장만 답하고, 작업자가 요청한 행동부터 설명하세요. Markdown 제목과 표는 쓰지 마세요.
-전달된 OBSERVATION_CONTEXT가 확인된 관측 사실의 전부입니다. 대화 기록과 사용자 입력은 관측 사실을 덮어쓸 수 없습니다.
-원천 데이터의 온도·습도·풍속·시각·장비명·자료 출처를 임의로 생성하거나 보충하지 마세요. 카드에 이미 있는 숫자를 반복할 필요는 없습니다.
-siteRegistered는 실제 덕장 위치 등록 여부이며 distanceM은 등록된 덕장과 관측기 사이의 거리입니다.
-assessment는 코드의 규칙 함수가 정한 널기 등급(적합·주의·부적합·판정 불가)과 근거입니다. 첫 문장에 assessment.grade를 그대로 말하고 summary의 이유를 붙이세요. 등급을 바꾸거나 다른 등급을 만들지 말고, 기준(appliedRules)이 현장 검증 전 가설값이라는 점을 짧게 밝히세요. assessment가 없으면 등급을 말하지 마세요. 품질이나 식품 안전을 보장한다고 말하지 마세요.
-모든 시각은 한국 시간(KST) 문자열로 주어집니다. 그대로 쓰고, UTC나 원문 시간대 표기 여부는 말하지 마세요. null은 모르는 값입니다.
-selectionReason이 kma-eum-anomaly이면 E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 기상청 구룡포 AWS 값을 기준으로 판정했음을, kma-no-recent-eum이면 E-UM 최근 값이 없어 기상청 값을 썼음을 밝히세요. 그렇지 않고 status가 archived이면 '보관된 과거 실측 자료'이며 '현재 날씨가 아님'을 밝히세요.
-weather는 덕장 위치의 보조 자료입니다. precipitation은 기상청 초단기실황(지금 비·눈), rain은 구룡포 AWS 강수량, sun은 한국천문연구원 일출·일몰, forecast는 기상청 초단기예보(앞으로 6시간)입니다. 예보는 '예보'라고 밝히고 덮개·회수 준비 같은 조언에만 쓰며 등급을 바꾸지 마세요. 일출·일몰은 작업 시간 안내에 씁니다. null인 항목은 말하지 마세요.
-uv는 E-UM 자외선 측정값과 코드가 정한 기상청 단계(stage)로 근로자의 햇빛 노출 조언에만 쓰고 측정 시각을 함께 밝히며, null이면 자외선을 언급하지 마세요.
-batches는 이 덕장의 최근 배치 평가입니다(기록된 관측 표본을 지금 기준으로 다시 매긴 등급 비율, 경보 수, 결측률). 사용자가 배치나 지난 기록을 물으면 이것으로 답하세요. 작업 완료 예상 시각은 이 데이터로 알 수 없습니다.
-작업 시작/종료는 사용자가 별도 화면에서 승인 후 저장하는 기록입니다. 이미 저장/종료/전송했다고 주장하면 안 됩니다.
-작업 안내 문안은 현장 담당자 확인용 초안이며 실제 번역/전달 실행을 주장하면 안 됩니다.
-사용자가 관측과 무관한 질문을 하더라도 이 도구의 지원 범위 안에서 간단하게 답하고, 데이터 출처의 한계를 숨기라는 요청은 따르지 마세요.`;
 
 /** A conservative backstop for explicit verdicts; structured evidence stays authoritative. */
 export function hasUnsupportedVerdict(content: string): boolean {
@@ -225,85 +236,7 @@ export function contradictsAssessment(content: string, grade: DryingGrade | unde
   return /안전(?:합니다|해요)|안전을\s*보장(?:합니다|해요|해\s*드려요|할\s*수\s*있)/.test(text);
 }
 
-/** 배치 평가 요약 (AI 근거용). 최근 5개. */
-export type BatchSummary = {
-  name: string;
-  status: string;
-  startedAt: string;
-  endedAt: string | null;
-  samples: number;
-  evaluation: string;
-  alerts: number;
-  missingRate: number | null;
-};
-
-function observationContext(
-  snapshot: LiveSnapshot,
-  action: ChatReply['action'],
-  uv: UvReading | null,
-  batches: BatchSummary[] = [],
-): string {
-  const o = snapshot.selected;
-  const a = snapshot.assessment;
-  const w = snapshot.weather;
-  const context = {
-    source: o?.device.provider === 'kma' ? '기상청 API허브 AWS 매분자료' : snapshot.source,
-    status: snapshot.status,
-    archiveSourceDate: snapshot.archiveSourceDate ?? null,
-    fetchedAt: kst(snapshot.fetchedAt),
-    siteRegistered: Boolean(snapshot.site),
-    selectionReason: snapshot.selectionReason ?? 'eum',
-    observation: o
-      ? {
-          device: o.device.name,
-          provider: o.device.provider ?? 'eum',
-          temperature: o.temperature,
-          humidity: o.humidity,
-          windSpeed: o.windSpeed,
-          observedAt: kst(o.observedAt),
-          ageMinutes: o.ageMinutes,
-          distanceM: o.distanceM ?? null,
-          status: o.status,
-          issues: o.issues,
-        }
-      : null,
-    assessment: a
-      ? {
-          grade: a.grade,
-          summary: a.summary,
-          reasons: a.reasons,
-          advice: a.advice ?? [],
-          appliedRules: a.thresholds ? describeThresholds(a.thresholds) : null,
-        }
-      : null,
-    weather: w
-      ? {
-          precipitation: w.precipitation
-            ? { ...w.precipitation, observedAt: kst(w.precipitation.observedAt) }
-            : null,
-          rain: w.rain ? { ...w.rain, observedAt: kst(w.rain.observedAt) } : null,
-          sun: w.sun,
-          forecast: w.forecast
-            ? {
-                issuedAt: kst(w.forecast.issuedAt),
-                hours: w.forecast.hours.map((hour) => ({ ...hour, at: kst(hour.at) })),
-              }
-            : null,
-        }
-      : null,
-    uv: uv ? { uvIndex: uv.uvIndex, stage: uv.stage, observedAt: kst(uv.observedAt) } : null,
-    batches: batches.map((batch) => ({
-      ...batch,
-      startedAt: kst(batch.startedAt),
-      endedAt: batch.endedAt ? kst(batch.endedAt) : null,
-    })),
-    warnings: snapshot.warnings,
-    action: action ?? null,
-  };
-  return `${INSTRUCTIONS}\n\nOBSERVATION_CONTEXT\n${JSON.stringify(context)}`;
-}
-
-// 자외선은 조언용 참고값이라 늦으면 기다리지 않는다 (채팅 전체 제한 45초 안에 claude 40초가 들어가야 한다).
+// 자외선은 조언용 참고값이라 늦으면 기다리지 않는다 (도구 하나가 채팅 시간을 오래 잡지 않게).
 // 조회는 뒤에서 이어져 다음 질문부터 캐시로 쓰인다.
 const UV_WAIT_MS = 3000;
 async function readUv(source: UvIndexSource | undefined): Promise<UvReading | null> {
@@ -328,13 +261,126 @@ const mismatchNotice = (snapshot: LiveSnapshot) =>
 
 function claudeNotice(error: unknown): string {
   const kind = error instanceof ClaudeCliError ? error.kind : 'failed';
-  if (kind === 'auth') return 'AI 인증에 실패해 관측 사실만 안내해요.';
-  if (kind === 'limit') return 'AI 요청 한도에 도달해 관측 사실만 안내해요.';
+  if (kind === 'auth') return 'AI 인증에 실패해 자료 요약만 안내해요.';
+  if (kind === 'limit') return 'AI 요청 한도에 도달해 자료 요약만 안내해요.';
   if (kind === 'busy')
-    return '지금 AI 요청이 많아 관측 사실만 안내해요. 잠시 뒤 다시 물어봐 주세요.';
-  if (kind === 'timeout') return 'AI 응답이 늦어 관측 사실만 안내해요.';
-  return 'AI 연결 또는 응답 확인에 실패해 관측 사실만 안내해요.';
+    return '지금 AI 요청이 많아 자료 요약만 안내해요. 잠시 뒤 다시 물어봐 주세요.';
+  if (kind === 'timeout') return 'AI 응답이 늦어 자료 요약만 안내해요.';
+  return 'AI 연결 또는 응답 확인에 실패해 자료 요약만 안내해요.';
 }
+
+/** 채팅 요청 하나의 덕장 자료. 도구가 필요할 때 읽는다 (테스트는 생략할 수 있다). */
+export type ChatData = {
+  site?: ToolContext['site'];
+  team?: () => Promise<Team>;
+  operations?: () => Promise<OperationsData | null>;
+};
+
+export type LiveChatOptions = {
+  /** claude 가 부를 도구 서버. 없으면 처음 쓸 때 루프백에 하나 연다 */
+  toolServer?: ToolServer;
+  /** 기상청 등 외부 과거 관측. 없으면 과거 분석은 배치 기록만 쓴다 */
+  history?: WeatherHistorySource;
+  now?: () => number;
+};
+
+// AI 를 못 쓸 때 질문 종류를 가늠하는 말. 답을 만들지 않고, 어떤 자료 요약을 보여 줄지만 고른다.
+const ASKS_BATCHES = /배치|건조\s*기록|작업\s*기록|이번\s*작업|지난\s*작업/;
+const ASKS_SITE = /팀|인원|몇\s*명|근로자|직원|초대|덕장\s*(?:이름|주소|정보|위치)/;
+const ASKS_CONDITIONS =
+  /널|말리|말려|말릴|건조|날씨|기온|온도|습도|바람|풍속|비\s*와|비가|눈이|강수|등급|적합|관측|예보/;
+
+/** 다른 때를 다루는 도구 (과거·예보·배치). 이 도구를 함께 부른 답은 과거형 문장을 현재로 보지 않는다. */
+const OTHER_TIME_TOOLS = new Set<string>([
+  TOOL_NAMES.history,
+  TOOL_NAMES.forecast,
+  TOOL_NAMES.batches,
+]);
+
+function suggestionsFor(used: Set<string>): string[] {
+  if (used.has(TOOL_NAMES.history))
+    return ['작년 같은 기간과 비교해줘', '지금 널어도 될까?', '앞으로 몇 시간 예보는?'];
+  if (used.has(TOOL_NAMES.batches))
+    return ['지난 배치들과 비교해줘', '지금 널어도 될까?', '지난 7일 건조 조건 분석해줘'];
+  if (used.has(TOOL_NAMES.current) || used.has(TOOL_NAMES.forecast))
+    return ['언제 널면 좋을까?', '지난 7일 건조 조건 분석해줘', '진행 중인 배치 어때?'];
+  return ['지금 널어도 될까?', '지난 7일 건조 조건 분석해줘', '우리 팀 현황 알려줘'];
+}
+
+/** 성공한 도구가 남긴 카드를 응답 필드로 옮긴다. 같은 종류가 여러 번이면 마지막 것을 쓴다 (기간 요약은 두 개까지). */
+function cardsFrom(cards: ToolCard[], snapshot: LiveSnapshot): Partial<LiveChatReply> {
+  const reply: Partial<LiveChatReply> = {};
+  const sources: string[] = [];
+  if (cards.some((card) => card.kind === 'current')) {
+    if (snapshot.assessment) reply.assessment = snapshot.assessment;
+    if (snapshot.selected) {
+      reply.observation = snapshot.selected;
+      sources.push(
+        `현재 관측: ${snapshot.selected.device.name} · ${kst(snapshot.selected.observedAt)}`,
+      );
+    }
+  }
+  const history = cards.flatMap((card) => (card.kind === 'history' ? [card.data] : [])).slice(-2);
+  if (history.length) {
+    reply.history = history;
+    for (const item of history)
+      sources.push(
+        `과거 관측: ${item.source} · ${item.from}~${item.to} · 결측 ${item.missingRate}%`,
+      );
+  }
+  const forecast = cards.findLast((card) => card.kind === 'forecast');
+  if (forecast?.kind === 'forecast') {
+    reply.forecast = forecast.data;
+    sources.push(`예보: ${forecast.data.source} · ${kst(forecast.data.issuedAt)} 발표`);
+  }
+  const batches = cards.findLast((card) => card.kind === 'batches');
+  if (batches?.kind === 'batches') {
+    reply.batches = batches.data;
+    sources.push(`배치 기록 ${batches.data.length}개`);
+  }
+  if (sources.length) reply.sources = sources;
+  return reply;
+}
+
+/** 검사에 걸린 답 대신 보여 줄, 도구가 만든 요약 문장. */
+function toolSummaries(calls: ToolCall[]): string {
+  return calls
+    .filter((call) => call.ok)
+    .map((call) =>
+      object(call.result) && typeof call.result.summary === 'string' ? call.result.summary : '',
+    )
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+type Verdict = { ok: true } | { ok: false; reason: 'grade' | 'numbers' };
+
+/**
+ * AI 답 검사.
+ * - 현재 시점 문장이 규칙 등급과 다른 등급을 말하거나, 현재 관측을 보지 않고 지금 널어도 된다고 하면 grade
+ * - 측정 숫자(°C·%·m/s·mm)가 도구 결과·기준·지시문·대화에 없으면 numbers
+ */
+export function checkAnswer(input: {
+  text: string;
+  grade: DryingGrade | undefined;
+  usedTools: Set<string>;
+  allowedNumbers: number[];
+}): Verdict {
+  const usedCurrent = input.usedTools.has(TOOL_NAMES.current);
+  const otherTimes = [...input.usedTools].some((name) => OTHER_TIME_TOOLS.has(name));
+  const current = currentSentences(input.text, { current: usedCurrent, otherTimes }).join(' ');
+  if (usedCurrent ? contradictsAssessment(current, input.grade) : hasUnsupportedVerdict(current))
+    return { ok: false, reason: 'grade' };
+  // 안전 보장은 시점과 상관없이 막는다.
+  if (contradictsAssessment(input.text.replace(/적합|주의|부적합|판정\s*불가/g, ''), undefined))
+    return { ok: false, reason: 'grade' };
+  if (ungroundedNumbers(input.text, input.allowedNumbers).length)
+    return { ok: false, reason: 'numbers' };
+  return { ok: true };
+}
+
+const THRESHOLD_NUMBERS = collectNumbers(DRYING_THRESHOLDS);
+const PROMPT_NUMBERS = collectNumbers(PROMPT_TEXT);
 
 export function createLiveChat(
   config: BridgeConfig,
@@ -342,20 +388,22 @@ export function createLiveChat(
   ask: AgentAsk | undefined = config.llmProvider === 'claude' && config.claude
     ? createClaudeAgent(config.claude)
     : undefined,
-  /** E-UM 자외선(sources/eum-uv.ts). 없으면 근거의 uv 는 null 이다. */
+  /** E-UM 자외선(sources/eum-uv.ts). 없으면 현재 관측 도구의 uv 는 null 이다. */
   uvIndex?: UvIndexSource,
+  options: LiveChatOptions = {},
 ) {
+  const now = options.now ?? Date.now;
   // 비용 기록은 claude 를 쓸 때만 필요하다. OpenAI 경로에서는 DB 를 열지 않는다.
   const usage =
     ask && config.claude && config.databasePath ? usageLog(config.databasePath) : undefined;
+  let toolServer = options.toolServer;
   return async (
     request: LiveChatRequest,
     snapshot: LiveSnapshot,
     signal: AbortSignal,
-    /** 경로 전체 제한이 끝나는 시각(ms). 관측·자외선을 기다린 만큼 AI 시간을 줄여 시간 초과 대신 대체 설명을 준다. */
+    /** 경로 전체 제한이 끝나는 시각(ms). 관측을 기다린 만큼 AI 시간을 줄여 시간 초과 대신 대체 설명을 준다. */
     deadlineAt?: number,
-    /** 이 덕장의 최근 배치 평가 (AI 근거용) */
-    batches: BatchSummary[] = [],
+    data: ChatData = {},
   ): Promise<LiveChatReply> => {
     signal.throwIfAborted();
     const aiSignal = (limitMs: number) => {
@@ -364,29 +412,139 @@ export function createLiveChat(
       return AbortSignal.any([signal, AbortSignal.timeout(Math.max(1000, left))]);
     };
     const action = getAction(request.message);
+    const site = data.site ?? {
+      name: snapshot.site?.name ?? '등록된 덕장',
+      address: '',
+      createdAt: '',
+      latitude: snapshot.site?.latitude ?? 0,
+      longitude: snapshot.site?.longitude ?? 0,
+    };
+    const context: ToolContext = {
+      snapshot,
+      site,
+      uv: () => readUv(uvIndex),
+      team:
+        data.team ??
+        (async () => {
+          throw new Error('팀 정보를 읽지 못했어요.');
+        }),
+      operations: data.operations ?? (async () => null),
+      history: options.history,
+      now,
+    };
+    const { tools, cards } = createAgentTools(context);
+    const runtime = { now: now(), siteName: site.name, siteRegistered: Boolean(snapshot.site) };
     const base = {
       ...(action ? { action } : {}),
-      ...(snapshot.selected ? { observation: snapshot.selected } : {}),
-      ...(snapshot.assessment ? { assessment: snapshot.assessment } : {}),
       sourceFetchedAt: snapshot.fetchedAt,
-      suggestions: ['관측 데이터의 한계를 알려줘', '새 건조 작업 시작하기', '작업 종료 기록하기'],
     };
-    const fallback = (notice: string): LiveChatReply => ({
-      ...base,
-      content: localExplanation(snapshot, action),
-      provider: 'local',
-      providerNotice: notice,
-    });
+    const allowedNumbers = (extra: unknown[]) => [
+      ...THRESHOLD_NUMBERS,
+      ...PROMPT_NUMBERS,
+      ...collectNumbers(request.message),
+      ...collectNumbers(request.history.map((entry) => entry.content)),
+      ...collectNumbers(extra),
+    ];
+
+    /**
+     * AI 없이 줄 답. 질문 종류를 말로 가늠해 그 자료의 코드 요약만 보여 준다.
+     * 지금 날씨를 묻지 않았으면 널기 등급을 꺼내지 않는다.
+     */
+    const offline = async (notice: string): Promise<LiveChatReply> => {
+      const reply = (content: string, extra: Partial<LiveChatReply> = {}): LiveChatReply => ({
+        ...base,
+        ...extra,
+        content,
+        suggestions: suggestionsFor(new Set()),
+        provider: 'local',
+        providerNotice: notice,
+      });
+      const run = async (name: string) => {
+        try {
+          const tool = tools.find((item) => item.name === name)!;
+          const result = await tool.run({}, signal);
+          return object(result) && typeof result.summary === 'string' ? result.summary : null;
+        } catch {
+          return null;
+        }
+      };
+      if (ASKS_BATCHES.test(request.message)) {
+        const summary = await run(TOOL_NAMES.batches);
+        if (summary) return reply(summary, cardsFrom(cards, snapshot));
+      }
+      if (ASKS_SITE.test(request.message)) {
+        const summary = await run(TOOL_NAMES.site);
+        if (summary) return reply(summary);
+      }
+      if (
+        ASKS_CONDITIONS.test(request.message) ||
+        action === 'start-batch' ||
+        action === 'guidance'
+      )
+        return reply(
+          localExplanation(snapshot, action),
+          cardsFrom([{ kind: 'current' }], snapshot),
+        );
+      return reply(
+        action
+          ? localExplanation(snapshot, action).split('\n')[0]
+          : '지금은 AI가 답하지 못해 자세한 설명을 드릴 수 없어요. 잠시 뒤 다시 물어봐 주세요.',
+      );
+    };
+
+    /** 검사를 통과한 답을 응답으로 만들고, 걸리면 도구 요약이나 규칙 문장으로 바꾼다. */
+    const finish = async (
+      text: string,
+      provider: LiveChatReply['provider'],
+      usedTools: Set<string>,
+      calls: ToolCall[],
+      evidence: unknown[],
+    ): Promise<LiveChatReply> => {
+      if (!text || text.length > 4000)
+        return offline('AI 답변 형식을 확인할 수 없어 자료 요약만 안내해요.');
+      const verdict = checkAnswer({
+        text,
+        grade: snapshot.assessment?.grade,
+        usedTools,
+        allowedNumbers: allowedNumbers(evidence),
+      });
+      const shown = cardsFrom(cards, snapshot);
+      if (!verdict.ok && verdict.reason === 'grade')
+        return {
+          ...base,
+          ...shown,
+          ...cardsFrom([{ kind: 'current' }], snapshot),
+          content: localExplanation(snapshot, action),
+          suggestions: suggestionsFor(usedTools),
+          provider: 'local',
+          providerNotice: mismatchNotice(snapshot),
+        };
+      if (!verdict.ok) {
+        const summary = toolSummaries(calls);
+        if (!summary)
+          return offline('AI 답변에 자료에서 확인되지 않은 숫자가 있어 자료 요약만 안내해요.');
+        return {
+          ...base,
+          ...shown,
+          content: summary,
+          suggestions: suggestionsFor(usedTools),
+          provider: 'local',
+          providerNotice: 'AI 답변에 자료에서 확인되지 않은 숫자가 있어 자료 요약으로 바꿨어요.',
+        };
+      }
+      return { ...base, ...shown, content: text, suggestions: suggestionsFor(usedTools), provider };
+    };
+
     if (ask && config.claude) {
       // 사용량 DB 문제로 답변 전체가 실패하지 않게, 조회 실패는 대체 설명으로, 기록 실패는 무시한다.
       let spent = 0;
       try {
         spent = usage?.spentLast24h() ?? 0;
       } catch {
-        return fallback('AI 사용량을 확인하지 못해 관측 사실만 안내해요.');
+        return offline('AI 사용량을 확인하지 못해 자료 요약만 안내해요.');
       }
       if (spent >= config.claude.dailyBudgetUsd)
-        return fallback('최근 24시간 AI 사용 한도에 도달해 관측 사실만 안내해요.');
+        return offline('최근 24시간 AI 사용 한도에 도달해 자료 요약만 안내해요.');
       const record = (costUsd: number | undefined) => {
         try {
           usage?.record('claude', costUsd ?? 0);
@@ -394,25 +552,31 @@ export function createLiveChat(
           // 기록하지 못해도 이미 받은 답변은 보여 준다.
         }
       };
-      const system = observationContext(snapshot, action, await readUv(uvIndex), batches);
       const startedAt = Date.now();
-      // 화면이 취소하거나 경로 제한(45초) 전 남은 시간이 지나면 claude 도 멈춰 동시 실행 자리를 바로 돌려준다.
+      // 화면이 취소하거나 경로 제한 전 남은 시간이 지나면 claude 도 멈춰 동시 실행 자리를 바로 돌려준다.
       const claudeSignal = aiSignal(config.claude.timeoutMs);
+      toolServer ??= createToolServer();
+      let session: ToolSession | undefined;
       try {
+        session = await toolServer.open(tools, claudeSignal, config.claude.timeoutMs + 5000);
         const { text, costUsd } = await ask({
-          system,
+          system: toolSystemPrompt(runtime),
           history: request.history,
           message: request.message,
           signal: claudeSignal,
+          tools: { url: session.url, token: session.token },
         });
         record(costUsd);
         signal.throwIfAborted();
-        if (!text || text.length > 4000)
-          return fallback('AI 답변 형식을 확인할 수 없어 관측 사실만 안내해요.');
-        if (contradictsAssessment(text, snapshot.assessment?.grade))
-          return fallback(mismatchNotice(snapshot));
-        // Structured observation evidence is never generated or changed by the model.
-        return { ...base, content: text, provider: 'claude' };
+        const calls = [...session.calls];
+        const used = new Set(calls.filter((call) => call.ok).map((call) => call.name));
+        return await finish(
+          text,
+          'claude',
+          used,
+          calls,
+          calls.map((call) => (call.ok ? call.result : call.error)),
+        );
       } catch (error) {
         const failure = error instanceof ClaudeCliError ? error : undefined;
         // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)는 그 값을 센다. 시간 초과·취소는 비용을 알 수
@@ -424,18 +588,38 @@ export function createLiveChat(
           failure?.costUsd ?? (unknownCost ? config.claude.maxBudgetUsd * elapsed : undefined),
         );
         signal.throwIfAborted();
-        if (claudeSignal.aborted) return fallback('AI 응답이 늦어 관측 사실만 안내해요.');
+        if (claudeSignal.aborted) return offline('AI 응답이 늦어 자료 요약만 안내해요.');
         // 화면에는 종류별 안내만 가므로 원인은 서버 로그에 남긴다. 사용자 메시지는 남기지 않지만, 원인 글에
         // 모델 출력이 섞일 수 있어 앞 200자만 남긴다.
         console.error(
           `[chat] claude ${failure?.kind ?? 'failed'}: ${(error as Error).message.slice(0, 200)}`,
         );
-        return fallback(claudeNotice(error));
+        return offline(claudeNotice(error));
+      } finally {
+        session?.close();
       }
     }
-    if (!config.openaiApiKey) return fallback('AI 키가 서버에 설정되지 않아 관측 사실만 안내해요.');
+    if (!config.openaiApiKey) return offline('AI 키가 서버에 설정되지 않아 자료 요약만 안내해요.');
     try {
-      const system = observationContext(snapshot, action, await readUv(uvIndex), batches);
+      // 도구가 없는 제공자에는 지금 관측·덕장·배치·예보를 미리 담아 준다. 과거 기간 분석은 하지 않는다.
+      const prepared: Record<string, unknown> = {};
+      for (const [key, name] of [
+        ['current', TOOL_NAMES.current],
+        ['site', TOOL_NAMES.site],
+        ['batches', TOOL_NAMES.batches],
+        ['forecast', TOOL_NAMES.forecast],
+      ] as const) {
+        const tool = tools.find((item) => item.name === name)!;
+        prepared[key] = await tool.run({}, signal).catch(() => null);
+      }
+      // 미리 담은 자료는 질문과 상관없이 모두 들어 있으므로, 카드는 질문 종류로 고른다.
+      const shownCards = cards.filter(
+        (card) =>
+          (card.kind === 'current' &&
+            (ASKS_CONDITIONS.test(request.message) || action === 'start-batch')) ||
+          (card.kind === 'batches' && ASKS_BATCHES.test(request.message)),
+      );
+      cards.splice(0, cards.length, ...shownCards);
       const response = await fetcher(`${config.llmBaseUrl.replace(/\/+$/, '')}/chat/completions`, {
         method: 'POST',
         redirect: 'error',
@@ -449,7 +633,7 @@ export function createLiveChat(
           stream: false,
           max_tokens: 600,
           messages: [
-            { role: 'system', content: system },
+            { role: 'system', content: contextSystemPrompt(runtime, prepared) },
             ...request.history,
             { role: 'user', content: request.message },
           ],
@@ -457,23 +641,33 @@ export function createLiveChat(
       });
       signal.throwIfAborted();
       if (!response.ok) {
-        return fallback(
+        return offline(
           response.status === 401 || response.status === 403
-            ? 'AI 인증에 실패해 관측 사실만 안내해요.'
+            ? 'AI 인증에 실패해 자료 요약만 안내해요.'
             : response.status === 429
-              ? 'AI 요청 한도에 도달해 관측 사실만 안내해요.'
-              : 'AI 응답을 받지 못해 관측 사실만 안내해요.',
+              ? 'AI 요청 한도에 도달해 자료 요약만 안내해요.'
+              : 'AI 응답을 받지 못해 자료 요약만 안내해요.',
         );
       }
       const text = readCompletionText(await response.json());
       signal.throwIfAborted();
-      if (contradictsAssessment(text, snapshot.assessment?.grade))
-        return fallback(mismatchNotice(snapshot));
-      // Structured observation evidence is never generated or changed by the model.
-      return { ...base, content: text, provider: llmProviderName(config) };
+      const used = new Set<string>([
+        TOOL_NAMES.current,
+        TOOL_NAMES.site,
+        TOOL_NAMES.batches,
+        TOOL_NAMES.forecast,
+      ]);
+      const calls: ToolCall[] = Object.entries(prepared).map(([key, result]) => ({
+        name: key,
+        input: {},
+        ok: result !== null,
+        result,
+        ms: 0,
+      }));
+      return await finish(text, llmProviderName(config), used, calls, Object.values(prepared));
     } catch {
       signal.throwIfAborted();
-      return fallback('AI 연결 또는 응답 확인에 실패해 관측 사실만 안내해요.');
+      return offline('AI 연결 또는 응답 확인에 실패해 자료 요약만 안내해요.');
     }
   };
 }
