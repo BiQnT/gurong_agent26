@@ -17,9 +17,13 @@
   flex-shrink: 0;
   color: #525252;
 }
-.site-switcher.is-switchable:hover {
+.site-switcher.is-switchable:not(:has(select:disabled)):hover {
   border-color: #a3a3a3;
   background: #fafafa;
+}
+/* 저장 중에는 바꿀 수 없다는 것이 보이게 흐리게 한다. */
+.site-switcher:has(select:disabled) {
+  opacity: 0.6;
 }
 .site-switcher:focus-within {
   outline: 2px solid #737373;
@@ -40,7 +44,7 @@
 }
 .site-switcher-text small {
   color: #525252;
-  font-size: 12px;
+  font-size: 13px;
 }
 .site-switcher-text strong {
   font-size: 15px;

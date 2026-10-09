@@ -50,7 +50,8 @@ export function SiteSwitcher({
         <>
           <ChevronDown className="site-switcher-chevron" size={17} aria-hidden="true" />
           <select
-            aria-label={vi ? 'Đổi nơi làm việc' : '덕장 바꾸기'}
+            // 화면에 보이는 덕장 이름·역할이 읽는 이름에도 들어가게 한다.
+            aria-label={`${vi ? 'Đổi nơi làm việc' : '덕장 바꾸기'}: ${site.name} · ${roles[site.role]}`}
             value={site.id}
             disabled={disabled}
             onChange={(event) => onSelect(event.target.value)}
