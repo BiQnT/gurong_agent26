@@ -276,8 +276,9 @@
 }
 .op-step-number {
   font-size: 12px;
-  width: 15px;
-  height: 15px;
+  line-height: 1;
+  width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
