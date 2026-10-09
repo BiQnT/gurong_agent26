@@ -168,6 +168,14 @@ if ! grep -q '^DEV_BASIC_AUTH=.' "$ENV_FILE"; then
   echo "DEV_BASIC_AUTH=haepung:$password" >> "$ENV_FILE"
   echo 'dev 접속 암호(DEV_BASIC_AUTH)를 만들었다.'
 fi
+# 초대 링크 다시 복사용 비밀값 (ADR 0012). dev·prod 가 같이 쓴다. 비어 있을 때만 만들고 화면에 찍지 않는다.
+if ! grep -q '^INVITE_LINK_SECRET=.' "$ENV_FILE"; then
+  secret=$(openssl rand -base64 32)
+  sed -i '/^INVITE_LINK_SECRET=/d' "$ENV_FILE"
+  [[ -z "$(tail -c1 "$ENV_FILE")" ]] || echo >> "$ENV_FILE"
+  echo "INVITE_LINK_SECRET=$secret" >> "$ENV_FILE"
+  echo '초대 링크 비밀값(INVITE_LINK_SECRET)을 만들었다.'
+fi
 chown "root:$APP_USER" "$ENV_FILE"
 chmod 0640 "$ENV_FILE"
 
