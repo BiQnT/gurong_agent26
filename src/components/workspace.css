@@ -693,19 +693,24 @@
 }
 .ws-map-wheel-hint {
   position: absolute;
-  bottom: 10px;
+  /* 오른쪽 아래 지도 출처 줄을 가리지 않게 그 위에 둔다. */
+  bottom: 26px;
   left: 10px;
   z-index: 450;
   display: flex;
   align-items: center;
   gap: 6px;
+  max-width: calc(100% - 20px);
   padding: 7px 11px;
   color: #ffffff;
   background: #262626d9;
   border-radius: 8px;
   font-size: 12px;
-  white-space: nowrap;
+  line-height: 1.5;
   pointer-events: none;
+}
+.ws-map-wheel-hint > svg {
+  flex-shrink: 0;
 }
 /* 휠이 없는 터치 화면은 두 손가락으로 확대하므로 안내를 숨긴다. */
 @media (hover: none) {

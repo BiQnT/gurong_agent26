@@ -34,9 +34,13 @@ export function LocationPicker({
   const [locating, setLocating] = useState(false);
   const [wheelZoom, setWheelZoom] = useState(false);
   const locatingRef = useRef(false);
+  const pinned = useRef(value !== null);
+  // 휠 확대를 켜려고 누른 것인지. 그 누름의 click 은 핀을 옮기지 않는다.
+  const activating = useRef(false);
   const id = useId();
   callback.current = onChange;
   locked.current = disabled;
+  pinned.current = value !== null;
 
   useEffect(() => {
     mounted.current = true;
@@ -68,6 +72,10 @@ export function LocationPicker({
     });
     instance.on('click', (event: L.LeafletMouseEvent) => {
       if (locked.current) return;
+      if (activating.current) {
+        activating.current = false;
+        return;
+      }
       const location = event.latlng.wrap();
       callback.current({
         latitude: Number(location.lat.toFixed(6)),
@@ -86,10 +94,17 @@ export function LocationPicker({
       instance.scrollWheelZoom.disable();
       if (mounted.current) setWheelZoom(false);
     };
+    // 핀이 이미 있으면 휠 확대를 켜는 첫 마우스 누름으로는 핀을 옮기지 않는다 (확인 표시와 주소가 그대로다).
+    // 새 덕장의 첫 핀은 한 번에 놓인다. 터치는 두 손가락으로 확대하므로 막지 않는다.
+    const press = (event: PointerEvent) => {
+      activating.current =
+        event.pointerType === 'mouse' && !instance.scrollWheelZoom.enabled() && pinned.current;
+      enableWheel();
+    };
     const leaveFocus = (event: FocusEvent) => {
       if (!element.contains(event.relatedTarget as Node | null)) disableWheel();
     };
-    element.addEventListener('pointerdown', enableWheel);
+    element.addEventListener('pointerdown', press);
     element.addEventListener('focusin', enableWheel);
     element.addEventListener('mouseleave', disableWheel);
     element.addEventListener('focusout', leaveFocus);
@@ -97,7 +112,7 @@ export function LocationPicker({
     observer.observe(element);
     return () => {
       mounted.current = false;
-      element.removeEventListener('pointerdown', enableWheel);
+      element.removeEventListener('pointerdown', press);
       element.removeEventListener('focusin', enableWheel);
       element.removeEventListener('mouseleave', disableWheel);
       element.removeEventListener('focusout', leaveFocus);
@@ -234,7 +249,9 @@ export function LocationPicker({
         {!wheelZoom && (
           <div className="ws-map-wheel-hint" aria-hidden="true">
             <MousePointerClick size={14} />
-            지도를 누르면 스크롤로 확대할 수 있어요
+            {value
+              ? '지도를 한 번 누르면 스크롤로 확대할 수 있어요. 핀은 그다음에 누른 곳으로 옮겨져요.'
+              : '지도를 누르면 핀이 놓이고 스크롤로 확대할 수 있어요.'}
           </div>
         )}
       </div>
