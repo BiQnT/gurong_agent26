@@ -31,7 +31,7 @@ const device = {
 const now = Date.parse('2026-10-03T12:00:00+09:00');
 const signal = () => new AbortController().signal;
 
-test('E-UM keys decode percent escapes once while preserving literal plus signs and other settings', () => {
+test('E-UM keys decode percent escapes once while preserving literal plus signs and other settings', (t) => {
   for (const [input, expected] of [
     ['  dummy+/key==  ', 'dummy+/key=='],
     ['  dummy%2B%2Fkey%3D%3D  ', 'dummy+/key=='],
@@ -70,6 +70,7 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
       databasePath: undefined,
       publicOrigins: [],
       cookieSecure: false,
+      inviteLinkSecret: undefined,
       devBasicAuth: undefined,
       devOpen: false,
       kmaAuthKey: undefined,
@@ -83,6 +84,20 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
     });
   }
   assert.equal(readBridgeConfig({}, '/test/project').eumServiceKey, '');
+  const secret = 'test-only-invite-link-secret-0123456789';
+  assert.equal(
+    readBridgeConfig({ INVITE_LINK_SECRET: `  ${secret}  ` }, '/test/project').inviteLinkSecret,
+    secret,
+  );
+  // 32자보다 짧은 비밀값은 쓰지 않고, 값을 빼고 한 번 알린다.
+  const warn = t.mock.method(console, 'warn', () => undefined);
+  const short = 'short-test-only-secret';
+  assert.equal(
+    readBridgeConfig({ INVITE_LINK_SECRET: short }, '/test/project').inviteLinkSecret,
+    undefined,
+  );
+  assert.equal(warn.mock.callCount(), 1);
+  assert.ok(!String(warn.mock.calls[0].arguments[0]).includes(short));
 });
 
 test('raw and encoded E-UM keys reach each upstream route with one query encoding pass', async () => {

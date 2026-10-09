@@ -1,7 +1,14 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Check, Eye, EyeOff, Globe2, LockKeyhole, MapPin, Wind } from 'lucide-react';
-import { workspaceApi, type InvitePreview, type WorkspaceSession } from '../../lib/workspace';
+import {
+  isStrongPassword,
+  PASSWORD_RULE,
+  workspaceApi,
+  WorkspaceError,
+  type InvitePreview,
+  type WorkspaceSession,
+} from '../../lib/workspace';
 import { BrandMark } from '../BrandMark';
 import { BusyIcon, errorMessage, FormError } from './shared';
 
@@ -28,6 +35,13 @@ export function AuthScreen({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting.current) return;
+    // 서버도 같은 규칙으로 거절하지만, 보내기 전에 무엇을 고칠지 바로 알려 준다.
+    if (mode === 'signup' && !isStrongPassword(password)) {
+      setError(
+        errorMessage(new WorkspaceError(PASSWORD_RULE, 400, 'WEAK_PASSWORD'), invite?.language),
+      );
+      return;
+    }
     submitting.current = true;
     setBusy(true);
     setError(null);
@@ -203,7 +217,7 @@ export function AuthScreen({
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder={
                         mode === 'signup'
-                          ? t('8자 이상 입력해 주세요', 'Ít nhất 8 ký tự')
+                          ? t('8자 이상, 문자와 숫자 포함', 'Ít nhất 8 ký tự, có chữ và số')
                           : t('비밀번호를 입력해 주세요', 'Nhập mật khẩu')
                       }
                       autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
@@ -230,8 +244,8 @@ export function AuthScreen({
                   {mode === 'signup' && (
                     <small id={`${id}-password-help`}>
                       {t(
-                        '다른 서비스에서 쓰지 않는 비밀번호를 사용해 주세요.',
-                        'Hãy dùng mật khẩu riêng cho tài khoản này.',
+                        '8~128자, 문자와 숫자를 함께 넣어 주세요. 다른 서비스에서 쓰지 않는 비밀번호가 안전해요.',
+                        'Từ 8 đến 128 ký tự, gồm cả chữ cái và chữ số. Hãy dùng mật khẩu riêng cho tài khoản này.',
                       )}
                     </small>
                   )}

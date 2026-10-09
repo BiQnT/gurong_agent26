@@ -17,6 +17,8 @@ import { readdirSync } from 'node:fs';
 import { posix, relative, resolve, sep } from 'node:path';
 
 const MAX_BODY_BYTES = 32768;
+// 초대 링크 비밀값의 최소 길이. 짧으면 추측해 초대 토큰을 만들 수 있다 (ADR 0012).
+const INVITE_SECRET_MIN_LENGTH = 32;
 const API_PATHS = new Set([
   '/api/health',
   '/api/observations',
@@ -50,6 +52,12 @@ function positive(env: Record<string, string>, name: string, fallback: number): 
 export function readBridgeConfig(env: Record<string, string>, projectRoot: string): BridgeConfig {
   const offset = env.EUM_TIMEZONE_OFFSET?.trim() || '+09:00';
   const age = Number(env.EUM_STALE_AFTER_MINUTES || 30);
+  const inviteSecret = env.INVITE_LINK_SECRET?.trim() || '';
+  // 짧은 비밀값은 없는 것으로 본다. 값은 로그에 남기지 않는다.
+  if (inviteSecret && inviteSecret.length < INVITE_SECRET_MIN_LENGTH)
+    console.warn(
+      `[config] INVITE_LINK_SECRET 이 ${INVITE_SECRET_MIN_LENGTH}자보다 짧아 쓰지 않는다. 초대 링크는 만들 때 한 번만 보인다.`,
+    );
   // workspace.ts 는 요청마다 process.env 를 읽으므로 .env 파일에서 온 값도 옮겨 둔다 (터널 주소와 같은 방식).
   for (const name of ['PUBLIC_ORIGINS', 'COOKIE_SECURE'])
     if (env[name] !== undefined && process.env[name] === undefined) process.env[name] = env[name];
@@ -76,6 +84,7 @@ export function readBridgeConfig(env: Record<string, string>, projectRoot: strin
       .map((origin) => origin.trim().replace(/\/+$/, ''))
       .filter(Boolean),
     cookieSecure: env.COOKIE_SECURE?.trim() === '1',
+    inviteLinkSecret: inviteSecret.length >= INVITE_SECRET_MIN_LENGTH ? inviteSecret : undefined,
     devBasicAuth: env.DEV_BASIC_AUTH?.trim() || undefined,
     devOpen: env.DEV_OPEN?.trim() === '1',
     kmaAuthKey: env.KMA_AUTH_KEY?.trim() || undefined,

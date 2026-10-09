@@ -14,7 +14,7 @@
   max-width: 1120px;
   margin: 0 auto;
   padding: 44px 48px 48px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
 }
 .op-page button,
@@ -53,7 +53,7 @@
   margin-bottom: 32px;
 }
 .op-eyebrow {
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.025em;
   color: #525252;
   margin-bottom: 7px;
@@ -68,7 +68,7 @@
 .op-page-heading p {
   margin: 0;
   color: var(--op-muted);
-  font-size: 14px;
+  font-size: 16px;
 }
 .op-button {
   display: inline-flex;
@@ -78,7 +78,7 @@
   flex-shrink: 0;
   min-height: 41px;
   padding: 10px 16px;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.4;
   font-weight: 550;
   border-radius: 9px;
@@ -121,7 +121,7 @@
 }
 .op-button--small {
   min-height: 32px;
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 10px;
   border-radius: 7px;
 }
@@ -134,7 +134,7 @@
   background: none;
   padding: 7px 0;
   color: #525252;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -196,7 +196,7 @@
   flex-wrap: wrap;
 }
 .op-title-row h2 {
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: -0.45px;
   font-weight: 650;
   line-height: 1.4;
@@ -205,7 +205,7 @@
 .op-batch-title p {
   margin: 5px 0 0;
   color: #525252;
-  font-size: 12px;
+  font-size: 14px;
 }
 .op-batch-title p > span {
   margin: 0 5px;
@@ -218,7 +218,7 @@
   gap: 6px;
   padding: 3px 8px;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.55;
   font-weight: 550;
   white-space: nowrap;
@@ -258,7 +258,7 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
 }
 .op-progress-rail > i {
@@ -275,9 +275,10 @@
   font-weight: 650;
 }
 .op-step-number {
-  font-size: 10px;
-  width: 15px;
-  height: 15px;
+  font-size: 12px;
+  line-height: 1;
+  width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -301,7 +302,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 14px;
   color: #525252;
   line-height: 1.4;
   margin-bottom: 7px;
@@ -320,7 +321,7 @@
 }
 .op-metric > strong > small {
   font-weight: 400;
-  font-size: 15px;
+  font-size: 17px;
   letter-spacing: -0.3px;
   margin-left: 4px;
   color: #666666;
@@ -328,7 +329,7 @@
 .op-metric-range {
   display: block;
   color: #666666;
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 5px;
   white-space: nowrap;
 }
@@ -343,7 +344,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-chart-caption > span:first-child {
@@ -373,7 +374,7 @@
 .op-chart-axis {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-chart-empty {
@@ -383,7 +384,7 @@
   gap: 8px;
   min-height: 125px;
   color: #666666;
-  font-size: 12px;
+  font-size: 14px;
 }
 .op-active-footer {
   display: flex;
@@ -398,7 +399,7 @@
   align-items: center;
   gap: 16px;
   color: #525252;
-  font-size: 11px;
+  font-size: 13px;
   flex-wrap: wrap;
 }
 .op-active-footer > div > span {
@@ -418,13 +419,13 @@
   margin: 0 auto 12px;
 }
 .op-batch-empty h2 {
-  font-size: 18px;
+  font-size: 19px;
   color: #404040;
   font-weight: 550;
   margin: 8px 0;
 }
 .op-batch-empty p {
-  font-size: 13px;
+  font-size: 15px;
   margin: 0 0 18px;
 }
 .op-records {
@@ -438,23 +439,23 @@
   margin-bottom: 15px;
 }
 .op-section-heading h2 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.2px;
   margin: 0;
 }
 .op-section-heading h2 > span {
-  font-size: 12px;
+  font-size: 14px;
   color: #666666;
   margin-left: 6px;
   font-weight: 400;
 }
 .op-section-heading > span {
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
 }
 .op-subtle-label {
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
   display: inline-flex;
   align-items: center;
@@ -471,14 +472,14 @@
   border-radius: 7px;
   background: none;
   color: #666666;
-  font-size: 11px;
+  font-size: 13px;
   padding: 6px 11px;
   display: flex;
   gap: 5px;
   align-items: center;
 }
 .op-filter-row button span {
-  font-size: 10px;
+  font-size: 12px;
   opacity: 0.8;
 }
 .op-filter-row button:hover {
@@ -538,7 +539,7 @@
 }
 .op-record-name strong {
   color: #404040;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -546,7 +547,7 @@
 }
 .op-record-name > span {
   color: #666666;
-  font-size: 10px;
+  font-size: 12px;
 }
 .op-record-name > span > span {
   margin: 0 4px;
@@ -554,7 +555,7 @@
 }
 .op-row-count {
   color: #666666;
-  font-size: 10px;
+  font-size: 12px;
   margin-right: 20px;
 }
 .op-row-chevron {
@@ -568,7 +569,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   gap: 4px;
 }
 .op-empty-filter p {
@@ -583,7 +584,7 @@
   justify-content: center;
   gap: 9px;
   color: #666666;
-  font-size: 11px;
+  font-size: 13px;
   margin-top: 26px;
   padding: 11px;
   line-height: 1.55;
@@ -598,7 +599,7 @@
   margin-left: 3px;
 }
 .op-demo-footnote {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
   line-height: 1.7;
   margin: 18px 0 0;
@@ -643,13 +644,13 @@
   flex: 1;
 }
 .op-approval-banner strong {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   color: #404040;
 }
 .op-approval-banner p {
   margin: 3px 0 0;
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
 }
 .op-guidance-layout {
@@ -685,7 +686,7 @@
   gap: 8px;
 }
 .op-guidance-item strong {
-  font-size: 12px;
+  font-size: 14px;
   color: #404040;
   font-weight: 550;
   flex: 1;
@@ -700,13 +701,13 @@
 .op-guidance-item p {
   margin: 9px 0 11px;
   color: #666666;
-  font-size: 10px;
+  font-size: 12px;
 }
 .op-guidance-item p > span {
   margin: 0 3px;
 }
 .op-guidance-status {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
   display: inline-flex;
   align-items: center;
@@ -728,7 +729,7 @@
   margin-bottom: 12px;
 }
 .op-original-card > .op-section-heading h2 {
-  font-size: 12px;
+  font-size: 14px;
   color: #525252;
 }
 .op-approved-label {
@@ -739,7 +740,7 @@
   font-size: 10px !important;
 }
 .op-original-card > p {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.9;
   color: #404040;
   margin: 0 0 18px;
@@ -749,7 +750,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
   padding-top: 12px;
   border-top: 1px solid #ededed;
@@ -775,7 +776,7 @@
   color: #525252;
 }
 .op-worker-heading strong {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 550;
 }
 .op-demo-pill {
@@ -786,7 +787,7 @@
   color: #666666;
   background: #fafafa;
   padding: 2px 6px;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
   font-weight: 400;
   white-space: nowrap;
@@ -808,7 +809,7 @@
   background: #f5f5f5;
   border: 1px solid #e5e5e5;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: #666666;
 }
@@ -819,12 +820,12 @@
   flex: 1;
 }
 .op-worker-language strong {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 550;
   color: #404040;
 }
 .op-worker-language > div > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-worker-language > svg {
@@ -832,7 +833,7 @@
   stroke-width: 1.5;
 }
 .op-translation {
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.85;
   letter-spacing: -0.15px;
   color: #404040;
@@ -854,11 +855,11 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-facts-heading > strong {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 550;
   color: #525252;
   background: #f5f5f5;
@@ -874,7 +875,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 15px;
   color: #525252;
 }
 .op-facts-values svg {
@@ -882,7 +883,7 @@
   stroke-width: 1.5;
 }
 .op-facts-source {
-  font-size: 9px;
+  font-size: 11px;
   color: #666666;
   display: flex;
   flex-wrap: wrap;
@@ -898,7 +899,7 @@
 .op-worker-actions > .op-button {
   flex-wrap: wrap;
   gap: 4px 6px;
-  font-size: 12px;
+  font-size: 14px;
   padding: 9px 8px;
 }
 .op-worker-actions .op-button--white {
@@ -911,7 +912,7 @@
 .op-worker-actions small {
   display: block;
   width: 100%;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 400;
   opacity: 0.6;
 }
@@ -932,7 +933,7 @@
   outline: 0;
   background: none;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 13px;
   color: #404040;
   padding: 9px 0;
 }
@@ -951,7 +952,7 @@
   color: #666666;
 }
 .op-worker-hint {
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.7;
   color: #666666;
   text-align: center;
@@ -964,7 +965,7 @@
   margin-bottom: 11px;
 }
 .op-response-log h2 {
-  font-size: 12px;
+  font-size: 14px;
 }
 .op-replies {
   border-radius: 11px;
@@ -994,19 +995,19 @@
   min-width: 0;
 }
 .op-reply strong {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 550;
   color: #525252;
 }
 .op-reply p {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
   color: #666666;
   margin: 3px 0 0;
   overflow-wrap: anywhere;
 }
 .op-reply time {
-  font-size: 9px;
+  font-size: 11px;
   color: #666666;
   margin-top: 2px;
 }
@@ -1019,7 +1020,7 @@
   padding: 23px;
   border: 1px dashed #e5e5e5;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .op-no-replies p {
   margin: 0;
@@ -1047,7 +1048,7 @@
   font-family: inherit;
   scrollbar-width: thin;
   scrollbar-color: #ededed transparent;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.55;
 }
 .op-modal--wide {
@@ -1069,7 +1070,7 @@
   color: #262626;
 }
 .op-modal-heading p {
-  font-size: 12px;
+  font-size: 14px;
   color: #666666;
   line-height: 1.7;
   margin: 7px 0 0;
@@ -1081,7 +1082,7 @@
 .op-form-row > label {
   display: flex;
   flex-direction: column;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   color: #525252;
   gap: 7px;
@@ -1103,7 +1104,7 @@
   border-radius: 8px;
   padding: 11px 12px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   color: #404040;
   font-weight: 400;
@@ -1112,7 +1113,7 @@
 .op-form input::placeholder,
 .op-form textarea::placeholder {
   color: #666666;
-  font-size: 12px;
+  font-size: 14px;
 }
 .op-form textarea {
   resize: vertical;
@@ -1133,7 +1134,7 @@
   position: absolute;
   right: 13px;
   top: 13px;
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
   font-weight: 400;
 }
@@ -1145,7 +1146,7 @@
 }
 .op-optional {
   display: inline;
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
   font-weight: 400;
   margin-left: 3px;
@@ -1168,11 +1169,11 @@
 .op-form-info p {
   margin: 0;
   color: #666666;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.85;
 }
 .op-form-info p > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-modal-actions {
@@ -1183,7 +1184,7 @@
   margin-top: 23px;
 }
 .op-modal-actions > .op-button {
-  font-size: 12px;
+  font-size: 14px;
   min-height: 40px;
 }
 .op-confirm-batch {
@@ -1210,12 +1211,12 @@
   gap: 4px;
 }
 .op-confirm-batch strong {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   color: #404040;
 }
 .op-confirm-batch > div > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-confirm-batch > div > span > span {
@@ -1229,18 +1230,18 @@
   margin: 0 0 14px;
 }
 .op-draft > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-draft p {
-  font-size: 13px;
+  font-size: 15px;
   color: #525252;
   line-height: 1.9;
   margin: 6px 0 0;
   word-break: keep-all;
 }
 .op-form-caption {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
   line-height: 1.8;
   margin: 13px 0 0;
@@ -1253,7 +1254,7 @@
 }
 .op-report-toolbar > .op-text-button {
   margin-left: auto;
-  font-size: 11px;
+  font-size: 13px;
 }
 .op-report-tabs {
   display: flex;
@@ -1267,7 +1268,7 @@
   padding: 13px 0;
   background: none;
   color: #666666;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1297,7 +1298,7 @@
   font-size: 28px;
 }
 .op-report-content .op-metric-range {
-  font-size: 9px;
+  font-size: 11px;
 }
 .op-report-stats {
   display: grid;
@@ -1317,17 +1318,17 @@
   border-left: 1px solid #e5e5e5;
 }
 .op-report-stats > div > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-report-stats strong {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 500;
   color: #525252;
   line-height: 1.3;
 }
 .op-report-stats small {
-  font-size: 9px;
+  font-size: 11px;
   color: #666666;
   line-height: 1.6;
 }
@@ -1336,11 +1337,11 @@
   padding: 15px 0 0;
 }
 .op-report-note > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-report-note p {
-  font-size: 12px;
+  font-size: 14px;
   color: #525252;
   line-height: 1.75;
   margin: 5px 0 0;
@@ -1362,10 +1363,10 @@
   gap: 8px;
   align-items: center;
   color: #666666;
-  font-size: 11px;
+  font-size: 13px;
 }
 .op-sample-controls .op-text-button {
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
 }
 .op-report-actions {
@@ -1376,7 +1377,7 @@
 .op-danger-text {
   margin-right: auto;
   color: #666666 !important;
-  font-size: 11px;
+  font-size: 13px;
 }
 .op-observations-table {
   overflow: auto;
@@ -1390,11 +1391,11 @@
   border-collapse: collapse;
   text-align: left;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 13px;
 }
 .op-observations-table th {
   font-weight: 500;
-  font-size: 10px;
+  font-size: 12px;
   color: #666666;
   padding: 11px 10px;
   border-bottom: 1px solid #e5e5e5;
@@ -1415,14 +1416,14 @@
 .op-missing-tag {
   background: #fff6df;
   color: #8a5a00;
-  font-size: 9px;
+  font-size: 11px;
   border-radius: 4px;
   padding: 3px 6px;
 }
 .op-valid-tag {
   background: #f5f5f5;
   color: #666666;
-  font-size: 9px;
+  font-size: 11px;
   border-radius: 4px;
   padding: 3px 6px;
 }
@@ -1475,26 +1476,26 @@
   padding-top: 2px;
 }
 .op-timeline strong {
-  font-size: 12px;
+  font-size: 14px;
   color: #525252;
   font-weight: 500;
 }
 .op-timeline p {
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
   line-height: 1.6;
   margin: 4px 0 5px;
   overflow-wrap: anywhere;
 }
 .op-timeline time {
-  font-size: 9px;
+  font-size: 11px;
   color: #666666;
 }
 .op-cancel-body {
   padding: 0 27px 24px;
 }
 .op-cancel-body > p {
-  font-size: 12px;
+  font-size: 14px;
   color: #666666;
   margin: 0;
   line-height: 1.9;
@@ -1518,7 +1519,7 @@
   background: #fafafa;
   border-radius: 11px;
   box-shadow: 0 8px 32px #00000017;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
   color: #525252;
 }
@@ -1554,7 +1555,7 @@
   text-align: center;
   background: #fff6df;
   color: #8a5a00;
-  font-size: 11px;
+  font-size: 13px;
   padding: 8px 16px;
 }
 .op-sr-only {
@@ -1656,7 +1657,7 @@
     display: none;
   }
   .op-metric-range {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-metric + .op-metric {
     padding-left: 17px;
@@ -1718,7 +1719,7 @@
     padding: 23px;
   }
   .op-guidance-page .op-demo-footnote {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-approval-banner {
     margin-bottom: 20px;
@@ -1733,14 +1734,14 @@
     gap: 10px;
   }
   .op-eyebrow {
-    font-size: 10px;
+    font-size: 12px;
     margin-bottom: 6px;
   }
   .op-page-heading h1 {
     font-size: 25px;
   }
   .op-page-heading p {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.6;
     max-width: 190px;
   }
@@ -1748,7 +1749,7 @@
     margin-top: 23px;
     min-height: 36px;
     padding: 8px 10px;
-    font-size: 11px;
+    font-size: 13px;
     gap: 5px;
   }
   .op-page-heading > .op-button svg {
@@ -1770,10 +1771,10 @@
     gap: 7px;
   }
   .op-title-row h2 {
-    font-size: 15px;
+    font-size: 17px;
   }
   .op-batch-title p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .op-active-heading > .op-text-button {
     font-size: 0;
@@ -1789,7 +1790,7 @@
     margin: 22px 0 19px;
   }
   .op-progress-rail > span {
-    font-size: 10px;
+    font-size: 12px;
     gap: 4px;
   }
   .op-progress-rail > i {
@@ -1808,11 +1809,11 @@
     font-size: 27px;
   }
   .op-metric > strong > small {
-    font-size: 12px;
+    font-size: 14px;
     margin-left: 3px;
   }
   .op-metric-label {
-    font-size: 10px;
+    font-size: 12px;
     gap: 3px;
     margin-bottom: 7px;
   }
@@ -1821,7 +1822,7 @@
     height: 12px;
   }
   .op-metric-range {
-    font-size: 8px;
+    font-size: 10px;
     line-height: 1.8;
     white-space: normal;
     max-width: 90px;
@@ -1833,10 +1834,10 @@
     margin-top: 18px;
   }
   .op-chart-caption {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-chart-axis {
-    font-size: 8px;
+    font-size: 10px;
   }
   .op-active-footer {
     flex-wrap: wrap;
@@ -1844,7 +1845,7 @@
     padding: 15px 0;
   }
   .op-active-footer > div {
-    font-size: 9px;
+    font-size: 11px;
     width: 100%;
     justify-content: space-between;
     gap: 8px;
@@ -1852,22 +1853,22 @@
   .op-active-footer > .op-button {
     width: 100%;
     min-height: 37px;
-    font-size: 12px;
+    font-size: 14px;
   }
   .op-records {
     margin-top: 27px;
   }
   .op-section-heading h2 {
-    font-size: 13px;
+    font-size: 15px;
   }
   .op-section-heading > .op-subtle-label {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-filter-row {
     gap: 3px;
   }
   .op-filter-row button {
-    font-size: 10px;
+    font-size: 12px;
     padding: 5px 9px;
   }
   .op-batch-row {
@@ -1882,13 +1883,13 @@
     width: 17px;
   }
   .op-record-name strong {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-record-name > span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-status {
-    font-size: 9px;
+    font-size: 11px;
     padding: 3px 6px;
   }
   .op-row-count {
@@ -1899,7 +1900,7 @@
     width: 13px;
   }
   .op-question-link {
-    font-size: 10px;
+    font-size: 12px;
     padding-left: 0;
     padding-right: 0;
     gap: 6px;
@@ -1914,7 +1915,7 @@
     flex-shrink: 0;
   }
   .op-demo-footnote {
-    font-size: 9px;
+    font-size: 11px;
     margin-top: 12px;
   }
   .op-approval-banner {
@@ -1927,10 +1928,10 @@
     height: 34px;
   }
   .op-approval-banner strong {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-approval-banner p {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.7;
   }
   .op-guidance-sidebar {
@@ -1944,10 +1945,10 @@
     padding: 17px 17px 14px;
   }
   .op-original-card > p {
-    font-size: 12px;
+    font-size: 14px;
   }
   .op-original-footer {
-    font-size: 9px;
+    font-size: 11px;
     flex-wrap: wrap;
     gap: 4px;
   }
@@ -1958,40 +1959,40 @@
     padding: 11px 15px;
   }
   .op-translation {
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 17px;
   }
   .op-facts {
     padding: 12px;
   }
   .op-facts-heading > span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-facts-values {
     gap: 17px;
   }
   .op-facts-values > span {
-    font-size: 12px;
+    font-size: 14px;
   }
   .op-facts-source {
-    font-size: 8px;
+    font-size: 10px;
     gap: 4px;
   }
   .op-worker-actions > .op-button {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-response-log > .op-section-heading h2 {
-    font-size: 12px;
+    font-size: 14px;
   }
   .op-reply {
     padding: 13px 12px;
     gap: 8px;
   }
   .op-reply p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .op-reply time {
-    font-size: 8px;
+    font-size: 10px;
   }
   .op-modal-backdrop {
     padding: 12px;
@@ -2005,17 +2006,17 @@
     padding: 21px 20px 18px;
   }
   .op-modal-heading h2 {
-    font-size: 19px;
+    font-size: 20px;
   }
   .op-modal-heading p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-form {
     padding: 0 20px 20px;
   }
   .op-form > label,
   .op-form-row > label {
-    font-size: 11px;
+    font-size: 13px;
     margin-bottom: 15px;
   }
   .op-form-row {
@@ -2024,16 +2025,16 @@
   .op-form input,
   .op-form select,
   .op-form textarea {
-    font-size: 16px;
+    font-size: 17px;
     padding: 10px;
     line-height: 1.5;
   }
   .op-form select {
-    font-size: 13px;
+    font-size: 15px;
   }
   .op-form input::placeholder,
   .op-form textarea::placeholder {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-input-unit > span {
     top: 15px;
@@ -2043,37 +2044,37 @@
     gap: 8px;
   }
   .op-modal-actions > .op-button {
-    font-size: 11px;
+    font-size: 13px;
     padding: 10px 12px;
   }
   .op-draft {
     padding: 14px;
   }
   .op-draft p {
-    font-size: 12px;
+    font-size: 14px;
   }
   .op-confirm-batch {
     padding: 12px;
     gap: 8px;
   }
   .op-confirm-batch strong {
-    font-size: 12px;
+    font-size: 14px;
   }
   .op-confirm-batch > div > span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-report-toolbar {
     padding: 0 20px 14px;
   }
   .op-report-toolbar > .op-text-button {
-    font-size: 10px;
+    font-size: 12px;
   }
   .op-report-tabs {
     padding: 0 20px;
     gap: 21px;
   }
   .op-report-tabs > button {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-report-content {
     padding: 21px 19px 0;
@@ -2083,19 +2084,19 @@
     font-size: 26px;
   }
   .op-report-content .op-metric-range {
-    font-size: 8px;
+    font-size: 10px;
   }
   .op-report-stats > div {
     padding: 12px 10px;
   }
   .op-report-stats > div > span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .op-report-stats strong {
-    font-size: 17px;
+    font-size: 18px;
   }
   .op-report-stats small {
-    font-size: 8px;
+    font-size: 10px;
     min-height: 25px;
   }
   .op-sample-controls {
@@ -2111,7 +2112,7 @@
     margin-top: 20px;
   }
   .op-report-note p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-observations-table {
     max-height: 360px;
@@ -2119,11 +2120,11 @@
     margin-right: -5px;
   }
   .op-observations-table th {
-    font-size: 9px;
+    font-size: 11px;
     padding: 10px 7px;
   }
   .op-observations-table td {
-    font-size: 10px;
+    font-size: 12px;
     padding: 11px 7px;
   }
   .op-observations-table td strong {
@@ -2135,17 +2136,17 @@
     max-height: 350px;
   }
   .op-timeline strong {
-    font-size: 11px;
+    font-size: 13px;
   }
   .op-timeline p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .op-cancel-body {
     padding: 0 20px 20px;
   }
   .op-toast {
     bottom: 18px;
-    font-size: 11px;
+    font-size: 13px;
     padding: 11px 12px;
     gap: 8px;
     width: max-content;
@@ -2181,18 +2182,18 @@
   color: #8a554c;
   background: #fff8f6;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 .op-save-error span {
   display: block;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .op-inline-status {
   padding: 5px 26px 15px;
   color: #7d8591;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 .op-network-warning {
@@ -2213,12 +2214,12 @@
   padding: 5px 2px;
   color: inherit;
   font: inherit;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
 }
 .op-reply time {
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 12px;
 }
 @media (max-width: 540px) {
   .op-reply {
@@ -2239,7 +2240,7 @@
 }
 .op-answer-form > label {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: #657181;
   margin-bottom: 8px;
 }
@@ -2250,7 +2251,7 @@
   border-radius: 7px;
   padding: 10px 11px;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
   color: #465363;
   background: #fafbfc;
@@ -2271,12 +2272,12 @@
   margin-top: 8px;
 }
 .op-answer-form > div > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #8c97a5;
 }
 .op-reply .op-answer-error {
   color: #9a5b50;
-  font-size: 11px;
+  font-size: 13px;
   margin-top: 9px;
 }
 .op-question-answer {
@@ -2287,14 +2288,14 @@
   border-radius: 0 6px 6px 0;
 }
 .op-reply .op-question-answer strong {
-  font-size: 11px;
+  font-size: 13px;
   color: #627286;
 }
 .op-reply .op-question-answer time {
   display: block;
   margin-top: 7px;
   color: #98a2ae;
-  font-size: 10px;
+  font-size: 12px;
 }
 @media (max-width: 540px) {
   .op-answer-form > div {

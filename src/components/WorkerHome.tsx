@@ -20,6 +20,7 @@ import './worker.css';
 const copy = {
   ko: {
     home: '오늘의 작업',
+    role: '근로자',
     greeting: '님, 반가워요.',
     intro: '작업 안내를 확인하고 현장 소식을 알려주세요.',
     logout: '로그아웃',
@@ -68,6 +69,7 @@ const copy = {
   },
   vi: {
     home: 'Công việc hôm nay',
+    role: 'Nhân viên',
     greeting: ', chào bạn.',
     intro: 'Xem hướng dẫn và báo lại tình hình công việc.',
     logout: 'Đăng xuất',
@@ -420,6 +422,7 @@ export function WorkerHome({
           <Wind size={23} strokeWidth={1.6} />
           <strong>해풍</strong>
           <span>{site.name}</span>
+          <em className="worker-site-role">{label.role}</em>
         </a>
         <button
           className="worker-icon-button"

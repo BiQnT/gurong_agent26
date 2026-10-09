@@ -20,6 +20,8 @@ export type BridgeConfig = {
   publicOrigins?: string[];
   /** TLS 프록시(Caddy) 뒤에서 세션 쿠키에 Secure 를 붙인다. */
   cookieSecure?: boolean;
+  /** 초대 링크 다시 복사용 서버 비밀값 (INVITE_LINK_SECRET). 없으면 초대 링크는 만들 때 한 번만 보인다. */
+  inviteLinkSecret?: string;
   /** dev 서버 앞의 공용 암호 "아이디:비밀번호". 설정하면 dev(Vite) 의 모든 요청에 Basic 인증. */
   devBasicAuth?: string;
   /** 암호 없이 연 dev. 화면에 필요한 파일만 준다 (DEV_OPEN=1) */

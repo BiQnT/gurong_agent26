@@ -132,7 +132,9 @@ button:active:not(:disabled) {
     width 0.25s,
     transform 0.25s,
     padding 0.25s;
-  overflow: hidden;
+  /* 낮은 화면에서는 아래 덕장·계정 영역을 자르지 않고 사이드바 전체를 스크롤한다. */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .sidebar-brand {
   display: flex;
@@ -182,7 +184,7 @@ button:active:not(:disabled) {
   padding: 13px 14px;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   background: #fafafa;
   color: #404040;
@@ -200,7 +202,7 @@ button:active:not(:disabled) {
 }
 .nav-caption {
   color: #666666;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.3px;
   font-weight: 550;
   padding: 0 12px;
@@ -220,7 +222,7 @@ button:active:not(:disabled) {
   padding: 0 13px;
   border-radius: 9px;
   gap: 12px;
-  font-size: 13px;
+  font-size: 15px;
   color: #404040;
 }
 .main-nav > button > svg {
@@ -240,7 +242,7 @@ button:active:not(:disabled) {
   display: flex;
 }
 .nav-count {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   background: #ededed;
   min-width: 20px;
@@ -276,10 +278,11 @@ button:active:not(:disabled) {
   background: transparent;
   border: 0;
   outline: 0;
-  font-size: 13px;
+  font-size: 15px;
 }
 .chat-history {
-  min-height: 60px;
+  /* 남는 높이를 채우고 안에서 스크롤한다. 공간이 모자라도 대화 세 줄 정도는 보이게 둔다. */
+  min-height: 132px;
   flex: 1;
   overflow: auto;
   padding-bottom: 16px;
@@ -296,7 +299,7 @@ button:active:not(:disabled) {
   min-width: 0;
   gap: 9px;
   text-align: left;
-  font-size: 12px;
+  font-size: 14px;
   padding: 11px 4px 11px 12px;
   border-radius: 8px;
   color: #525252;
@@ -352,11 +355,12 @@ button:active:not(:disabled) {
   opacity: 0.6;
 }
 .history-empty p {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 10px;
 }
 .sidebar-bottom {
   margin-top: auto;
+  padding-bottom: 14px;
 }
 .site-card {
   display: flex;
@@ -376,12 +380,12 @@ button:active:not(:disabled) {
 }
 .site-card strong {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 .site-card div > span {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   margin-top: 4px;
   color: #666666;
 }
@@ -399,7 +403,7 @@ button:active:not(:disabled) {
   width: 100%;
   margin: 16px 0 15px;
   padding: 4px 11px;
-  font-size: 12px;
+  font-size: 14px;
   color: #525252;
 }
 .sidebar-help > svg:last-child {
@@ -425,19 +429,19 @@ button:active:not(:disabled) {
   background: #ededed;
   color: #525252;
   border-radius: 50%;
-  font-size: 13px;
+  font-size: 15px;
 }
 .profile-row > div:nth-child(2) {
   flex: 1;
 }
 .profile-row strong {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 .profile-row span {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
   margin-top: 4px;
 }
@@ -447,6 +451,33 @@ button:active:not(:disabled) {
   padding-left: 0;
   padding-right: 0;
   border: 0;
+}
+/* 노트북처럼 낮은 화면에서는 사이드바 여백을 줄여 최근 대화와 아래 영역이 함께 보이게 한다. */
+@media (max-height: 820px) {
+  .sidebar {
+    padding-top: 20px;
+  }
+  .sidebar-brand {
+    padding-bottom: 18px;
+  }
+  .sidebar > .nav-caption {
+    margin: 18px 0 8px;
+  }
+  .main-nav {
+    gap: 3px;
+  }
+  .main-nav > button {
+    height: 40px;
+  }
+  .history-heading {
+    margin-top: 16px;
+  }
+  .sidebar-help {
+    margin: 10px 0;
+  }
+  .profile-row {
+    padding: 12px 5px 10px;
+  }
 }
 .workspace {
   display: flex;
@@ -468,7 +499,7 @@ button:active:not(:disabled) {
   display: flex;
   align-items: center;
   gap: 13px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .breadcrumb-parent {
   color: #666666;
@@ -478,7 +509,7 @@ button:active:not(:disabled) {
 }
 .topbar-title strong {
   color: #404040;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
 }
 .topbar-actions {
@@ -490,7 +521,7 @@ button:active:not(:disabled) {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: -0.1px;
   color: #525252;
   background: #f5f5f5;
@@ -503,63 +534,6 @@ button:active:not(:disabled) {
   height: 4px;
   border-radius: 50%;
   background: #737373;
-}
-.site-picker {
-  position: relative;
-}
-.site-picker-button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #525252;
-  font-size: 12px;
-  padding: 5px 0;
-}
-.site-picker-button > svg:first-child {
-  color: #666666;
-}
-.popover-dismiss {
-  position: fixed;
-  inset: 0;
-  z-index: 9;
-  cursor: default;
-}
-.site-popover {
-  position: absolute;
-  top: 37px;
-  right: 0;
-  z-index: 10;
-  width: 260px;
-  padding: 22px;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  box-shadow: 0 12px 45px #00000015;
-  animation: slide-in 0.2s;
-}
-.site-popover > strong {
-  font-size: 14px;
-}
-.site-popover > p {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 7px 0 21px;
-}
-.site-popover > div {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  margin: 12px 0;
-}
-.site-popover > div span {
-  color: var(--muted);
-}
-.site-popover > small {
-  display: block;
-  padding-top: 15px;
-  border-top: 1px solid var(--border);
-  color: #666666;
-  font-size: 11px;
 }
 .main-content {
   flex: 1;
@@ -1475,14 +1449,14 @@ button:active:not(:disabled) {
   margin: 10px 0;
 }
 .app-dialog > p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.85;
   color: #666666;
   margin-bottom: 24px;
 }
 .setting-label {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   color: #525252;
   margin-bottom: 9px;
@@ -1493,14 +1467,14 @@ button:active:not(:disabled) {
   border-radius: 8px;
   background: white;
   color: #404040;
-  font-size: 13px;
+  font-size: 15px;
   padding: 12px;
 }
 .settings-note {
   display: flex;
   gap: 9px;
   padding: 16px 0 21px;
-  font-size: 12px;
+  font-size: 14px;
   color: #666666;
   line-height: 1.8;
 }
@@ -1528,11 +1502,11 @@ button:active:not(:disabled) {
 }
 .help-items section strong {
   display: block;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
 }
 .help-items section p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   color: #666666;
   margin: 6px 0 0;
@@ -1551,7 +1525,7 @@ button:active:not(:disabled) {
   color: #ffffff;
   border: 1px solid #737373;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 14px;
   max-width: calc(100vw - 30px);
   z-index: 200;
   box-shadow: 0 4px 20px #00000022;
@@ -1698,9 +1672,6 @@ button:active:not(:disabled) {
   .welcome h1 {
     font-size: 28px;
   }
-  .site-picker-button span {
-    display: none;
-  }
 }
 @media (max-width: 900px) {
   :root {
@@ -1758,9 +1729,6 @@ button:active:not(:disabled) {
   .composer-area {
     max-width: 800px;
   }
-  .site-picker-button span {
-    display: inline;
-  }
   .topbar-actions {
     gap: 15px;
   }
@@ -1777,22 +1745,18 @@ button:active:not(:disabled) {
     gap: 6px;
   }
   .breadcrumb-parent,
-  .breadcrumb-chevron,
-  .site-picker-button span {
+  .breadcrumb-chevron {
     display: none;
   }
   .topbar-title strong {
-    font-size: 13px;
+    font-size: 15px;
   }
   .topbar-actions {
     gap: 12px;
   }
   .demo-badge {
-    font-size: 10px;
+    font-size: 12px;
     padding: 4px 6px;
-  }
-  .site-picker-button {
-    gap: 4px;
   }
   .welcome {
     padding: 30px 21px 15px;
@@ -2022,14 +1986,14 @@ button:active:not(:disabled) {
     padding: 23px;
   }
   .app-dialog h2 {
-    font-size: 18px;
+    font-size: 19px;
   }
   .app-dialog select {
-    font-size: 16px;
+    font-size: 17px;
   }
   .toast {
     bottom: 18px;
-    font-size: 12px;
+    font-size: 14px;
     width: max-content;
     text-align: center;
   }
@@ -2047,22 +2011,6 @@ button:active:not(:disabled) {
 }
 
 /* Real observation surfaces share the neutral application palette. */
-.station-picker {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #666;
-}
-.station-picker select {
-  max-width: 220px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #555;
-  padding: 8px 3px;
-  font-size: 12px;
-  text-overflow: ellipsis;
-}
 .weather-location {
   min-width: 0;
 }
@@ -2142,7 +2090,7 @@ button:active:not(:disabled) {
   justify-content: space-between;
   padding: 12px 0;
   border-bottom: 1px solid #ececec;
-  font-size: 12px;
+  font-size: 14px;
 }
 .connection-settings dt {
   flex-shrink: 0;
@@ -2164,7 +2112,7 @@ button:active:not(:disabled) {
   max-width: 145px;
 }
 .profile-row span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .composer-context > span:last-child {
   max-width: 230px;
@@ -2173,18 +2121,11 @@ button:active:not(:disabled) {
   white-space: nowrap;
 }
 @media (max-width: 1150px) {
-  .station-picker select {
-    max-width: 150px;
-  }
   .weather-location strong {
     max-width: 180px;
   }
 }
 @media (max-width: 600px) {
-  .station-picker select {
-    max-width: 130px;
-    font-size: 11px;
-  }
   .topbar-actions {
     gap: 7px;
   }
@@ -2211,7 +2152,7 @@ button:active:not(:disabled) {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: #777;
   padding: 10px 7px 0;
   width: 100%;
@@ -2232,7 +2173,7 @@ button:active:not(:disabled) {
   display: flex;
   flex-direction: column;
   gap: 9px;
-  font-size: 12px;
+  font-size: 14px;
   color: #666;
   margin: 16px 0;
 }
@@ -2243,59 +2184,59 @@ button:active:not(:disabled) {
   color: #333;
   background: white;
   max-width: 100%;
-  font-size: 14px;
+  font-size: 16px;
 }
 .worker-site-switch {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 12px 20px;
+  padding: 10px max(16px, calc((100vw - 900px) / 2));
   border-bottom: 1px solid #e9e9eb;
-  background: #fafafa;
+  background: #f3f4f6;
 }
-.worker-site-switch label {
-  font-size: 12px;
-  color: #666;
-  flex-shrink: 0;
-}
-.worker-site-switch select {
-  border: 1px solid #e2e2e5;
-  background: white;
-  border-radius: 8px;
-  padding: 9px 30px 9px 12px;
-  font-size: 14px;
-  max-width: 70%;
+.worker-site-switch .site-switcher {
+  flex: 1;
+  max-width: 520px;
 }
 .topbar-actions {
   min-width: 0;
 }
-.topbar-actions .station-picker select {
-  max-width: 180px;
+/* 상단 바 글자는 줄을 바꾸지 않는다. 좁아지면 덕장 바꾸기 단추의 글자가 줄임표로 줄어든다. */
+.topbar {
+  gap: 12px;
 }
-@media (max-width: 600px) {
-  .topbar-actions .demo-badge {
-    display: none;
-  }
-  .topbar-actions .station-picker select {
-    max-width: 130px;
-    font-size: 12px;
-  }
+.topbar-title {
+  flex-shrink: 0;
+}
+.breadcrumb-parent,
+.topbar-title strong,
+.demo-badge {
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
   .breadcrumb-parent,
   .breadcrumb-chevron {
     display: none;
   }
+}
+@media (max-width: 760px) {
+  .topbar-actions .demo-badge {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
   .topbar-title {
     gap: 10px;
   }
   .topbar-actions {
     gap: 4px;
   }
-  .worker-site-switch select {
-    font-size: 16px;
-  }
   .station-setting select {
-    font-size: 16px;
+    font-size: 17px;
+  }
+}
+/* 아주 좁은 폰에서는 화면 이름 대신 덕장 바꾸기 단추에 자리를 준다. 지금 화면은 아래 탭이 보여 준다. */
+@media (max-width: 359px) {
+  .topbar-title strong {
+    display: none;
   }
 }
 
@@ -2332,7 +2273,7 @@ button:active:not(:disabled) {
     border: 0;
     background: transparent;
     color: #737373;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: -0.02em;
     white-space: nowrap;
@@ -2364,7 +2305,7 @@ button:active:not(:disabled) {
     border-radius: 8px;
     background: var(--ink);
     color: #ffffff;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 650;
     line-height: 16px;
     text-align: center;
@@ -2380,6 +2321,17 @@ button:active:not(:disabled) {
   }
   .jump-bottom {
     bottom: calc(177px + var(--tabbar-height) + env(safe-area-inset-bottom));
+  }
+}
+/* 아주 좁은 폰에서 "오늘의 덕장" 같은 탭 이름이 칸을 넘지 않게 줄이고, 그래도 넘치면 줄임표로 자른다. */
+@media (max-width: 359px) {
+  .mobile-tabbar button {
+    font-size: 12px;
+  }
+  .mobile-tabbar button > span:last-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 /* 키보드가 올라와 화면이 낮아졌을 때만 글쓰는 동안 탭을 숨긴다. 보낸 뒤 키보드를 내리면 다시 보인다.
