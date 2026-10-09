@@ -103,7 +103,8 @@ const batch: Batch = {
   logs: [],
 };
 const operations: OperationsData = { batches: [batch], guidance: [] };
-const team: Team = {
+// 다른 브랜치가 초대에 필드를 더해도 이 시험 자료는 그대로 쓸 수 있게 타입 단언으로 둔다.
+const team = {
   members: [
     {
       id: 'u1',
@@ -140,7 +141,7 @@ const team: Team = {
       expiresAt: '2026-10-12T00:00:00Z',
     },
   ],
-};
+} as Team;
 const data: ChatData = {
   site: {
     name: 'QA-C 덕장',
