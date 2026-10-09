@@ -271,6 +271,11 @@ function OwnerWorkspace({
     setSpeakingId(messageId);
     speech.speak(utterance);
   }
+  // 다른 대화로 옮기거나 화면을 떠나면 읽기를 멈춘다.
+  useEffect(() => {
+    window.speechSynthesis?.cancel();
+    setSpeakingId(null);
+  }, [activeId]);
   useEffect(() => () => window.speechSynthesis?.cancel(), []);
   function openSettings() {
     setSettingsOpen(true);

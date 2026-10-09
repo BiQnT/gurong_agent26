@@ -10,21 +10,34 @@ import type { AddressInfo } from 'node:net';
 // - 도구는 서버가 미리 정한 함수뿐이고 결과는 코드가 계산한다. AI 는 무엇을 부를지만 고른다.
 // - 쓰는 메서드는 initialize, tools/list, tools/call, ping 뿐이라 SDK 없이 직접 처리한다.
 
+/** 도구 결과. content 는 AI 에게 가고, card 는 화면 카드 자료로 서버에만 남는다. */
+export type ToolOutput = { content: unknown; card?: unknown };
+
 export type ToolDefinition = {
   name: string;
   /** AI 에게 보이는 설명. 언제 부르는지 적는다 */
   description: string;
   /** 입력 JSON Schema (type: object) */
   inputSchema: Record<string, unknown>;
-  run: (input: Record<string, unknown>, signal: AbortSignal) => Promise<unknown>;
+  run: (input: Record<string, unknown>, signal: AbortSignal) => Promise<ToolOutput>;
 };
+
+/** AI 에게 그대로 보여도 되는 안내 (입력 오류, 자료 없음). 다른 오류의 글은 AI 에게 넘기지 않는다. */
+export class ToolNotice extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ToolNotice';
+  }
+}
 
 export type ToolCall = {
   name: string;
   input: Record<string, unknown>;
   ok: boolean;
-  /** 성공했을 때 도구가 돌려준 값 (화면 카드와 숫자 검사에 쓴다) */
+  /** 성공했을 때 AI 에게 간 결과 (숫자 검사에 쓴다) */
   result?: unknown;
+  /** 성공했을 때의 화면 카드 자료 */
+  card?: unknown;
   error?: string;
   ms: number;
 };
@@ -41,6 +54,8 @@ export type ToolSession = {
 type Session = {
   tools: Map<string, ToolDefinition>;
   calls: ToolCall[];
+  /** 실행 중인 도구 수 (상한 계산용) */
+  running: number;
   signal: AbortSignal;
   expiresAt: number;
 };
@@ -122,30 +137,30 @@ export function createToolServer(now: () => number = Date.now) {
         const input = object(params.arguments) ? params.arguments : {};
         const toolError = (text: string) =>
           reply({ content: [{ type: 'text', text }], isError: true });
-        if (session.calls.length >= MAX_CALLS_PER_SESSION)
+        // 한 번에 여러 도구를 불러도 상한을 넘지 않게, 기다리기 전에 자리를 먼저 잡는다.
+        if (session.calls.length + session.running >= MAX_CALLS_PER_SESSION)
           return toolError(
             '이 질문에서 부를 수 있는 도구 횟수를 넘었어요. 가진 자료로 답해 주세요.',
           );
+        session.running += 1;
         const startedAt = now();
+        const record = (call: Omit<ToolCall, 'name' | 'input' | 'ms'>) =>
+          session.calls.push({ name: tool.name, input, ms: now() - startedAt, ...call });
         try {
-          const result = await tool.run(input, session.signal);
-          const text = JSON.stringify(result);
+          const { content, card } = await tool.run(input, session.signal);
+          const text = JSON.stringify(content);
           if (text.length > MAX_RESULT_CHARS)
-            throw new Error('결과가 너무 길어요. 기간을 줄여 주세요.');
-          session.calls.push({ name: tool.name, input, ok: true, result, ms: now() - startedAt });
+            throw new ToolNotice('결과가 너무 길어요. 기간을 줄여 주세요.');
+          record({ ok: true, result: content, ...(card === undefined ? {} : { card }) });
           return reply({ content: [{ type: 'text', text }] });
         } catch (error) {
-          // 도구가 던진 글은 서버가 만든 안내문이다. 원천 오류 본문이나 키는 도구 안에서 걸러 낸다.
+          // 서버가 만든 안내문(ToolNotice)만 AI 에게 넘긴다. 저장소·원천 오류 글은 넘기지 않는다.
           const text =
-            error instanceof Error ? error.message.slice(0, 300) : '도구 실행에 실패했어요.';
-          session.calls.push({
-            name: tool.name,
-            input,
-            ok: false,
-            error: text,
-            ms: now() - startedAt,
-          });
+            error instanceof ToolNotice ? error.message.slice(0, 300) : '자료를 읽지 못했어요.';
+          record({ ok: false, error: text });
           return toolError(text);
+        } finally {
+          session.running -= 1;
         }
       }
       default:
@@ -207,12 +222,20 @@ export function createToolServer(now: () => number = Date.now) {
           }
         });
       });
-      server.once('error', reject);
-      server.listen(0, '127.0.0.1', () => {
+      const created = server;
+      created.once('error', reject);
+      created.listen(0, '127.0.0.1', () => {
+        created.off('error', reject);
+        // 연 뒤의 오류로 프로세스가 죽지 않게 남기기만 한다.
+        created.on('error', (error) => console.error(`[tool-server] ${error.message}`));
         // 이 서버 때문에 프로세스가 끝나지 못하는 일이 없게 한다.
-        server!.unref();
-        resolve(`http://127.0.0.1:${(server!.address() as AddressInfo).port}/mcp`);
+        created.unref();
+        resolve(`http://127.0.0.1:${(created.address() as AddressInfo).port}/mcp`);
       });
+    });
+    // 열지 못했으면 다음 채팅에서 다시 연다 (실패를 붙잡아 두지 않는다).
+    listening.catch(() => {
+      listening = undefined;
     });
     return listening;
   }
@@ -226,6 +249,7 @@ export function createToolServer(now: () => number = Date.now) {
       const session: Session = {
         tools: new Map(tools.map((tool) => [tool.name, tool])),
         calls: [],
+        running: 0,
         signal,
         expiresAt: now() + ttlMs,
       };

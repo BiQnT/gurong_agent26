@@ -60,7 +60,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 
 - **claude**: 이 덕장의 읽기 전용 도구 6개(`server/agent-tools.ts`)를 부를 수 있다. 서버는 AI 가 실제로 부른 도구로 화면 카드를 정한다. 도구 목록과 카드는 [채팅 요청·응답](chat-api.md#채팅-요청응답).
 - **OpenAI 호환**: 도구 없이, 같은 지시문과 서버가 미리 담은 자료(현재 관측·덕장·배치·예보)로 답한다. 과거 기간 분석은 하지 않는다.
-- 답은 내보내기 전에 검사한다(`server/answer-checks.ts`). 현재 시점 문장의 등급이 규칙과 다르거나 현재 관측을 보지 않고 널어도 된다고 하면 규칙 문장으로, 측정 숫자가 도구 결과·기준·지시문·대화에 없으면 도구가 만든 요약으로 바꾸고 `provider: local` 과 `providerNotice` 를 붙인다. 호출이 실패해도 같은 대체 답을 준다. 대체 답은 질문이 지금 날씨를 묻지 않으면 등급을 꺼내지 않는다.
+- 답은 내보내기 전에 검사하고(`server/answer-checks.ts`), 걸리면 규칙 문장이나 도구가 만든 요약으로 바꾼 뒤 `provider: local` 과 `providerNotice` 를 붙인다. 호출이 실패해도 질문 종류에 맞는 대체 답을 준다. 검사 규칙과 대체 답은 [chat-api.md](chat-api.md#ai-가-보는-자료-도구).
 
 **claude CLI** (`server/claude-cli.ts`): 메시지마다 `claude -p` 프로세스 하나. 프롬프트는 stdin, 결과는 `--output-format json`. 이전 대화는 화면이 보낸 `history` 를 글로 이어 붙이고, 첫 질문도 `지금 질문:` 으로 감싼다. `/` 로 시작하는 입력은 `--disable-slash-commands` 를 줘도 CLI 가 명령으로 가로채기 때문이다.
 

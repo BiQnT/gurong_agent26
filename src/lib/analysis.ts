@@ -37,6 +37,8 @@ export type HistoryRow = {
   rainMm: number | null;
   /** 등급별 시간 (표본 수 × 표본 간격). 제외는 값이 비었거나 판정 기준 밖인 시간 */
   gradeHours: GradeCounts;
+  /** 이 칸에서 자료가 있어야 하는 시간 (마지막 주가 짧거나 오늘이면 지금까지) */
+  expectedHours: number;
   /** 일 단위일 때 가장 길게 이어진 적합 구간 (예: `13~16시`) */
   bestWindow: string | null;
 };
@@ -186,8 +188,9 @@ function bestWindow(samples: HistorySample[], sampleMinutes: number, t: DryingTh
   for (const sample of samples) {
     const time = Date.parse(sample.at);
     if (gradeSample(sample, t) === '적합') {
+      // 관측 시각이 수집 간격보다 조금 늦게 찍혀도(13:00 다음 13:31) 같은 구간으로 본다.
       run =
-        run && time - run.end <= step
+        run && time - run.end < step * 1.5
           ? { start: run.start, end: time }
           : { start: time, end: time };
       if (!best || run.end - run.start > best.end - best.start) best = { ...run };
@@ -255,6 +258,7 @@ export function summarizeHistory(
       windSpeed: stat(inBin.map((sample) => sample.windSpeed)),
       rainMm: rainTotal(inBin),
       gradeHours: hoursOf(counts, input.sampleMinutes),
+      expectedHours: round1(Math.max(0, Math.min(binEnd, end) - binStart) / 3_600_000),
       bestWindow: binDays === 1 ? bestWindow(inBin, input.sampleMinutes, t) : null,
     });
   }
@@ -377,6 +381,10 @@ const validStat = (value: unknown) =>
 const validCounts = (value: unknown) =>
   record(value) && ['적합', '주의', '부적합', '제외'].every((key) => finite(value[key]));
 const GRADES = ['적합', '주의', '부적합', '판정 불가'];
+const instant = (value: unknown) => text(value) && Number.isFinite(Date.parse(value));
+const date = (value: unknown) => text(value) && /^\d{4}-\d{2}-\d{2}$/.test(value);
+const validPercentages = (value: unknown) =>
+  record(value) && ['적합', '주의', '부적합'].every((key) => finite(value[key]));
 
 export function readHistorySummary(value: unknown): HistorySummary | null {
   if (
@@ -384,16 +392,21 @@ export function readHistorySummary(value: unknown): HistorySummary | null {
     value.kind !== 'history' ||
     !text(value.source) ||
     !text(value.station) ||
-    !text(value.from) ||
-    !text(value.to) ||
+    !date(value.from) ||
+    !date(value.to) ||
     !nullableNumber(value.distanceM) ||
     (value.resolution !== 'day' && value.resolution !== 'week') ||
     !finite(value.missingRate) ||
     !text(value.summary) ||
+    !text(value.thresholds) ||
     !Array.isArray(value.rows) ||
     value.rows.length > 40 ||
     !record(value.totals) ||
-    !validCounts(value.totals.gradeHours)
+    !validCounts(value.totals.gradeHours) ||
+    !validStat(value.totals.temperature) ||
+    !validStat(value.totals.humidity) ||
+    !validStat(value.totals.windSpeed) ||
+    !validPercentages(value.totals.percentages)
   )
     return null;
   const rowsValid = value.rows.every(
@@ -406,6 +419,7 @@ export function readHistorySummary(value: unknown): HistorySummary | null {
       validStat(row.windSpeed) &&
       nullableNumber(row.rainMm) &&
       validCounts(row.gradeHours) &&
+      finite(row.expectedHours) &&
       (row.bestWindow === null || text(row.bestWindow)),
   );
   return rowsValid ? (value as HistorySummary) : null;
@@ -417,7 +431,9 @@ export function readBatchDigest(value: unknown): BatchDigest | null {
     value.kind !== 'batch' ||
     !text(value.name) ||
     !['진행 중', '종료', '취소'].includes(value.status as string) ||
-    !text(value.startedAt) ||
+    !text(value.fish) ||
+    !finite(value.quantity) ||
+    !instant(value.startedAt) ||
     !finite(value.elapsedHours) ||
     !finite(value.samples) ||
     !nullableNumber(value.missingRate) ||
@@ -426,13 +442,7 @@ export function readBatchDigest(value: unknown): BatchDigest | null {
     !validStat(value.windSpeed) ||
     !finite(value.alerts) ||
     !text(value.summary) ||
-    (value.percentages !== null &&
-      !(
-        record(value.percentages) &&
-        ['적합', '주의', '부적합'].every((key) =>
-          finite((value.percentages as Record<string, unknown>)[key]),
-        )
-      ))
+    (value.percentages !== null && !validPercentages(value.percentages))
   )
     return null;
   return value as BatchDigest;
@@ -443,8 +453,9 @@ export function readForecastOutlook(value: unknown): ForecastOutlook | null {
     !record(value) ||
     value.kind !== 'forecast' ||
     !text(value.source) ||
-    !text(value.issuedAt) ||
+    !instant(value.issuedAt) ||
     !text(value.summary) ||
+    !text(value.thresholds) ||
     !Array.isArray(value.hours) ||
     value.hours.length > 72
   )
@@ -452,7 +463,7 @@ export function readForecastOutlook(value: unknown): ForecastOutlook | null {
   const hoursValid = value.hours.every(
     (hour) =>
       record(hour) &&
-      text(hour.at) &&
+      instant(hour.at) &&
       nullableNumber(hour.temperature) &&
       nullableNumber(hour.humidity) &&
       nullableNumber(hour.windSpeed) &&

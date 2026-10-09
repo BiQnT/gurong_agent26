@@ -39,6 +39,13 @@ const hourFormatter = new Intl.DateTimeFormat('ko-KR', {
 });
 const value = (number: number | null, unit: string) => (number === null ? '-' : `${number}${unit}`);
 const shortDate = (date: string) => `${date.slice(5, 7)}.${date.slice(8, 10)}`;
+/** 올해가 아니면 연도를 붙인다 ("작년 같은 기간과 비교"의 두 카드를 구분하려고). */
+function period(from: string, to: string): string {
+  const thisYear = String(new Date().getFullYear());
+  const show = (date: string) =>
+    date.slice(0, 4) === thisYear ? shortDate(date) : `${date.slice(0, 4)}.${shortDate(date)}`;
+  return `${show(from)}~${from.slice(0, 4) === to.slice(0, 4) ? shortDate(to) : show(to)}`;
+}
 
 function GradeLegend() {
   return (
@@ -54,10 +61,20 @@ function GradeLegend() {
 }
 
 /** 등급별 시간을 한 줄 막대로. 칸 전체 시간(24시간·주)에 맞춰 그려 결측은 빈 칸으로 남는다. */
-function GradeBar({ hours, span, label }: { hours: GradeCounts; span: number; label: string }) {
+function GradeBar({
+  hours,
+  span,
+  label,
+  unit = '시간',
+}: {
+  hours: GradeCounts;
+  span: number;
+  label: string;
+  unit?: '시간' | '%';
+}) {
   const filled = GRADE_ORDER.reduce((sum, grade) => sum + hours[grade], 0);
   const missing = Math.max(0, span - filled);
-  const title = `${label} · 적합 ${hours.적합}시간 · 주의 ${hours.주의}시간 · 부적합 ${hours.부적합}시간 · 제외 ${hours.제외}시간${missing ? ` · 자료 없음 ${Math.round(missing * 10) / 10}시간` : ''}`;
+  const title = `${label} · 적합 ${hours.적합}${unit} · 주의 ${hours.주의}${unit} · 부적합 ${hours.부적합}${unit}${unit === '시간' ? ` · 제외 ${hours.제외}시간` : ''}${missing && unit === '시간' ? ` · 자료 없음 ${Math.round(missing * 10) / 10}시간` : ''}`;
   return (
     <div className="grade-bar" role="img" aria-label={title} title={title}>
       {GRADE_ORDER.map((grade) =>
@@ -76,7 +93,6 @@ function GradeBar({ hours, span, label }: { hours: GradeCounts; span: number; la
 const mean = (stat: Stat, unit: string) => value(stat.mean, unit);
 
 export function HistoryCard({ history }: { history: HistorySummary }) {
-  const span = history.resolution === 'day' ? 24 : 24 * 7;
   const total = history.totals;
   const source = (
     <p className="analysis-note">
@@ -93,9 +109,7 @@ export function HistoryCard({ history }: { history: HistorySummary }) {
       <section className="assessment-card analysis-card" aria-label="기간 건조 조건 요약">
         <div className="assessment-title">
           <span className="eyebrow">기간 요약</span>
-          <span className="grade-pill muted">
-            {shortDate(history.from)}~{shortDate(history.to)}
-          </span>
+          <span className="grade-pill muted">{period(history.from, history.to)}</span>
         </div>
         <h3>이 기간에는 판정할 자료가 없어요.</h3>
         {source}
@@ -105,9 +119,7 @@ export function HistoryCard({ history }: { history: HistorySummary }) {
     <section className="assessment-card analysis-card" aria-label="기간 건조 조건 요약">
       <div className="assessment-title">
         <span className="eyebrow">기간 요약</span>
-        <span className="grade-pill muted">
-          {shortDate(history.from)}~{shortDate(history.to)}
-        </span>
+        <span className="grade-pill muted">{period(history.from, history.to)}</span>
       </div>
       <h3>
         적합 {total.gradeHours.적합}시간 ({total.percentages.적합}%) · 주의 {total.gradeHours.주의}
@@ -141,7 +153,7 @@ export function HistoryCard({ history }: { history: HistorySummary }) {
         {history.rows.map((row) => (
           <div className="grade-row" key={row.label}>
             <span className="grade-row-label">{row.label}</span>
-            <GradeBar hours={row.gradeHours} span={span} label={row.label} />
+            <GradeBar hours={row.gradeHours} span={row.expectedHours} label={row.label} />
             <span className="grade-row-value">{row.gradeHours.적합}h</span>
           </div>
         ))}
@@ -250,7 +262,8 @@ export function BatchCards({ batches }: { batches: BatchDigest[] }) {
                   제외: 0,
                 }}
                 span={100}
-                label={`${batch.name} 등급 비율 (%)`}
+                unit="%"
+                label={`${batch.name} 등급 비율`}
               />
             ) : null}
             <p className="analysis-note">

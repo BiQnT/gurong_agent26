@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react';
 import type { ChatReply } from '../../lib/chat';
 import { BatchCards, ForecastCard, HistoryCard } from './AnalysisCards';
 import { ConditionsCard } from './ConditionsCard';
@@ -11,7 +12,33 @@ type ReplyCardsProps = {
   onGuide: () => void;
 };
 
-export function ReplyCards({ reply, onStart, onGuide }: ReplyCardsProps) {
+/**
+ * 카드 하나가 그리다 실패해도 답 문장과 앱은 남긴다. 답은 브라우저에 저장되므로, 여기서 막지 않으면
+ * 새로고침할 때마다 같은 오류로 화면 전체가 비게 된다.
+ */
+class CardBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? (
+      <p className="provider-notice">이 답의 자료 카드를 표시하지 못했어요.</p>
+    ) : (
+      this.props.children
+    );
+  }
+}
+
+export function ReplyCards(props: ReplyCardsProps) {
+  return (
+    <CardBoundary>
+      <Cards {...props} />
+    </CardBoundary>
+  );
+}
+
+function Cards({ reply, onStart, onGuide }: ReplyCardsProps) {
   const hasConditions = Boolean(reply.assessment || reply.observation);
   if (!hasConditions && !reply.forecast && !reply.history?.length && !reply.batches?.length)
     return null;

@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
-import { createToolServer, MAX_CALLS_PER_SESSION, type ToolDefinition } from './tool-server.ts';
+import {
+  createToolServer,
+  MAX_CALLS_PER_SESSION,
+  ToolNotice,
+  type ToolDefinition,
+} from './tool-server.ts';
 import { callTool } from './test-helpers/tool-ask.ts';
 
 const server = createToolServer();
@@ -10,14 +15,25 @@ const echo: ToolDefinition = {
   name: 'echo',
   description: '받은 값을 돌려준다',
   inputSchema: { type: 'object', properties: { value: { type: 'number' } } },
-  run: async (input) => ({ summary: `값 ${String(input.value)}`, value: input.value }),
+  run: async (input) => ({
+    content: { summary: `값 ${String(input.value)}`, value: input.value },
+    card: { value: input.value },
+  }),
 };
 const broken: ToolDefinition = {
   name: 'broken',
   description: '항상 실패한다',
   inputSchema: { type: 'object', properties: {} },
   run: async () => {
-    throw new Error('자료를 읽지 못했어요.');
+    throw new ToolNotice('그 기간은 자료가 없어요.');
+  },
+};
+const leaky: ToolDefinition = {
+  name: 'leaky',
+  description: '저장소 오류를 그대로 던진다',
+  inputSchema: { type: 'object', properties: {} },
+  run: async () => {
+    throw new Error('SqliteError: database is locked at /srv/haepung/db/haepung.db');
   },
 };
 
@@ -61,27 +77,36 @@ test('a session speaks the MCP handshake and lists only its own tools', async ()
   session.close();
 });
 
-test('tool calls are recorded, failures come back as tool errors, and the per-question cap holds', async () => {
-  const session = await server.open([echo, broken], new AbortController().signal, 10_000);
+test('tool calls are recorded with their card, only notices reach the model, and the cap holds', async () => {
+  const session = await server.open([echo, broken, leaky], new AbortController().signal, 10_000);
   const tools = { url: session.url, token: session.token };
   const ok = await callTool(tools, 'echo', { value: 7 });
   assert.deepEqual(ok.result, { summary: '값 7', value: 7 });
   assert.equal(ok.isError, false);
+  // 카드 자료는 AI 에게 가지 않고 서버 기록에만 남는다.
+  assert.deepEqual(session.calls[0].card, { value: 7 });
   const failed = await callTool(tools, 'broken');
   assert.equal(failed.isError, true);
-  assert.equal(failed.result, '자료를 읽지 못했어요.');
+  assert.equal(failed.result, '그 기간은 자료가 없어요.');
+  // 저장소 오류 글은 AI 에게 넘기지 않는다.
+  const leaked = await callTool(tools, 'leaky');
+  assert.equal(leaked.result, '자료를 읽지 못했어요.');
   assert.deepEqual(
-    session.calls.map((call) => [call.name, call.ok]),
+    session.calls.map((call) => [call.name, call.ok, call.card === undefined]),
     [
-      ['echo', true],
-      ['broken', false],
+      ['echo', true, false],
+      ['broken', false, true],
+      ['leaky', false, true],
     ],
   );
-  for (let index = session.calls.length; index < MAX_CALLS_PER_SESSION; index += 1)
-    await callTool(tools, 'echo', { value: index });
-  const capped = await callTool(tools, 'echo', { value: 99 });
-  assert.equal(capped.isError, true);
-  assert.match(String(capped.result), /도구 횟수를 넘었어요/);
+  // 한꺼번에 불러도 상한을 넘지 않는다.
+  const burst = await Promise.all(
+    Array.from({ length: MAX_CALLS_PER_SESSION }, (_, index) =>
+      callTool(tools, 'echo', { value: index }),
+    ),
+  );
+  assert.equal(burst.filter((item) => item.isError).length, 3);
+  assert.match(String(burst.find((item) => item.isError)?.result), /도구 횟수를 넘었어요/);
   assert.equal(session.calls.length, MAX_CALLS_PER_SESSION);
   session.close();
 });

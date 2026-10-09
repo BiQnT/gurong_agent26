@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { describeThresholds } from '../src/lib/drying.ts';
 
 // AI 도우미의 기본 지시는 server/prompts/*.md 에 둔다 (PR 로 리뷰하려고 코드와 나눴다, ADR 0011).
 // 서버가 시작할 때 한 번 읽는다. 파일이 없으면 서버가 뜨지 않게 바로 던진다.
@@ -30,6 +31,8 @@ function runtimeBlock({ now, siteName, siteRegistered }: PromptRuntime): string 
     '# 지금',
     `- 지금 시각: ${nowLine(now)}`,
     `- 덕장: ${siteName}${siteRegistered ? '' : ' (위치 미등록)'}`,
+    // 기준을 묻는 질문에 도구 없이 답하게 한다. 값은 규칙 함수의 기준에서 바로 만든다 (정본: drying.ts).
+    `- 널기 판정 기준 (현장 검증 전 가설값): ${describeThresholds()}`,
   ].join('\n');
 }
 

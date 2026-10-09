@@ -15,7 +15,7 @@ import type { OperationsData } from '../src/lib/operations.ts';
 import type { Team } from '../src/lib/workspace.ts';
 import { batchHistorySamples, digestBatches } from './assessment.ts';
 import type { UvReading } from './sources/eum-uv.ts';
-import type { ToolDefinition } from './tool-server.ts';
+import { ToolNotice, type ToolDefinition } from './tool-server.ts';
 
 // AI 도우미가 부르는 읽기 전용 도구 6개 (ADR 0011). 모두 한 덕장 범위이고, 숫자는 코드가 계산한다.
 // 도구 결과의 summary 는 코드가 만든 문장이라, AI 답이 검사에 걸리면 이 문장으로 대신 답한다.
@@ -51,7 +51,7 @@ export type ToolContext = {
  */
 export type ToolCard =
   | { kind: 'current' }
-  | { kind: 'history'; data: HistorySummary }
+  | { kind: 'history'; data: HistorySummary[] }
   | { kind: 'forecast'; data: ForecastOutlook }
   | { kind: 'batches'; data: BatchDigest[] };
 
@@ -74,17 +74,20 @@ function readRange(input: Record<string, unknown>, now: number): { from: string;
   const { from, to } = input;
   const today = kstDate(now);
   if (typeof from !== 'string' || typeof to !== 'string' || !DATE.test(from) || !DATE.test(to))
-    throw new Error('from 과 to 는 YYYY-MM-DD 형식의 날짜여야 해요.');
-  // 2월 30일처럼 없는 날짜는 다른 날로 넘어가므로 되돌려 확인한다.
-  if (kstDate(kstMidnight(from)) !== from || kstDate(kstMidnight(to)) !== to)
-    throw new Error('없는 날짜예요.');
-  if (from > to) throw new Error('from 이 to 보다 늦어요.');
+    throw new ToolNotice('from 과 to 는 YYYY-MM-DD 형식의 날짜여야 해요.');
+  // 13월처럼 읽을 수 없거나, 2월 30일처럼 다른 날로 넘어가는 날짜를 막는다.
+  const real = (date: string) =>
+    Number.isFinite(kstMidnight(date)) && kstDate(kstMidnight(date)) === date;
+  if (!real(from) || !real(to)) throw new ToolNotice('없는 날짜예요.');
+  if (from > to) throw new ToolNotice('from 이 to 보다 늦어요.');
   if (from > today)
-    throw new Error(`미래 날짜예요. 오늘은 ${today} 이에요. 앞으로의 날씨는 예보 도구를 쓰세요.`);
+    throw new ToolNotice(
+      `미래 날짜예요. 오늘은 ${today} 이에요. 앞으로의 날씨는 예보 도구를 쓰세요.`,
+    );
   const end = to > today ? today : to;
   const days = Math.round((kstMidnight(end) - kstMidnight(from)) / 86_400_000) + 1;
   if (days > MAX_HISTORY_DAYS)
-    throw new Error(`한 번에 ${MAX_HISTORY_DAYS}일까지 조회할 수 있어요. 기간을 나눠 주세요.`);
+    throw new ToolNotice(`한 번에 ${MAX_HISTORY_DAYS}일까지 조회할 수 있어요. 기간을 나눠 주세요.`);
   return { from, to: end };
 }
 
@@ -220,13 +223,12 @@ export function compareHistory(
   };
 }
 
-/** 도구 목록과, 성공한 도구가 채우는 카드 목록을 만든다. 채팅 요청 하나에 한 번 만든다. */
-export function createAgentTools(context: ToolContext): {
-  tools: ToolDefinition[];
-  cards: ToolCard[];
-} {
+/**
+ * 도구 목록. 채팅 요청 하나에 한 번 만든다. 각 도구는 AI 에게 줄 결과(content)와 화면 카드(card)를
+ * 함께 돌려주고, 도구 서버는 결과가 AI 에게 실제로 간 호출에만 카드를 남긴다.
+ */
+export function createAgentTools(context: ToolContext): ToolDefinition[] {
   const { snapshot, site } = context;
-  const cards: ToolCard[] = [];
 
   /** 기간 요약. 외부 과거 관측이 있으면 그것을, 없으면 이 덕장의 배치 기록을 쓴다. */
   async function historyFor(
@@ -266,17 +268,16 @@ export function createAgentTools(context: ToolContext): {
     };
   }
 
-  const tools: ToolDefinition[] = [
+  return [
     {
       name: TOOL_NAMES.current,
       description:
         '지금 덕장 기준 관측(기온·습도·풍속, 측정 시각, 관측기와 거리), 규칙 함수의 현재 널기 등급과 이유, 지금 비·눈, 오늘 강수량, 일출·일몰, 자외선. "지금/오늘 널어도 돼?", "지금 날씨·바람·습도", "관측값 출처" 같은 현재 상태 질문에만 부른다.',
       inputSchema: noInput,
-      run: async () => {
-        const result = currentConditions(snapshot, await context.uv());
-        cards.push({ kind: 'current' });
-        return result;
-      },
+      run: async () => ({
+        content: currentConditions(snapshot, await context.uv()),
+        card: { kind: 'current' } satisfies ToolCard,
+      }),
     },
     {
       name: TOOL_NAMES.site,
@@ -306,7 +307,7 @@ export function createAgentTools(context: ToolContext): {
             observedAt: kst(item.observedAt),
           }));
         const ongoing = batches.filter((batch) => batch.status === 'ongoing').length;
-        return {
+        const content = {
           summary:
             `${site.name}: 팀원 ${members.length}명(운영자 ${count((m) => m.role === 'owner')}명, 근로자 ${count((m) => m.role === 'worker')}명), ` +
             `초대 대기 ${pending}건, 진행 중인 배치 ${ongoing}개, 답을 기다리는 질문 ${waiting}건.`,
@@ -327,6 +328,7 @@ export function createAgentTools(context: ToolContext): {
           },
           guidance: { total: guidance.length, questionsWaitingForAnswer: waiting },
         };
+        return { content };
       },
     },
     {
@@ -347,7 +349,7 @@ export function createAgentTools(context: ToolContext): {
       },
       run: async (input) => {
         const operations = await context.operations();
-        if (!operations) throw new Error('배치 기록을 읽지 못했어요.');
+        if (!operations) throw new ToolNotice('배치 기록을 읽지 못했어요.');
         const status =
           input.status === 'ongoing' || input.status === 'completed' || input.status === 'cancelled'
             ? input.status
@@ -357,13 +359,17 @@ export function createAgentTools(context: ToolContext): {
             ? Math.min(10, Math.max(1, input.limit))
             : 5;
         const batches = digestBatches(operations, context.now(), { status, limit });
-        if (batches.length) cards.push({ kind: 'batches', data: batches });
         return {
-          summary: batches.length
-            ? batches.map((batch) => batch.summary).join(' ')
-            : '조건에 맞는 배치 기록이 없어요.',
-          batches: batches.map(batchForModel),
-          note: '등급 비율은 기록된 표본을 지금 기준으로 다시 매긴 값이고, 기록에 그때의 비·눈이 없어 세 축(기온·습도·풍속)만 썼어요.',
+          content: {
+            summary: batches.length
+              ? batches.map((batch) => batch.summary).join(' ')
+              : '조건에 맞는 배치 기록이 없어요.',
+            batches: batches.map(batchForModel),
+            note: '등급 비율은 기록된 표본을 지금 기준으로 다시 매긴 값이고, 기록에 그때의 비·눈이 없어 세 축(기온·습도·풍속)만 썼어요.',
+          },
+          ...(batches.length
+            ? { card: { kind: 'batches', data: batches } satisfies ToolCard }
+            : {}),
         };
       },
     },
@@ -381,8 +387,10 @@ export function createAgentTools(context: ToolContext): {
       },
       run: async (input, signal) => {
         const { summary, note } = await historyFor(readRange(input, context.now()), signal);
-        cards.push({ kind: 'history', data: summary });
-        return note ? { ...summary, note } : summary;
+        return {
+          content: note ? { ...summary, note } : summary,
+          card: { kind: 'history', data: [summary] } satisfies ToolCard,
+        };
       },
     },
     {
@@ -408,9 +416,10 @@ export function createAgentTools(context: ToolContext): {
           historyFor(baseRange, signal),
           historyFor(targetRange, signal),
         ]);
-        cards.push({ kind: 'history', data: base.summary });
-        cards.push({ kind: 'history', data: target.summary });
-        return compareHistory(base.summary, target.summary, [base.note, target.note]);
+        return {
+          content: compareHistory(base.summary, target.summary, [base.note, target.note]),
+          card: { kind: 'history', data: [base.summary, target.summary] } satisfies ToolCard,
+        };
       },
     },
     {
@@ -420,16 +429,17 @@ export function createAgentTools(context: ToolContext): {
       inputSchema: noInput,
       run: async () => {
         const forecast = snapshot.weather?.forecast;
-        if (!forecast?.hours.length) throw new Error('기상청 예보를 받지 못했어요.');
+        if (!forecast?.hours.length) throw new ToolNotice('기상청 예보를 받지 못했어요.');
         const outlook = forecastOutlook(forecast);
-        cards.push({ kind: 'forecast', data: outlook });
         return {
-          ...outlook,
-          issuedAt: kst(outlook.issuedAt),
-          hours: outlook.hours.map((hour) => ({ ...hour, at: kst(hour.at) })),
+          content: {
+            ...outlook,
+            issuedAt: kst(outlook.issuedAt),
+            hours: outlook.hours.map((hour) => ({ ...hour, at: kst(hour.at) })),
+          },
+          card: { kind: 'forecast', data: outlook } satisfies ToolCard,
         };
       },
     },
   ];
-  return { tools, cards };
 }

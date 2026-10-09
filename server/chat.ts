@@ -6,6 +6,7 @@ import {
   kst,
   type DryingGrade,
 } from '../src/lib/drying.ts';
+import type { HistorySummary } from '../src/lib/analysis.ts';
 import type { LiveObservation, LiveSnapshot } from '../src/lib/live.ts';
 import type { OperationsData } from '../src/lib/operations.ts';
 import type { Team } from '../src/lib/workspace.ts';
@@ -16,13 +17,24 @@ import {
   type ToolContext,
   type WeatherHistorySource,
 } from './agent-tools.ts';
-import { collectNumbers, currentSentences, ungroundedNumbers } from './answer-checks.ts';
+import {
+  addEvidence,
+  addLooseNumbers,
+  addTextEvidence,
+  currentSentences,
+  emptyEvidence,
+  promisesSafety,
+  ungroundedNumbers,
+  type Evidence,
+  type Unit,
+} from './answer-checks.ts';
 import { BridgeError, object, type BridgeConfig } from './eum.ts';
 import { ClaudeCliError, createClaudeAgent, type AgentAsk } from './claude-cli.ts';
 import { contextSystemPrompt, PROMPT_TEXT, toolSystemPrompt } from './prompts.ts';
 import {
   createToolServer,
   type ToolCall,
+  type ToolDefinition,
   type ToolServer,
   type ToolSession,
 } from './tool-server.ts';
@@ -85,7 +97,13 @@ export function readChatRequest(value: unknown): LiveChatRequest {
 }
 
 export function getAction(message: string): ChatReply['action'] {
-  if (/작업\s*안내|베트남|번역|근로자|전달/.test(message)) return 'guidance';
+  // "근로자 몇 명?"처럼 근로자를 묻기만 하는 말은 안내 작성이 아니다. 안내·전달·번역을 하려는 말만 고른다.
+  if (
+    /작업\s*안내|번역|전달|(?:근로자|베트남)[^?？]*(?:안내|알려\s*(?:줘|주|달)|보내|말해\s*(?:줘|주))/.test(
+      message,
+    )
+  )
+    return 'guidance';
   if (/기준|방법|어떻게|설명|신뢰|관측기|데이터|거리|사용법|이유/.test(message)) return undefined;
   if (
     /회수했|거뒀|거두었|(종료|완료|마무리|끝).*(작업|건조|기록|배치)|(작업|건조|배치).*(종료|완료|마무리|끝)/.test(
@@ -298,6 +316,7 @@ export type LiveChatOptions = {
 // AI 를 못 쓸 때 질문 종류를 가늠하는 말. 답을 만들지 않고, 어떤 자료 요약을 보여 줄지만 고른다.
 const ASKS_BATCHES = /배치|건조\s*기록|작업\s*기록|이번\s*작업|지난\s*작업/;
 const ASKS_SITE = /팀|인원|몇\s*명|근로자|직원|초대|덕장\s*(?:이름|주소|정보|위치)/;
+const ASKS_FORECAST = /예보|언제|이따|나중|오후|저녁|밤|내일|비\s*와|비\s*오/;
 const ASKS_CONDITIONS =
   /널|말리|말려|말릴|건조|날씨|기온|온도|습도|바람|풍속|비\s*와|비가|눈이|강수|등급|적합|관측|예보/;
 
@@ -321,8 +340,12 @@ function suggestionsFor(used: Set<string>): string[] {
   return ['지금 널어도 될까?', '지난 7일 건조 조건 분석해줘', '우리 팀 현황 알려줘'];
 }
 
-/** 성공한 도구가 남긴 카드를 응답 필드로 옮긴다. 같은 종류가 여러 번이면 마지막 것을 쓴다 (기간 요약은 두 개까지). */
-function cardsFrom(cards: ToolCard[], snapshot: LiveSnapshot): Partial<LiveChatReply> {
+/**
+ * 성공한 도구 호출의 카드를 응답 필드로 옮긴다. 같은 종류가 여러 번이면 마지막 것을 쓰고,
+ * 기간 요약은 같은 기간·출처를 하나로 합쳐 마지막 두 개까지 쓴다.
+ */
+function cardsFrom(calls: ToolCall[], snapshot: LiveSnapshot): Partial<LiveChatReply> {
+  const cards = calls.filter((call) => call.ok && call.card).map((call) => call.card as ToolCard);
   const reply: Partial<LiveChatReply> = {};
   const sources: string[] = [];
   if (cards.some((card) => card.kind === 'current')) {
@@ -334,7 +357,15 @@ function cardsFrom(cards: ToolCard[], snapshot: LiveSnapshot): Partial<LiveChatR
       );
     }
   }
-  const history = cards.flatMap((card) => (card.kind === 'history' ? [card.data] : [])).slice(-2);
+  const byPeriod = new Map<string, HistorySummary>();
+  for (const card of cards)
+    if (card.kind === 'history')
+      for (const item of card.data) {
+        const key = `${item.from}|${item.to}|${item.source}`;
+        byPeriod.delete(key);
+        byPeriod.set(key, item);
+      }
+  const history = [...byPeriod.values()].slice(-2);
   if (history.length) {
     reply.history = history;
     for (const item of history)
@@ -371,30 +402,40 @@ type Verdict = { ok: true } | { ok: false; reason: 'grade' | 'numbers' };
 
 /**
  * AI 답 검사.
- * - 현재 시점 문장이 규칙 등급과 다른 등급을 말하거나, 현재 관측을 보지 않고 지금 널어도 된다고 하면 grade
- * - 측정 숫자(°C·%·m/s·mm)가 도구 결과·기준·지시문·대화에 없으면 numbers
+ * - 현재 시점 문장이 규칙 등급과 다른 등급을 말하거나, 현재 관측을 보지 않고 지금 널어도 된다고 하거나,
+ *   품질·안전을 보장하면 grade
+ * - 측정 숫자(°C·%·m/s·mm)가 같은 단위의 근거(도구 결과·기준·지시문·대화)에 없으면 numbers
  */
 export function checkAnswer(input: {
   text: string;
   grade: DryingGrade | undefined;
   usedTools: Set<string>;
-  allowedNumbers: number[];
+  evidence: Evidence;
 }): Verdict {
   const usedCurrent = input.usedTools.has(TOOL_NAMES.current);
   const otherTimes = [...input.usedTools].some((name) => OTHER_TIME_TOOLS.has(name));
   const current = currentSentences(input.text, { current: usedCurrent, otherTimes }).join(' ');
   if (usedCurrent ? contradictsAssessment(current, input.grade) : hasUnsupportedVerdict(current))
     return { ok: false, reason: 'grade' };
-  // 안전 보장은 시점과 상관없이 막는다.
-  if (contradictsAssessment(input.text.replace(/적합|주의|부적합|판정\s*불가/g, ''), undefined))
-    return { ok: false, reason: 'grade' };
-  if (ungroundedNumbers(input.text, input.allowedNumbers).length)
-    return { ok: false, reason: 'numbers' };
+  if (promisesSafety(input.text)) return { ok: false, reason: 'grade' };
+  if (ungroundedNumbers(input.text, input.evidence).length) return { ok: false, reason: 'numbers' };
   return { ok: true };
 }
 
-const THRESHOLD_NUMBERS = collectNumbers(DRYING_THRESHOLDS);
-const PROMPT_NUMBERS = collectNumbers(PROMPT_TEXT);
+/** 어떤 답에서든 근거가 되는 숫자: 판정 기준값과 지시문(과메기 상식)에 단위와 함께 적힌 값. */
+const BASE_EVIDENCE = addTextEvidence(addEvidence(emptyEvidence(), DRYING_THRESHOLDS), PROMPT_TEXT);
+/** claude 가 프로세스를 멈추는 데 걸리는 최대 시간(SIGTERM 뒤 SIGKILL 5초) + 대체 답을 만들 여유 */
+const STOP_MARGIN_MS = 8000;
+
+/** 도구를 AI 없이 바로 실행해 호출 기록 모양으로 돌려준다 (대체 답·OpenAI 경로). */
+async function runDirect(tool: ToolDefinition, signal: AbortSignal): Promise<ToolCall> {
+  try {
+    const { content, card } = await tool.run({}, signal);
+    return { name: tool.name, input: {}, ok: true, result: content, card, ms: 0 };
+  } catch {
+    return { name: tool.name, input: {}, ok: false, ms: 0 };
+  }
+}
 
 export function createLiveChat(
   config: BridgeConfig,
@@ -415,17 +456,20 @@ export function createLiveChat(
     request: LiveChatRequest,
     snapshot: LiveSnapshot,
     signal: AbortSignal,
-    /** 경로 전체 제한이 끝나는 시각(ms). 관측을 기다린 만큼 AI 시간을 줄여 시간 초과 대신 대체 설명을 준다. */
+    /** 경로 전체 제한이 끝나는 시각(ms). 관측을 기다린 만큼 AI 시간을 줄여 시간 초과 대신 대체 답을 준다. */
     deadlineAt?: number,
     data: ChatData = {},
   ): Promise<LiveChatReply> => {
     signal.throwIfAborted();
     const aiSignal = (limitMs: number) => {
       const left =
-        deadlineAt === undefined ? limitMs : Math.min(limitMs, deadlineAt - Date.now() - 2000);
+        deadlineAt === undefined
+          ? limitMs
+          : Math.min(limitMs, deadlineAt - Date.now() - STOP_MARGIN_MS);
       return AbortSignal.any([signal, AbortSignal.timeout(Math.max(1000, left))]);
     };
     const action = getAction(request.message);
+    const prefill = action === 'start-batch' ? startPrefill(request.message) : undefined;
     const site = data.site ?? {
       name: snapshot.site?.name ?? '등록된 덕장',
       address: '',
@@ -433,126 +477,134 @@ export function createLiveChat(
       latitude: snapshot.site?.latitude ?? 0,
       longitude: snapshot.site?.longitude ?? 0,
     };
-    const context: ToolContext = {
+    const tools = createAgentTools({
       snapshot,
       site,
       uv: () => readUv(uvIndex),
       team:
         data.team ??
         (async () => {
-          throw new Error('팀 정보를 읽지 못했어요.');
+          throw new Error('팀 정보가 없다');
         }),
       operations: data.operations ?? (async () => null),
       history: options.history,
       now,
-    };
-    const { tools, cards } = createAgentTools(context);
+    });
+    const tool = (name: string) => tools.find((item) => item.name === name)!;
     const runtime = { now: now(), siteName: site.name, siteRegistered: Boolean(snapshot.site) };
-    const prefill = action === 'start-batch' ? startPrefill(request.message) : undefined;
     const base = {
       ...(action ? { action } : {}),
       ...(prefill ? { prefill } : {}),
       sourceFetchedAt: snapshot.fetchedAt,
     };
-    const allowedNumbers = (extra: unknown[]) => [
-      ...THRESHOLD_NUMBERS,
-      ...PROMPT_NUMBERS,
-      ...collectNumbers(request.message),
-      ...collectNumbers(request.history.map((entry) => entry.content)),
-      ...collectNumbers(extra),
-    ];
+    const evidenceFrom = (results: unknown[]) => {
+      const evidence = addEvidence(emptyEvidence(), results);
+      for (const unit of Object.keys(evidence) as Unit[])
+        evidence[unit].push(...BASE_EVIDENCE[unit]);
+      addLooseNumbers(evidence, request.message);
+      for (const entry of request.history)
+        if (entry.role === 'user') addLooseNumbers(evidence, entry.content);
+        else addTextEvidence(evidence, entry.content);
+      return evidence;
+    };
 
     /**
      * AI 없이 줄 답. 질문 종류를 말로 가늠해 그 자료의 코드 요약만 보여 준다.
      * 지금 날씨를 묻지 않았으면 널기 등급을 꺼내지 않는다.
      */
     const offline = async (notice: string): Promise<LiveChatReply> => {
-      const reply = (content: string, extra: Partial<LiveChatReply> = {}): LiveChatReply => ({
+      const reply = (content: string, calls: ToolCall[] = []): LiveChatReply => ({
         ...base,
-        ...extra,
+        ...cardsFrom(calls, snapshot),
         content,
         suggestions: suggestionsFor(new Set()),
         provider: 'local',
         providerNotice: notice,
       });
-      const run = async (name: string) => {
-        try {
-          const tool = tools.find((item) => item.name === name)!;
-          const result = await tool.run({}, signal);
-          return object(result) && typeof result.summary === 'string' ? result.summary : null;
-        } catch {
-          return null;
-        }
-      };
       if (ASKS_BATCHES.test(request.message)) {
-        const summary = await run(TOOL_NAMES.batches);
-        if (summary) return reply(summary, cardsFrom(cards, snapshot));
+        const call = await runDirect(tool(TOOL_NAMES.batches), signal);
+        const summary = toolSummaries([call]);
+        if (summary) return reply(summary, [call]);
       }
       if (ASKS_SITE.test(request.message)) {
-        const summary = await run(TOOL_NAMES.site);
+        const call = await runDirect(tool(TOOL_NAMES.site), signal);
+        const summary = toolSummaries([call]);
         if (summary) return reply(summary);
+        if (!ASKS_CONDITIONS.test(request.message))
+          return reply('지금은 덕장·팀 정보를 읽지 못했어요. 잠시 뒤 다시 물어봐 주세요.');
       }
-      if (
-        ASKS_CONDITIONS.test(request.message) ||
-        action === 'start-batch' ||
-        action === 'guidance'
-      )
-        return reply(
-          localExplanation(snapshot, action),
-          cardsFrom([{ kind: 'current' }], snapshot),
-        );
+      if (ASKS_CONDITIONS.test(request.message) || action === 'start-batch')
+        return reply(localExplanation(snapshot, action), [currentCall]);
       return reply(
         action
           ? localExplanation(snapshot, action).split('\n')[0]
           : '지금은 AI가 답하지 못해 자세한 설명을 드릴 수 없어요. 잠시 뒤 다시 물어봐 주세요.',
       );
     };
+    /** 현재 상태 카드만 붙이는 가짜 호출 (규칙 문장으로 바꿀 때) */
+    const currentCall: ToolCall = {
+      name: TOOL_NAMES.current,
+      input: {},
+      ok: true,
+      card: { kind: 'current' },
+      ms: 0,
+    };
 
-    /** 검사를 통과한 답을 응답으로 만들고, 걸리면 도구 요약이나 규칙 문장으로 바꾼다. */
+    /**
+     * 검사를 통과한 답을 응답으로 만들고, 걸리면 바꾼다.
+     * - 현재 상태만 본 답의 등급이 틀리면 규칙 문장
+     * - 다른 때를 함께 본 답이 걸리면 그 도구들의 요약 (summariesAllowed 일 때)
+     * - 그 밖에는 질문 종류에 맞는 대체 답
+     */
     const finish = async (
       text: string,
       provider: LiveChatReply['provider'],
-      usedTools: Set<string>,
       calls: ToolCall[],
-      evidence: unknown[],
+      summariesAllowed: boolean,
     ): Promise<LiveChatReply> => {
       if (!text || text.length > 4000)
         return offline('AI 답변 형식을 확인할 수 없어 자료 요약만 안내해요.');
+      const usedTools = new Set(calls.filter((call) => call.ok).map((call) => call.name));
       const verdict = checkAnswer({
         text,
         grade: snapshot.assessment?.grade,
         usedTools,
-        allowedNumbers: allowedNumbers(evidence),
+        evidence: evidenceFrom(calls.filter((call) => call.ok).map((call) => call.result)),
       });
-      const shown = cardsFrom(cards, snapshot);
-      if (!verdict.ok && verdict.reason === 'grade')
+      const replace = (content: string, shown: ToolCall[], notice: string): LiveChatReply => ({
+        ...base,
+        ...cardsFrom(shown, snapshot),
+        content,
+        suggestions: suggestionsFor(usedTools),
+        provider: 'local',
+        providerNotice: notice,
+      });
+      if (verdict.ok)
         return {
           ...base,
-          ...shown,
-          ...cardsFrom([{ kind: 'current' }], snapshot),
-          content: localExplanation(snapshot, action),
+          ...cardsFrom(calls, snapshot),
+          content: text,
           suggestions: suggestionsFor(usedTools),
-          provider: 'local',
-          providerNotice: mismatchNotice(snapshot),
+          provider,
         };
-      if (!verdict.ok) {
-        const summary = toolSummaries(calls);
-        if (!summary)
-          return offline('AI 답변에 자료에서 확인되지 않은 숫자가 있어 자료 요약만 안내해요.');
-        return {
-          ...base,
-          ...shown,
-          content: summary,
-          suggestions: suggestionsFor(usedTools),
-          provider: 'local',
-          providerNotice: 'AI 답변에 자료에서 확인되지 않은 숫자가 있어 자료 요약으로 바꿨어요.',
-        };
-      }
-      return { ...base, ...shown, content: text, suggestions: suggestionsFor(usedTools), provider };
+      const otherTimes = [...usedTools].some((name) => OTHER_TIME_TOOLS.has(name));
+      if (verdict.reason === 'grade' && usedTools.has(TOOL_NAMES.current) && !otherTimes)
+        return replace(localExplanation(snapshot, action), calls, mismatchNotice(snapshot));
+      const summary = summariesAllowed ? toolSummaries(calls) : '';
+      const notice =
+        verdict.reason === 'grade'
+          ? 'AI 답변이 규칙 판정과 달라 자료 요약으로 바꿨어요.'
+          : 'AI 답변에 자료에서 확인되지 않은 숫자가 있어 자료 요약으로 바꿨어요.';
+      if (summary) return replace(summary, calls, notice);
+      return offline(
+        verdict.reason === 'grade'
+          ? mismatchNotice(snapshot)
+          : 'AI 답변에 자료에서 확인되지 않은 숫자가 있어 자료 요약만 안내해요.',
+      );
     };
 
     if (ask && config.claude) {
-      // 사용량 DB 문제로 답변 전체가 실패하지 않게, 조회 실패는 대체 설명으로, 기록 실패는 무시한다.
+      // 사용량 DB 문제로 답변 전체가 실패하지 않게, 조회 실패는 대체 답으로, 기록 실패는 무시한다.
       let spent = 0;
       try {
         spent = usage?.spentLast24h() ?? 0;
@@ -584,15 +636,7 @@ export function createLiveChat(
         });
         record(costUsd);
         signal.throwIfAborted();
-        const calls = [...session.calls];
-        const used = new Set(calls.filter((call) => call.ok).map((call) => call.name));
-        return await finish(
-          text,
-          'claude',
-          used,
-          calls,
-          calls.map((call) => (call.ok ? call.result : call.error)),
-        );
+        return await finish(text, 'claude', [...session.calls], true);
       } catch (error) {
         const failure = error instanceof ClaudeCliError ? error : undefined;
         // claude 가 비용을 알려 준 실패(예: 메시지당 상한 초과)는 그 값을 센다. 시간 초과·취소는 비용을 알 수
@@ -618,24 +662,18 @@ export function createLiveChat(
     if (!config.openaiApiKey) return offline('AI 키가 서버에 설정되지 않아 자료 요약만 안내해요.');
     try {
       // 도구가 없는 제공자에는 지금 관측·덕장·배치·예보를 미리 담아 준다. 과거 기간 분석은 하지 않는다.
-      const prepared: Record<string, unknown> = {};
-      for (const [key, name] of [
-        ['current', TOOL_NAMES.current],
-        ['site', TOOL_NAMES.site],
-        ['batches', TOOL_NAMES.batches],
-        ['forecast', TOOL_NAMES.forecast],
-      ] as const) {
-        const tool = tools.find((item) => item.name === name)!;
-        prepared[key] = await tool.run({}, signal).catch(() => null);
-      }
-      // 미리 담은 자료는 질문과 상관없이 모두 들어 있으므로, 카드는 질문 종류로 고른다.
-      const shownCards = cards.filter(
-        (card) =>
-          (card.kind === 'current' &&
-            (ASKS_CONDITIONS.test(request.message) || action === 'start-batch')) ||
-          (card.kind === 'batches' && ASKS_BATCHES.test(request.message)),
+      const prepared = await Promise.all(
+        [TOOL_NAMES.current, TOOL_NAMES.site, TOOL_NAMES.batches, TOOL_NAMES.forecast].map((name) =>
+          runDirect(tool(name), signal),
+        ),
       );
-      cards.splice(0, cards.length, ...shownCards);
+      const [current, overview, batches, forecast] = prepared;
+      const context = {
+        current: current.ok ? current.result : null,
+        site: overview.ok ? overview.result : null,
+        batches: batches.ok ? batches.result : null,
+        forecast: forecast.ok ? forecast.result : null,
+      };
       const response = await fetcher(`${config.llmBaseUrl.replace(/\/+$/, '')}/chat/completions`, {
         method: 'POST',
         redirect: 'error',
@@ -649,7 +687,7 @@ export function createLiveChat(
           stream: false,
           max_tokens: 600,
           messages: [
-            { role: 'system', content: contextSystemPrompt(runtime, prepared) },
+            { role: 'system', content: contextSystemPrompt(runtime, context) },
             ...request.history,
             { role: 'user', content: request.message },
           ],
@@ -667,20 +705,17 @@ export function createLiveChat(
       }
       const text = readCompletionText(await response.json());
       signal.throwIfAborted();
-      const used = new Set<string>([
-        TOOL_NAMES.current,
-        TOOL_NAMES.site,
-        TOOL_NAMES.batches,
-        TOOL_NAMES.forecast,
-      ]);
-      const calls: ToolCall[] = Object.entries(prepared).map(([key, result]) => ({
-        name: key,
-        input: {},
-        ok: result !== null,
-        result,
-        ms: 0,
-      }));
-      return await finish(text, llmProviderName(config), used, calls, Object.values(prepared));
+      // 미리 담은 자료는 질문과 상관없이 모두 들어 있으므로, 카드는 질문 종류로 고른다.
+      const asked = (call: ToolCall) =>
+        call === current
+          ? ASKS_CONDITIONS.test(request.message) || action === 'start-batch'
+          : call === batches
+            ? ASKS_BATCHES.test(request.message)
+            : call === forecast
+              ? ASKS_FORECAST.test(request.message)
+              : true;
+      const shown = prepared.map((call) => (asked(call) ? call : { ...call, card: undefined }));
+      return await finish(text, llmProviderName(config), shown, false);
     } catch {
       signal.throwIfAborted();
       return offline('AI 연결 또는 응답 확인에 실패해 자료 요약만 안내해요.');

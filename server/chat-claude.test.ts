@@ -296,7 +296,7 @@ test('the OpenAI-compatible provider stays the default and never starts claude',
   assert.equal(fake.calls().length, 0);
 });
 
-test('the AI only gets the time left before the 45 s route deadline, then the local explanation', async () => {
+test('the AI only gets the time left before the route deadline (minus the stop margin), then the fallback', async () => {
   const fake = makeFakeClaude({ sleepMs: 20000 }, { timeoutMs: 30000 });
   const started = Date.now();
   // 관측·자외선에 시간을 다 쓰고 3.5초만 남은 상황
