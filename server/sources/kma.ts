@@ -50,11 +50,12 @@ export const AWS_816 = {
   provider: 'kma' as const,
 };
 
-const PRECIPITATION: Record<string, string> = {
+export const PRECIPITATION: Record<string, string> = {
   '0': '없음',
   '1': '비',
   '2': '비/눈',
   '3': '눈',
+  '4': '소나기',
   '5': '빗방울',
   '6': '빗방울눈날림',
   '7': '눈날림',
@@ -100,7 +101,7 @@ export function toKmaGrid(latitude: number, longitude: number): { nx: number; ny
 }
 
 /** KST 시각 문자열 `YYYYMMDDHHMI` 를 ISO 로. */
-function kstIso(stamp: string): string | null {
+export function kstIso(stamp: string): string | null {
   const match = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(stamp);
   if (!match) return null;
   const parsed = Date.parse(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:00+09:00`);
@@ -112,7 +113,7 @@ function kstIso(stamp: string): string | null {
 }
 
 /** KST 기준 날짜·시각 조각. */
-function kstParts(time: number) {
+export function kstParts(time: number) {
   const kst = new Date(time + 9 * 60 * 60 * 1000).toISOString();
   return {
     date: kst.slice(0, 10).replaceAll('-', ''),
@@ -125,6 +126,36 @@ function kstParts(time: number) {
 function measured(value: string | undefined, min = -50, max = Infinity): number | null {
   const number = Number(value);
   return Number.isFinite(number) && number > min && number <= max ? number : null;
+}
+
+/** AWS 매분자료(A2) 응답의 816 관측 줄을 모두 읽는다 (과거 기간 조회용). -50 이하는 없는 값이다. */
+export function readAwsRows(body: string): {
+  at: string;
+  temperature: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  rain60mMm: number | null;
+}[] {
+  return body
+    .split('\n')
+    .map((row) => row.trim())
+    .filter((row) => row && !row.startsWith('#'))
+    .map((row) => row.split(/\s+/))
+    .filter((column) => column.length >= 15 && column[1] === '816')
+    .flatMap((column) => {
+      const at = kstIso(column[0]);
+      return at
+        ? [
+            {
+              at,
+              temperature: measured(column[8], -50, 60),
+              humidity: measured(column[14], -1, 100),
+              windSpeed: measured(column[7], -1, 100),
+              rain60mMm: measured(column[11]),
+            },
+          ]
+        : [];
+    });
 }
 
 /** AWS 매분자료(A2) 응답에서 마지막 관측 줄을 읽는다. */
@@ -257,7 +288,7 @@ export function readRiseSet(xml: string): SiteWeather['sun'] {
 }
 
 /** 공공데이터포털 키는 인코딩된 값(Encoding)이면 한 번 풀어 둔다. URLSearchParams 가 다시 한 번 인코딩한다. */
-function plainKey(key: string): string {
+export function plainKey(key: string): string {
   if (!key.includes('%')) return key;
   try {
     return decodeURIComponent(key);

@@ -44,10 +44,11 @@ cp docs/decisions/_template.md docs/decisions/0002-<slug>.md
 | [0002](0002-gcp-runtime-layout.md) | GCP VM 하나에 dev·prod 를 나눠 띄우고 SQLite 는 공유 | 2026-10-04 | 대체됨 (→ 0005) |
 | [0003](0003-claude-cli-wrapper.md) | claude CLI 를 메시지마다 띄우고 E-UM 은 MCP 도구로 제공 | 2026-10-04 | 일부 대체됨 (→ 0005) |
 | [0004](0004-dev-port-open-for-phone.md) | dev 포트(3001)도 외부에 열어 폰으로 UI 를 확인 | 2026-10-04 | 대체됨 (→ 0005) |
-| [0005](0005-merge-backend-into-haepung-app.md) | 백엔드를 팀원의 해풍 앱 서버에 합치고 화면의 API 계약을 정본으로 둠 | 2026-10-04 | 일부 대체됨 (→ 0007, 0008) |
+| [0005](0005-merge-backend-into-haepung-app.md) | 백엔드를 팀원의 해풍 앱 서버에 합치고 화면의 API 계약을 정본으로 둠 | 2026-10-04 | 일부 대체됨 (→ 0007, 0008, 0011) |
 | [0006](0006-shared-db-validation-order.md) | dev·prod DB 공유를 유지하고, 저장 검증 규칙 변경은 prod 배포를 먼저 함 | 2026-10-04 | 확정 |
 | [0007](0007-dev-subdomain-on-443.md) | dev 를 440 대신 같은 443 의 `dev.` 주소로 연다 | 2026-10-06 | 확정 |
 | [0008](0008-open-dev-app-files-only.md) | dev 를 암호 없이 열고 화면에 필요한 파일만 준다 | 2026-10-06 | 확정 |
 | [0009](0009-kma-fallback-for-eum.md) | E-UM 을 정본으로 두고 기상청 AWS 816 을 대체·교차 확인에 쓴다 | 2026-10-06 | 일부 대체됨 (→ 0010) |
-| [0010](0010-drying-grade-rules.md) | 널기 등급을 규칙 함수로 산출한다 (가설 기준, 기준값과 함께 기록) | 2026-10-06 | 확정 |
+| [0010](0010-drying-grade-rules.md) | 널기 등급을 규칙 함수로 산출한다 (가설 기준, 기준값과 함께 기록) | 2026-10-06 | 일부 대체됨 (→ 0011) |
+| [0011](0011-assistant-reads-with-tools.md) | AI 도우미는 읽기 전용 도구로 필요한 자료만 보고, 카드는 본 자료로 정한다 | 2026-10-09 | 확정 |
 | [0012](0012-invite-link-rederive.md) | 초대 토큰을 서버 비밀값의 HMAC 으로 만들어 대기 중인 초대 링크를 다시 복사한다 | 2026-10-09 | 확정 |

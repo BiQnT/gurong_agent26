@@ -1,6 +1,6 @@
 # 서버 구조
 
-최종 확인: **2026-10-04** · 정본: [server/main.ts](../../server/main.ts), [server/vite-api.ts](../../server/vite-api.ts), [server/workspace.ts](../../server/workspace.ts), [server/sqlite-store.ts](../../server/sqlite-store.ts), [server/claude-cli.ts](../../server/claude-cli.ts), [server/chat.ts](../../server/chat.ts), [server/collect.ts](../../server/collect.ts)
+최종 확인: **2026-10-09** · 정본: [server/main.ts](../../server/main.ts), [server/vite-api.ts](../../server/vite-api.ts), [server/workspace.ts](../../server/workspace.ts), [server/sqlite-store.ts](../../server/sqlite-store.ts), [server/claude-cli.ts](../../server/claude-cli.ts), [server/chat.ts](../../server/chat.ts), [server/collect.ts](../../server/collect.ts)
 
 왜 이렇게 정했나: [0005 백엔드 통합](../decisions/0005-merge-backend-into-haepung-app.md). 엔드포인트와 요청·응답은 [관측·채팅 API](chat-api.md), [계정·작업 API](workspace-api.md)에 있고 여기서는 되풀이하지 않는다. VM 배치·배포·백업은 [infra/gcp/README.md](../../infra/gcp/README.md). 변수 이름은 [.env.example](../../.env.example).
 
@@ -56,13 +56,18 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 
 ## LLM 제공자
 
-`LLM_PROVIDER` 가 `claude` 이면 claude CLI, 그 밖에는 OpenAI 호환 HTTP API(기본)다. 어느 쪽이든 서버가 관측 근거를 확보해 시스템 프롬프트로 주고 모델은 설명만 쓴다. 모델에는 도구가 없고 판정·등급은 코드가 정한다. 응답이 규칙 등급과 어긋나거나(다른 등급, 적합이 아닌데 널어도 된다는 말, 안전 보장) 호출이 실패하면 규칙 등급을 옮긴 로컬 설명으로 바꾸고 `provider: local` 과 `providerNotice` 를 붙인다. 등급 규칙은 [0010](../decisions/0010-drying-grade-rules.md).
+`LLM_PROVIDER` 가 `claude` 이면 claude CLI, 그 밖에는 OpenAI 호환 HTTP API(기본)다. 기본 지시는 [server/prompts/](../../server/prompts/)의 md 파일(페르소나·규칙·도구 쓰는 법·자료 읽는 법·과메기 상식)이고 서버가 시작할 때 읽는다. 판정·등급·숫자는 코드가 정하고 모델은 설명만 쓴다 ([0010](../decisions/0010-drying-grade-rules.md), [0011](../decisions/0011-assistant-reads-with-tools.md)).
+
+- **claude**: 이 덕장의 읽기 전용 도구 6개(`server/agent-tools.ts`)를 부를 수 있다. 서버는 AI 가 실제로 부른 도구로 화면 카드를 정한다. 도구 목록과 카드는 [채팅 요청·응답](chat-api.md#채팅-요청응답).
+- **OpenAI 호환**: 도구 없이, 같은 지시문과 서버가 미리 담은 자료(현재 관측·덕장·배치·예보)로 답한다. 과거 기간 분석은 하지 않는다.
+- 답은 내보내기 전에 검사하고(`server/answer-checks.ts`), 걸리면 규칙 문장이나 도구가 만든 요약으로 바꾼 뒤 `provider: local` 과 `providerNotice` 를 붙인다. 호출이 실패해도 질문 종류에 맞는 대체 답을 준다. 검사 규칙과 대체 답은 [chat-api.md](chat-api.md#ai-가-보는-자료-도구).
 
 **claude CLI** (`server/claude-cli.ts`): 메시지마다 `claude -p` 프로세스 하나. 프롬프트는 stdin, 결과는 `--output-format json`. 이전 대화는 화면이 보낸 `history` 를 글로 이어 붙이고, 첫 질문도 `지금 질문:` 으로 감싼다. `/` 로 시작하는 입력은 `--disable-slash-commands` 를 줘도 CLI 가 명령으로 가로채기 때문이다.
 
 - 제한 플래그: `--tools ""`, `--strict-mcp-config`, `--disable-slash-commands`, `--setting-sources ""`, `--no-session-persistence`, `--max-budget-usd`. `api_key` 모드는 `--bare` 를 더한다.
+- 도구: `--mcp-config` 로 서버 안의 루프백 MCP 엔드포인트(`server/tool-server.ts`, 127.0.0.1 임의 포트, Streamable HTTP 의 JSON 응답만)를 주고 `--allowedTools mcp__haepung` 으로 그것만 허용한다. 채팅 요청마다 일회용 토큰을 만들고 요청이 끝나면 지운다. 토큰은 인자가 아니라 환경변수 `HAEPUNG_TOOL_TOKEN` 으로 넘긴다 (프로세스 목록에 보이지 않게). 한 질문에 도구는 8번까지다.
 - 작업 폴더는 빈 폴더(`AGENT_WORKDIR`). 자식 프로세스에는 허용 목록의 환경변수(`PATH`, `HOME`, `CLAUDE_CONFIG_DIR` 등)와 인증 값 하나만 넘기고 `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` 을 건다. E-UM 키 같은 다른 비밀값은 넘기지 않는다.
-- 시간 초과(`AGENT_TIMEOUT_MS`)는 프로세스 그룹에 SIGTERM, 5초 뒤 SIGKILL 이다. 화면이 요청을 취소하거나 전체 45초 제한이 지나도 같은 방법으로 멈춰 동시 실행 자리를 바로 돌려준다.
+- 시간 초과(`AGENT_TIMEOUT_MS`)는 프로세스 그룹에 SIGTERM, 5초 뒤 SIGKILL 이다. 화면이 요청을 취소하거나 채팅 경로 전체 제한(90초)이 지나도 같은 방법으로 멈춰 동시 실행 자리를 바로 돌려준다.
 - 인증 값(`CLAUDE_CODE_OAUTH_TOKEN` 또는 `ANTHROPIC_API_KEY`)은 `.env.local` 이 아니라 프로세스 환경변수에서만 읽는다. VM 은 systemd 가 `backend.env` 로 넣는다.
 
 | 변수 | 기본값 | 뜻 |
@@ -73,7 +78,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 | `AGENT_AUTH_MODE` | `subscription` | `subscription`: 토큰 또는 서버 로그인. `api_key`: `--bare` + `ANTHROPIC_API_KEY` |
 | `AGENT_MODEL`, `AGENT_EFFORT` | CLI 기본 | 모델, 추론 강도 |
 | `AGENT_MAX_BUDGET_USD` | `0.5` | 메시지 하나당 비용 상한. 시간 초과 때 기록하는 비용이기도 하다 |
-| `AGENT_TIMEOUT_MS` | `40000` | 메시지 하나당 시간 제한 |
+| `AGENT_TIMEOUT_MS` | `75000` | 메시지 하나당 시간 제한 (도구 왕복 포함) |
 | `AGENT_MAX_CONCURRENCY` | `4` | 동시에 띄우는 claude 수. 넘으면 로컬 설명 |
 | `AGENT_DAILY_BUDGET_USD` | `10` | 최근 24시간 비용 합계 상한. `DATABASE_PATH` 가 있을 때만 세고 dev·prod 가 합산 |
 
@@ -83,7 +88,7 @@ dev 가 저장 형식을 바꾸는 작업을 할 때는 `copy-prod-to-dev.ts` �
 | --- | --- |
 | 정상 종료 | claude 가 알려 준 실제 비용 |
 | 비용을 알려 준 실패 (예: 메시지당 상한 초과) | 그 비용 |
-| 시간 초과, 화면이 취소 (연결 끊김, 전체 45초 제한) | 비용을 알 수 없어 `AGENT_MAX_BUDGET_USD × (돈 시간 / AGENT_TIMEOUT_MS)`. 제한 시간을 다 쓰면 메시지당 상한 전체다. 세지 않으면 취소를 반복해 하루 한도를 피해 갈 수 있다 |
+| 시간 초과, 화면이 취소 (연결 끊김, 채팅 전체 90초 제한) | 비용을 알 수 없어 `AGENT_MAX_BUDGET_USD × (돈 시간 / AGENT_TIMEOUT_MS)`. 제한 시간을 다 쓰면 메시지당 상한 전체다. 세지 않으면 취소를 반복해 하루 한도를 피해 갈 수 있다 |
 | 그 밖에 비용을 알 수 없는 실패 | 세지 않는다 |
 
 VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env.example). OpenAI 호환 경로의 변수(`OPENAI_API_KEY`, `LLM_API_BASE` 등)와 응답 형식은 [chat-api.md](chat-api.md).

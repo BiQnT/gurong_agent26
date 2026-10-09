@@ -70,6 +70,12 @@ export type Assessment = {
   thresholds?: DryingThresholds;
 };
 
+/** 등급과 서술격 조사. 받침이 있으면 '이에요': '적합'이에요, '주의'예요. */
+export function gradeIs(grade: DryingGrade): string {
+  const syllable = grade.charCodeAt(grade.length - 1) - 0xac00;
+  return `'${grade}'${syllable >= 0 && syllable % 28 !== 0 ? '이에요' : '예요'}`;
+}
+
 /** ISO 시각을 한국 시간 `MM.DD HH:mm KST` 로. 서버·화면·AI 설명이 같은 표기를 쓴다. */
 export function kst(value: string | null | undefined): string {
   const time = value ? Date.parse(value) : NaN;

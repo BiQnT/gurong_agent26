@@ -38,4 +38,4 @@
 
 2026-10-04 E-UM 목록·일괄·단건 API는 모두 200을 확인했다. [호출 기록](research/api-tests/2026-10-04-eum-key.md). OpenAI 실제 호출 결과는 [이전 기록](research/api-tests/2026-10-03-live-connection.md)에 있다.
 
-운영 서버(`node server/main.ts`)는 화면과 API를 함께 제공하며, VM에서 Caddy(HTTPS) 뒤에 돌아 폰에서도 쓴다. 허용 출처 전체 일치, Secure 쿠키, 로그인·가입 시도 제한으로 접근을 좁히고, 암호 없이 연 dev 는 화면 파일만 내준다. AI 설명은 claude CLI(도구 없음, 비용·시간·동시 실행 상한) 또는 OpenAI 호환 API가 쓰고, 판정은 코드가 한다. prod 전용 30분 수집기가 진행 중인 배치에 관측·결측과 규칙 등급을 기록하고 부적합이면 경보를 남긴다. 이메일 확인·비밀번호 재설정 메일은 없다. 정적 빌드만 배포하면 서버가 포함되지 않는다. 구조는 [서버 구조](docs/design/backend.md), 배포·백업은 [infra/gcp/README.md](infra/gcp/README.md).
+운영 서버(`node server/main.ts`)는 화면과 API를 함께 제공하며, VM에서 Caddy(HTTPS) 뒤에 돌아 폰에서도 쓴다. 허용 출처 전체 일치, Secure 쿠키, 로그인·가입 시도 제한으로 접근을 좁히고, 암호 없이 연 dev 는 화면 파일만 내준다. AI 설명은 claude CLI(이 덕장의 읽기 전용 도구만, 비용·시간·동시 실행 상한, [0011](docs/decisions/0011-assistant-reads-with-tools.md)) 또는 OpenAI 호환 API가 쓰고, 판정과 숫자는 코드가 한다. prod 전용 30분 수집기가 진행 중인 배치에 관측·결측과 규칙 등급을 기록하고 부적합이면 경보를 남긴다. 이메일 확인·비밀번호 재설정 메일은 없다. 정적 빌드만 배포하면 서버가 포함되지 않는다. 구조는 [서버 구조](docs/design/backend.md), 배포·백업은 [infra/gcp/README.md](infra/gcp/README.md).

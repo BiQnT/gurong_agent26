@@ -63,7 +63,7 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
         model: undefined,
         effort: undefined,
         maxBudgetUsd: 0.5,
-        timeoutMs: 40000,
+        timeoutMs: 75000,
         maxConcurrency: 4,
         dailyBudgetUsd: 10,
       },
@@ -436,7 +436,7 @@ test('Responses output is read across messages and model failures keep immutable
   assert.equal(reply.action, 'start-batch');
   assert.equal(reply.assessment, undefined);
   assert.deepEqual(reply.observation, snapshot.selected);
-  assert.ok(input.includes('OBSERVATION_CONTEXT'));
+  assert.ok(input.includes('# CONTEXT'));
   assert.ok(!input.includes(config.eumServiceKey) && !input.includes(config.openaiApiKey));
   const failure = await createLiveChat(
     config,
