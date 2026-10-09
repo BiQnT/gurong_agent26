@@ -32,6 +32,15 @@ export type InvitePreview = {
 };
 export type OperationsEnvelope = { data: OperationsData; revision: number };
 
+/** 새 비밀번호 규칙. 서버 가입 검증과 가입 화면이 같은 문구·함수를 쓴다. */
+export const PASSWORD_RULE = '비밀번호는 8~128자로, 문자와 숫자를 하나 이상 넣어 주세요.';
+/** 가입처럼 비밀번호를 새로 정할 때만 쓴다. 로그인은 규칙 전에 만든 비밀번호도 받도록 길이만 본다. */
+export const isStrongPassword = (password: string) =>
+  password.length >= 8 &&
+  password.length <= 128 &&
+  /\p{L}/u.test(password) &&
+  /[0-9]/.test(password);
+
 export class WorkspaceError extends Error {
   status: number;
   code: string;

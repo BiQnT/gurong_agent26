@@ -13,17 +13,19 @@ import {
   type GuidanceReply,
   type OperationsData,
 } from '../src/lib/operations.ts';
-import type {
-  Account,
-  Invitation,
-  InvitePreview,
-  MemberLanguage,
-  MemberRole,
-  OperationsEnvelope,
-  Site,
-  SiteInput,
-  Team,
-  WorkspaceSession,
+import {
+  isStrongPassword,
+  PASSWORD_RULE,
+  type Account,
+  type Invitation,
+  type InvitePreview,
+  type MemberLanguage,
+  type MemberRole,
+  type OperationsEnvelope,
+  type Site,
+  type SiteInput,
+  type Team,
+  type WorkspaceSession,
 } from '../src/lib/workspace.ts';
 
 const COOKIE_NAME = 'gwamegi_session';
@@ -324,6 +326,8 @@ function readCredentials(value: unknown, signup = false) {
   ) {
     fail(400, 'INVALID_CREDENTIALS', '이름, 이메일과 8~128자의 비밀번호를 확인해 주세요.');
   }
+  // 로그인은 규칙이 생기기 전에 만든 비밀번호도 받아야 하므로 문자·숫자 규칙은 가입에만 적용한다.
+  if (signup && !isStrongPassword(value.password)) fail(400, 'WEAK_PASSWORD', PASSWORD_RULE);
   return {
     email: value.email.trim().toLowerCase(),
     password: value.password,

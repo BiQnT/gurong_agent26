@@ -11,6 +11,7 @@ import {
   createWorkspaceMiddleware,
   createWorkspaceService,
   openWorkspaceStore,
+  passwordHash,
 } from './workspace.ts';
 import { createApiMiddleware } from './vite-api.ts';
 import { runScript, scriptPath } from './test-helpers/run-script.ts';
@@ -245,6 +246,54 @@ test('signup, duplicate rejection, login, session rotation and logout use protec
   assert.ok(!raw.includes(credentials('Owner').password));
   assert.ok(!raw.includes(loggedInCookie.split('=')[1]));
   assert.equal((await stat(f.dataFile)).mode & 0o777, 0o600);
+});
+
+test('new passwords need 8 to 128 characters with a letter and a digit, older ones still log in', async (t) => {
+  const f = await fixture(t);
+  // 규칙 전에 가입한 계정(문자만 있는 비밀번호)을 첫 요청 전에 저장해 둔다.
+  const salt = '0123456789abcdef0123456789abcdef';
+  await writeFile(
+    f.dataFile,
+    JSON.stringify({
+      version: 1,
+      users: [
+        {
+          id: 'legacy-user',
+          name: 'Legacy',
+          email: 'legacy@example.test',
+          salt,
+          passwordHash: await passwordHash('onlyletters', salt),
+          createdAt: '2026-10-01T00:00:00.000Z',
+        },
+      ],
+      sites: [],
+      memberships: [],
+      sessions: [],
+      invitations: [],
+      operations: [],
+    }),
+  );
+  const signup = (password: string) =>
+    f.agent().call('/auth/signup', 'POST', { ...credentials('New'), password });
+  for (const password of ['onlyletters', '12345678', '--------', 'abc1234']) {
+    const rejected = await signup(password);
+    assert.equal(rejected.status, 400, password);
+    assert.match(rejected.body.code, /^(WEAK_PASSWORD|INVALID_CREDENTIALS)$/, password);
+  }
+  const weak = await signup('onlyletters');
+  assert.equal(weak.body.code, 'WEAK_PASSWORD');
+  assert.match(weak.body.error, /문자와 숫자/);
+  assert.equal((await signup(`a1${'x'.repeat(127)}`)).status, 400);
+  assert.equal((await signup('덕장비밀번호2026')).status, 200);
+  assert.equal(
+    (
+      await f.agent().call('/auth/login', 'POST', {
+        email: 'legacy@example.test',
+        password: 'onlyletters',
+      })
+    ).status,
+    200,
+  );
 });
 
 test('site registration validates coordinates and every owner route enforces site membership', async (t) => {

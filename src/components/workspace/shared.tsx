@@ -6,6 +6,7 @@ import { WorkspaceError, type MemberLanguage } from '../../lib/workspace';
 
 const vietnameseErrors: Record<string, string> = {
   INVALID_CREDENTIALS: 'Kiểm tra họ tên, email và mật khẩu từ 8 đến 128 ký tự.',
+  WEAK_PASSWORD: 'Mật khẩu cần từ 8 đến 128 ký tự, có ít nhất một chữ cái và một chữ số.',
   EMAIL_IN_USE: 'Email này đã được đăng ký. Hãy chọn Đăng nhập để tiếp tục.',
   LOGIN_FAILED: 'Email hoặc mật khẩu không chính xác. Hãy kiểm tra và thử lại.',
   AUTH_REQUIRED: 'Phiên đăng nhập đã hết hạn. Hãy tải lại trang và đăng nhập.',

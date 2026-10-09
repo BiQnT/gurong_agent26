@@ -1,6 +1,6 @@
 # 계정·덕장 API
 
-최종 확인: **2026-10-04**
+최종 확인: **2026-10-09**
 
 정본 계약: [`src/lib/workspace.ts`](../../src/lib/workspace.ts). 구현: [`server/workspace.ts`](../../server/workspace.ts), Vite 연결: [`server/vite-api.ts`](../../server/vite-api.ts). 이 문서는 실제 구현의 범위를 설명한다. 서버 구성(저장소, 접근 제어)은 [서버 구조](backend.md)에 있다.
 
@@ -32,7 +32,7 @@
 
 ## 계정·초대 수명
 
-- 이메일은 공백 제거·소문자로 정규화하며 중복 가입을 거절한다. 비밀번호는 8~128자, 이름은 1~80자다. 비밀번호는 계정별 난수 salt와 Node `scrypt`로 해시한다.
+- 이메일은 공백 제거·소문자로 정규화하며 중복 가입을 거절한다. 이름은 1~80자다. 새 비밀번호(가입, 관리 스크립트의 임시 비밀번호)는 8~128자이고 문자(`\p{L}`)와 숫자(`0-9`)를 하나 이상 포함해야 하며, 어기면 HTTP 400 `WEAK_PASSWORD`다. 규칙은 `isStrongPassword`([`src/lib/workspace.ts`](../../src/lib/workspace.ts)) 하나를 서버와 가입 화면이 같이 쓴다. 로그인은 규칙 전에 만든 비밀번호도 받도록 8~128자 길이만 확인한다. 비밀번호는 계정별 난수 salt와 Node `scrypt`로 해시한다.
 - 세션은 32바이트 난수의 불투명 토큰이다. `gwamegi_session` 쿠키는 `HttpOnly; SameSite=Lax; Path=/`, 30일 만료이며 서버에도 만료 시각을 저장한다. 연결이 HTTPS이거나 `COOKIE_SECURE=1`이면 `Secure`를 붙인다. TLS 프록시(Caddy) 뒤의 서버는 평문 연결로 보이므로 VM은 `COOKIE_SECURE=1`을 쓴다. 저장소에는 토큰 원문 대신 SHA-256 해시만 저장한다.
 - 가입·로그인 시 현재 세션을 교체하고, 로그아웃 시 서버 세션과 쿠키를 폐기한다. 한 계정은 세션을 최근 10개만 둔다. 11번째를 만들면 가장 오래된 세션이 지워지고 그 기기는 로그아웃된 상태가 된다. `Account` 응답에는 `id`, `name`, `email`만 포함한다.
 - 초대는 32바이트 난수 링크이며 7일 후 만료한다. 초대 생성 응답에서만 토큰 원문을 제공하고 디스크에는 해시만 저장한다. 링크 전송은 운영자가 복사하여 수행하며 이메일을 발송하지 않는다.
@@ -52,6 +52,7 @@
 | HTTP | 대표 코드 | 의미 |
 | --- | --- | --- |
 | 400 | `INVALID_CREDENTIALS`, `INVALID_SITE`, `INVALID_OPERATIONS`, `INVALID_REPLY`, `INVALID_ANSWER` | 입력 형식 오류 |
+| 400 | `WEAK_PASSWORD` | 가입 비밀번호가 8~128자, 문자·숫자 포함 규칙에 맞지 않음 |
 | 400 | `PROTECTED_WORKER_HISTORY` | 응답·답변·근로자 로그 변조 시도 |
 | 401 | `AUTH_REQUIRED`, `LOGIN_FAILED` | 로그인 필요 또는 인증 실패 |
 | 403 | `SITE_ACCESS_DENIED`, `LOCAL_ORIGIN_REQUIRED` | 덕장 권한 또는 허용 출처 불일치 |
