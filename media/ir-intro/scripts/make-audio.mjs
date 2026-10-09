@@ -1,8 +1,8 @@
 // 영상 음악과 효과음을 직접 합성해 public/audio/*.wav 로 쓴다 (외부 음원 없음, 저작권 문제 없음).
 //   node scripts/make-audio.mjs
-// 음악 구성은 src/timeline.ts 의 장면 시각과 맞춘다. 영상이 설계의 0.8배 속도라 음악도 80BPM, 화음 하나 6초:
-// 0~18초 어두운 도입(패드·성긴 음), 18초 로고와 함께 본편(아르페지오·부드러운 킥), 84~90초 쉼(패드와 성긴 음),
-// 90초 마지막 화음. 아래 시각은 모두 설계 시각 × STRETCH 이다.
+// 음악 구성은 src/timeline.ts 의 장면 시각과 맞춘다. 영상이 설계의 0.9배 속도라 음악도 90BPM, 화음 하나 약 5.3초:
+// 0~16초 어두운 도입(패드·성긴 음), 16초 로고와 함께 본편(아르페지오·부드러운 킥), 74.7~80초 쉼(패드와 성긴 음),
+// 80초 마지막 화음. 아래 시각은 모두 설계 시각 × STRETCH 이다.
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const SR = 44100;
@@ -90,8 +90,9 @@ function reverb(input, offset) {
 }
 
 // ── 음악 ──
-/** 설계 시각(timeline.ts 의 SCENES) → 실제 초. timeline.ts 의 1 / SPEED 와 같다. */
-const STRETCH = 1.25;
+/** 설계 시각(timeline.ts 의 SCENES) → 실제 초. timeline.ts 의 SPEED 와 같은 값을 쓴다. */
+const SPEED = 0.9;
+const STRETCH = 1 / SPEED;
 const LENGTH = 78 * STRETCH;
 const N = SR * LENGTH;
 const dryL = new Float32Array(N);
@@ -197,10 +198,11 @@ const CHORDS = [
 const SPAN = BEAT * 8;
 const ARP = [0, 2, 1, 3, 2, 4, 3, 1];
 
-for (let start = 0, k = 0; start < LENGTH - 4; start += SPAN, k++) {
+// 화음 시작은 곱으로 구하고(더해 가면 오차가 쌓인다) 비교에 여유를 둔다
+for (let k = 0, start = 0; start < LENGTH - 4; k++, start = k * SPAN) {
   const chord = CHORDS[k % 4];
-  const inBreak = start >= BREAK[0] - 0.1 && start < BREAK[1];
-  const ending = start >= BREAK[1];
+  const inBreak = start >= BREAK[0] - 0.1 && !(start >= BREAK[1] - 0.01);
+  const ending = start >= BREAK[1] - 0.01;
   const quiet = start < MAIN - 0.1 || inBreak;
   // 패드 (계속). 도입·쉼은 아르페지오가 없어 패드를 조금 키운다
   for (const [index, note] of chord.entries())
