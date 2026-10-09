@@ -11,6 +11,7 @@ node scripts/make-audio.mjs                           # 음악·효과음 합성
 npx remotion studio                                   # 미리 보기
 npx remotion render HaepungIntro out/haepung-intro.mp4 # MP4 (1920×1080, 30fps, 소리 포함)
 node scripts/stills.mjs 600 1200                      # 확인용 정지 화면 (out/stills)
+node scripts/readme-images.mjs                        # 저장소 README 이미지 (out/readme → docs/assets/readme)
 ```
 
 ## 구성
@@ -21,6 +22,7 @@ node scripts/stills.mjs 600 1200                      # 확인용 정지 화면 
 | `src/HaepungIntro.tsx` | 장면 9개와 음악 |
 | `src/scenes/` | `Dark` 여는 말·문제·한 줄 정리, `Light` 로고·앱 전체·맺음, `Desk` 말하면 기록·지금 판단·예보와 과거, `Exchange` 운영자와 근로자 |
 | `src/components/` | 카메라(`Stage`), 화면 상태 전환(`AppScreen`), 커서·탭, 타이핑·강조·막대 걷어 내기, 장 제목, 날아가는 칩, 바람 줄기, 로고(앱과 같은 SVG), 효과음 |
+| `src/Readme.tsx` | 저장소 README 이미지 (대표 이미지, 지금 판단, 과거 분석). 운영자·근로자 이미지는 영상의 한 프레임 |
 | `src/shots.ts` | 화면 안 좌표 (찍을 때 잰 요소 위치와 입력칸 글자 범위, CSS px) |
 | `public/shots/` | 실제 앱 화면 상태 27장 (데스크톱 1440×900 · 폰 390×844, 2·3배) |
 | `public/audio/`, `scripts/make-audio.mjs` | 직접 합성한 음악·효과음 |

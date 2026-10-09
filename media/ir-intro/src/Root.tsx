@@ -1,5 +1,6 @@
 import { Composition, Folder } from "remotion";
 import { HaepungIntro } from "./HaepungIntro";
+import { ReadmeHero, ReadmeHistory, ReadmeNow } from "./Readme";
 import { ColdOpen, Problem, Statement } from "./scenes/Dark";
 import { Insight, Now, Record } from "./scenes/Desk";
 import { Exchange } from "./scenes/Exchange";
@@ -21,6 +22,11 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="Insight" component={Insight} durationInFrames={length("insight")} {...SIZE} />
       <Composition id="Statement" component={Statement} durationInFrames={length("statement")} {...SIZE} />
       <Composition id="End" component={End} durationInFrames={length("end")} {...SIZE} />
+    </Folder>
+    <Folder name="Readme">
+      <Composition id="ReadmeHero" component={ReadmeHero} durationInFrames={1} fps={FPS} width={1600} height={800} />
+      <Composition id="ReadmeNow" component={ReadmeNow} durationInFrames={1} fps={FPS} width={1600} height={1300} />
+      <Composition id="ReadmeHistory" component={ReadmeHistory} durationInFrames={1} fps={FPS} width={1600} height={1380} />
     </Folder>
   </>
 );
