@@ -1107,6 +1107,12 @@
 .ws-invite-status--accepted {
   color: #737373;
 }
+.ws-invitation-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 .ws-invitations-empty {
   display: flex;
   align-items: center;
@@ -1779,8 +1785,14 @@
     font-size: 10px;
   }
   .ws-invitation {
+    flex-wrap: wrap;
     gap: 9px;
     padding: 16px 12px;
+  }
+  /* 다시 복사 버튼이 있으면 버튼 줄을 아래로 내려 초대 설명이 좁아지지 않게 한다. */
+  .ws-invitation-actions:has(.ws-invite-copy) {
+    flex-basis: 100%;
+    justify-content: flex-end;
   }
   .ws-invitation-icon {
     width: 28px;

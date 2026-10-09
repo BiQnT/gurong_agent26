@@ -76,6 +76,7 @@ export function readBridgeConfig(env: Record<string, string>, projectRoot: strin
       .map((origin) => origin.trim().replace(/\/+$/, ''))
       .filter(Boolean),
     cookieSecure: env.COOKIE_SECURE?.trim() === '1',
+    inviteLinkSecret: env.INVITE_LINK_SECRET?.trim() || undefined,
     devBasicAuth: env.DEV_BASIC_AUTH?.trim() || undefined,
     devOpen: env.DEV_OPEN?.trim() === '1',
     kmaAuthKey: env.KMA_AUTH_KEY?.trim() || undefined,

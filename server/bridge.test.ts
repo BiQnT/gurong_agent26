@@ -70,6 +70,7 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
       databasePath: undefined,
       publicOrigins: [],
       cookieSecure: false,
+      inviteLinkSecret: undefined,
       devBasicAuth: undefined,
       devOpen: false,
       kmaAuthKey: undefined,
@@ -83,6 +84,11 @@ test('E-UM keys decode percent escapes once while preserving literal plus signs 
     });
   }
   assert.equal(readBridgeConfig({}, '/test/project').eumServiceKey, '');
+  assert.equal(
+    readBridgeConfig({ INVITE_LINK_SECRET: '  test-only-secret  ' }, '/test/project')
+      .inviteLinkSecret,
+    'test-only-secret',
+  );
 });
 
 test('raw and encoded E-UM keys reach each upstream route with one query encoding pass', async () => {

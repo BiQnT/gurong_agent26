@@ -37,6 +37,12 @@ const invitationLabels: Record<Invitation['status'], string> = {
   revoked: '초대 취소',
 };
 
+function inviteUrl(token: string) {
+  const url = new URL('/', window.location.origin);
+  url.searchParams.set('invite', token);
+  return url.toString();
+}
+
 function invitationStatus(invitation: Invitation): Invitation['status'] {
   return invitation.status === 'pending' && Date.parse(invitation.expiresAt) <= Date.now()
     ? 'expired'
@@ -67,6 +73,8 @@ export function TeamView({
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [linkBusyId, setLinkBusyId] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
   const pending = useRef(false);
   const fetchVersion = useRef(0);
   const linkInput = useRef<HTMLInputElement>(null);
@@ -93,6 +101,7 @@ export function TeamView({
     setInviteOpen(false);
     setEditOpen(false);
     setRemoval(null);
+    setListError(null);
     void refresh();
     return () => {
       fetchVersion.current += 1;
@@ -121,9 +130,7 @@ export function TeamView({
     setActionError(null);
     try {
       const result = await workspaceApi.invite(site.id, language);
-      const url = new URL('/', window.location.origin);
-      url.searchParams.set('invite', result.token);
-      setCreatedInvite({ url: url.toString(), invitation: result.invitation });
+      setCreatedInvite({ url: inviteUrl(result.token), invitation: result.invitation });
       setTeam((current) =>
         current
           ? { ...current, invitations: [result.invitation, ...current.invitations] }
@@ -135,6 +142,34 @@ export function TeamView({
     } finally {
       pending.current = false;
       setBusy(false);
+    }
+  }
+
+  // 대기 중인 초대의 링크를 서버에서 다시 받아 복사한다. 자동 복사가 막히면 링크 창을 열어 직접 복사하게 한다.
+  async function copyAgain(invitation: Invitation) {
+    if (pending.current) return;
+    pending.current = true;
+    setLinkBusyId(invitation.id);
+    setListError(null);
+    try {
+      const { token } = await workspaceApi.invitationLink(site.id, invitation.id);
+      const url = inviteUrl(token);
+      try {
+        await navigator.clipboard.writeText(url);
+        setNotice('초대 링크를 다시 복사했어요. 동료에게 전달해 주세요.');
+      } catch {
+        setCreatedInvite({ url, invitation });
+        setCopied(false);
+        setCopyError(true);
+        setActionError(null);
+        setInviteOpen(true);
+      }
+    } catch (failure) {
+      setListError(errorMessage(failure));
+      void refresh();
+    } finally {
+      pending.current = false;
+      setLinkBusyId(null);
     }
   }
 
@@ -346,6 +381,7 @@ export function TeamView({
             </div>
             <Link2 size={18} />
           </div>
+          <FormError>{listError}</FormError>
           {team.invitations.length ? (
             <ul className="ws-invitation-list" aria-label="동료 초대 내역">
               {team.invitations.map((invitation) => {
@@ -367,16 +403,29 @@ export function TeamView({
                       {invitationLabels[status]}
                     </span>
                     {isOwner && status === 'pending' && (
-                      <button
-                        className="ws-icon-button"
-                        aria-label={`${shortDate(invitation.createdAt)}에 만든 ${languageName(invitation.language)} 초대 취소`}
-                        onClick={() => {
-                          setActionError(null);
-                          setRemoval({ type: 'invite', invitation });
-                        }}
-                      >
-                        <X size={16} />
-                      </button>
+                      <div className="ws-invitation-actions">
+                        {invitation.linkAvailable && (
+                          <button
+                            className="ws-button ws-button--secondary ws-button--small ws-invite-copy"
+                            aria-label={`${shortDate(invitation.createdAt)}에 만든 ${languageName(invitation.language)} 초대 링크 다시 복사`}
+                            disabled={linkBusyId !== null}
+                            onClick={() => void copyAgain(invitation)}
+                          >
+                            {linkBusyId === invitation.id ? <BusyIcon /> : <Copy size={14} />}
+                            링크 다시 복사
+                          </button>
+                        )}
+                        <button
+                          className="ws-icon-button"
+                          aria-label={`${shortDate(invitation.createdAt)}에 만든 ${languageName(invitation.language)} 초대 취소`}
+                          onClick={() => {
+                            setActionError(null);
+                            setRemoval({ type: 'invite', invitation });
+                          }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
                     )}
                   </li>
                 );
@@ -450,7 +499,9 @@ export function TeamView({
                   </p>
                 </div>
                 <p className="ws-caption">
-                  이 창을 닫기 전에 링크를 복사해 주세요. 다시 필요하면 새 초대를 만들 수 있어요.
+                  {createdInvite.invitation.linkAvailable
+                    ? '수락하기 전까지는 초대 내역에서 링크를 다시 복사할 수 있어요.'
+                    : '이 창을 닫기 전에 링크를 복사해 주세요. 다시 필요하면 새 초대를 만들 수 있어요.'}
                 </p>
                 <div className="ws-dialog-actions">
                   <button

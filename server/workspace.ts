@@ -1,4 +1,11 @@
-import { createHash, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  randomUUID,
+  scrypt,
+  timingSafeEqual,
+} from 'node:crypto';
 import { chmod, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
@@ -75,7 +82,7 @@ export type SiteMembership = {
 };
 type StoredUser = Account & { salt: string; passwordHash: string; createdAt: string };
 type StoredSession = { tokenHash: string; userId: string; expiresAt: string };
-type StoredInvitation = Omit<Invitation, 'status'> & {
+type StoredInvitation = Omit<Invitation, 'status' | 'linkAvailable'> & {
   tokenHash: string;
   status: 'pending' | 'accepted' | 'revoked';
   acceptedBy?: string;
@@ -99,6 +106,8 @@ export type WorkspaceConfig = {
   cookieSecure?: boolean;
   /** 옛 형식으로 저장된 문서를 이 코드의 형식으로 덮어써도 되는가. 없으면 ALLOW_SCHEMA_UPGRADE=1 을 본다. */
   allowSchemaUpgrade?: boolean;
+  /** 설정하면 새 초대 토큰을 이 비밀값의 HMAC 으로 만들어 운영자가 링크를 다시 복사할 수 있다 (INVITE_LINK_SECRET, ADR 0012). */
+  inviteLinkSecret?: string;
   now?: () => number;
 };
 export type WorkspaceMembership = { user: Account; site: StoredSite; membership: SiteMembership };
@@ -385,6 +394,17 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
   const cookieSecure = config.cookieSecure === true;
   const clock = config.now || Date.now;
   const timestamp = () => new Date(clock()).toISOString();
+  const linkSecret = config.inviteLinkSecret || '';
+  // 비밀값이 있으면 초대 토큰을 초대 ID 로 다시 계산할 수 있다. 저장하는 것은 지금처럼 토큰의 해시뿐이다.
+  const derivedToken = (invitationId: string) =>
+    createHmac('sha256', linkSecret).update(`invite:${invitationId}`).digest('base64url');
+  // 다시 계산한 토큰의 해시가 저장된 해시와 같을 때만 링크로 쓴다.
+  // 비밀값 없이 만든(난수) 초대와 비밀값을 바꾸기 전에 만든 초대는 맞지 않아 null 이다.
+  const reusableToken = (item: StoredInvitation) => {
+    if (!linkSecret) return null;
+    const token = derivedToken(item.id);
+    return hash(token) === item.tokenHash ? token : null;
+  };
   // 로그인 실패 기록은 프로세스 메모리에만 둔다. dev·prod 가 따로 세고 재시작하면 지워지지만
   // 막으려는 것은 짧은 시간의 연속 추측이라 이것으로 충분하다.
   const loginAttempts = new Map<string, { failures: number[]; blockedUntil: number }>();
@@ -484,16 +504,16 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
     return token;
   }
   function invitationFor(item: StoredInvitation): Invitation {
+    const status =
+      item.status === 'pending' && Date.parse(item.expiresAt) <= clock() ? 'expired' : item.status;
     return {
       id: item.id,
       siteId: item.siteId,
       language: item.language,
       createdAt: item.createdAt,
       expiresAt: item.expiresAt,
-      status:
-        item.status === 'pending' && Date.parse(item.expiresAt) <= clock()
-          ? 'expired'
-          : item.status,
+      status,
+      linkAvailable: status === 'pending' && reusableToken(item) !== null,
     };
   }
   function tokenInvitation(db: Database, token: string) {
@@ -624,9 +644,10 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
         requireMember(db, request, siteId, 'owner');
         if (!object(body) || !language(body.language))
           fail(400, 'INVALID_LANGUAGE', '한국어 또는 베트남어를 선택해 주세요.');
-        const token = randomBytes(32).toString('base64url');
+        const id = randomUUID();
+        const token = linkSecret ? derivedToken(id) : randomBytes(32).toString('base64url');
         const invitation: StoredInvitation = {
-          id: randomUUID(),
+          id,
           siteId,
           language: body.language,
           tokenHash: hash(token),
@@ -636,6 +657,28 @@ export function createWorkspaceService(config: WorkspaceConfig = {}) {
         };
         db.invitations.push(invitation);
         return { invitation: invitationFor(invitation), token };
+      }),
+    /** 대기 중인 초대의 토큰을 다시 계산한다. 저장된 해시와 맞을 때만 돌려준다 (ADR 0012). */
+    invitationLink: (request: IncomingMessage, siteId: string, invitationId: string) =>
+      dbStore.read((db) => {
+        requireMember(db, request, siteId, 'owner');
+        const invitation =
+          db.invitations.find((i) => i.id === invitationId && i.siteId === siteId) ||
+          fail(404, 'INVITATION_NOT_FOUND', '초대를 찾을 수 없어요.');
+        if (invitationFor(invitation).status !== 'pending')
+          fail(
+            410,
+            'INVITATION_UNAVAILABLE',
+            '만료되었거나 이미 사용·취소된 초대예요. 새 초대를 만들어 주세요.',
+          );
+        const token =
+          reusableToken(invitation) ||
+          fail(
+            409,
+            'INVITE_LINK_UNAVAILABLE',
+            '이 초대는 링크를 다시 볼 수 없어요. 필요하면 취소하고 새 초대를 만들어 주세요.',
+          );
+        return { token };
       }),
     revokeInvite: (request: IncomingMessage, siteId: string, invitationId: string) =>
       dbStore.write((db) => {
@@ -1058,6 +1101,9 @@ export function createWorkspaceMiddleware(service: WorkspaceService): Connect.Ne
           } else if (parts[2] === 'invitations' && parts.length === 4) {
             expect('DELETE');
             result = await service.revokeInvite(request, siteId, parts[3]);
+          } else if (parts[2] === 'invitations' && parts.length === 5 && parts[4] === 'link') {
+            expect('GET');
+            result = await service.invitationLink(request, siteId, parts[3]);
           } else if (parts[2] === 'members' && parts.length === 4) {
             expect('DELETE');
             result = await service.removeMember(request, siteId, parts[3]);

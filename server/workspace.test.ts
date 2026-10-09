@@ -113,11 +113,11 @@ function agent(base: string) {
     },
   };
 }
-async function fixture(t: TestContext, bridge = false) {
+async function fixture(t: TestContext, bridge = false, inviteLinkSecret?: string) {
   const directory = await mkdtemp(join(tmpdir(), 'gwamegi-workspace-test-'));
   const dataFile = join(directory, 'workspace.json');
   let now = Date.parse('2026-10-04T09:00:00.000Z');
-  const service = createWorkspaceService({ dataFile, now: () => now });
+  const service = createWorkspaceService({ dataFile, now: () => now, inviteLinkSecret });
   const middleware = bridge
     ? createApiMiddleware(
         {
@@ -142,6 +142,7 @@ async function fixture(t: TestContext, bridge = false) {
     dataFile,
     base,
     agent: () => agent(base),
+    now: () => now,
     advance: (milliseconds: number) => {
       now += milliseconds;
     },
@@ -407,6 +408,132 @@ test('invites are one-time hashed bearer links with expiry, revocation and safe 
       (i) => i.id === expired.invitation.id,
     )?.status,
     'expired',
+  );
+});
+
+const LINK_SECRET = 'test-only-invite-link-secret';
+test('owners copy a pending invite link again from the server secret; others and used links cannot', async (t) => {
+  const f = await fixture(t, false, LINK_SECRET);
+  const owner = f.agent();
+  const worker = f.agent();
+  const other = f.agent();
+  await owner.signup('Owner');
+  await worker.signup('Worker');
+  await other.signup('Other');
+  const site = await owner.site();
+  const otherSite = await other.site('다른 덕장');
+  const link = (agentOf: ReturnType<typeof f.agent>, siteId: string, invitationId: string) =>
+    agentOf.call<{ token?: string; code?: string }>(
+      `/sites/${siteId}/invitations/${invitationId}/link`,
+    );
+
+  const accepted = await owner.invite(site.id);
+  assert.match(accepted.token, /^[A-Za-z0-9_-]{43}$/);
+  assert.equal(accepted.invitation.linkAvailable, true);
+  const copied = await link(owner, site.id, accepted.invitation.id);
+  assert.equal(copied.status, 200);
+  assert.deepEqual(copied.body, { token: accepted.token });
+  await worker.accept(accepted.token);
+  const used = await link(owner, site.id, accepted.invitation.id);
+  assert.equal(used.status, 410);
+  assert.equal(used.body.code, 'INVITATION_UNAVAILABLE');
+
+  const pending = await owner.invite(site.id);
+  assert.equal((await link(worker, site.id, pending.invitation.id)).status, 403);
+  assert.equal((await link(other, site.id, pending.invitation.id)).status, 403);
+  assert.equal((await link(f.agent(), site.id, pending.invitation.id)).status, 401);
+  const elsewhere = await link(other, otherSite.id, pending.invitation.id);
+  assert.equal(elsewhere.status, 404);
+  assert.equal(elsewhere.body.code, 'INVITATION_NOT_FOUND');
+  assert.equal(
+    (await owner.call(`/sites/${site.id}/invitations/${pending.invitation.id}/link`, 'POST', {}))
+      .status,
+    405,
+  );
+  const team = (await owner.call<Team>(`/sites/${site.id}/team`)).body;
+  assert.deepEqual(
+    team.invitations.map((i) => [i.id, i.status, i.linkAvailable]),
+    [
+      [accepted.invitation.id, 'accepted', false],
+      [pending.invitation.id, 'pending', true],
+    ],
+  );
+
+  assert.equal(
+    (await owner.call(`/sites/${site.id}/invitations/${pending.invitation.id}`, 'DELETE')).status,
+    200,
+  );
+  assert.equal((await link(owner, site.id, pending.invitation.id)).status, 410);
+  const expiring = await owner.invite(site.id);
+  f.advance(7 * 24 * 60 * 60 * 1000);
+  assert.equal((await link(owner, site.id, expiring.invitation.id)).status, 410);
+  assert.equal(
+    (await owner.call<Team>(`/sites/${site.id}/team`)).body.invitations.find(
+      (i) => i.id === expiring.invitation.id,
+    )?.linkAvailable,
+    false,
+  );
+
+  // 저장 형식은 그대로다. 토큰 원문이나 linkAvailable 은 저장하지 않는다.
+  const raw = await readFile(f.dataFile, 'utf8');
+  for (const token of [accepted.token, pending.token, expiring.token])
+    assert.ok(!raw.includes(token));
+  const stored = JSON.parse(raw) as { invitations: Record<string, unknown>[] };
+  for (const invitation of stored.invitations)
+    assert.deepEqual(
+      Object.keys(invitation)
+        .filter((key) => key !== 'acceptedBy')
+        .sort(),
+      ['createdAt', 'expiresAt', 'id', 'language', 'siteId', 'status', 'tokenHash'],
+    );
+});
+
+test('without the secret links show once; random links made before the secret stay valid but cannot be copied again', async (t) => {
+  const f = await fixture(t);
+  const owner = f.agent();
+  await owner.signup('Owner');
+  const site = await owner.site();
+  const legacy = await owner.invite(site.id);
+  assert.equal(legacy.invitation.linkAvailable, false);
+  const unset = await owner.call(`/sites/${site.id}/invitations/${legacy.invitation.id}/link`);
+  assert.equal(unset.status, 409);
+  assert.equal(unset.body.code, 'INVITE_LINK_UNAVAILABLE');
+
+  // 같은 저장소를 비밀값을 설정한 서버로 다시 띄운다 (배포 후 재시작과 같다).
+  const restart = async (inviteLinkSecret: string) => {
+    const service = createWorkspaceService({ dataFile: f.dataFile, now: f.now, inviteLinkSecret });
+    const started = await startServer(createWorkspaceMiddleware(service));
+    t.after(() => closeServer(started.server));
+    const next = agent(started.base);
+    return <T = Failure>(path: string, method = 'GET', body?: unknown) =>
+      next.call<T>(path, method, body, { Cookie: owner.cookie });
+  };
+  const withSecret = await restart(LINK_SECRET);
+  const old = await withSecret(`/sites/${site.id}/invitations/${legacy.invitation.id}/link`);
+  assert.equal(old.status, 409);
+  assert.equal(old.body.code, 'INVITE_LINK_UNAVAILABLE');
+  assert.equal(
+    (await withSecret<InvitePreview>(`/invitations/${legacy.token}`)).body.status,
+    'pending',
+  );
+  const fresh = (
+    await withSecret<InvitationResult>(`/sites/${site.id}/invitations`, 'POST', { language: 'ko' })
+  ).body;
+  assert.equal(fresh.invitation.linkAvailable, true);
+  assert.deepEqual(
+    (await withSecret(`/sites/${site.id}/invitations/${fresh.invitation.id}/link`)).body,
+    { token: fresh.token },
+  );
+
+  // 비밀값을 바꾸면 그 전 초대는 다시 복사할 수 없지만 링크는 그대로 쓸 수 있다.
+  const rotated = await restart('another-test-only-secret');
+  assert.equal(
+    (await rotated(`/sites/${site.id}/invitations/${fresh.invitation.id}/link`)).status,
+    409,
+  );
+  assert.equal(
+    (await rotated<InvitePreview>(`/invitations/${fresh.token}`)).body.status,
+    'pending',
   );
 });
 

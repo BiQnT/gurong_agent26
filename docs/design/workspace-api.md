@@ -18,6 +18,7 @@
 | `/sites/:id/team` | GET | 없음 | 운영자만 팀원·초대 목록, `Team` |
 | `/sites/:id/invitations` | POST | `{ language: 'ko' \| 'vi' }` | 운영자만 생성, `{ invitation, token }` |
 | `/sites/:id/invitations/:invitationId` | DELETE | 없음 | 운영자만 취소, `{ ok: true }` |
+| `/sites/:id/invitations/:invitationId/link` | GET | 없음 | 운영자만, 대기 중인 초대의 링크를 다시 계산해 `{ token }` ([0012](../decisions/0012-invite-link-rederive.md)) |
 | `/sites/:id/members/:userId` | DELETE | 없음 | 운영자만 근로자 접근 제거, `{ ok: true }` |
 | `/invitations/:token` | GET | 없음 | 링크 보유자에게 덕장·운영자 이름, 언어, 만료 시각, 상태 |
 | `/invitations/:token/accept` | POST | `{}` | 로그인한 계정을 근로자로 등록, `Site` |
@@ -35,7 +36,7 @@
 - 이메일은 공백 제거·소문자로 정규화하며 중복 가입을 거절한다. 이름은 1~80자다. 새 비밀번호(가입, 관리 스크립트의 임시 비밀번호)는 8~128자이고 문자(`\p{L}`)와 숫자(`0-9`)를 하나 이상 포함해야 하며, 어기면 HTTP 400 `WEAK_PASSWORD`다. 규칙은 `isStrongPassword`([`src/lib/workspace.ts`](../../src/lib/workspace.ts)) 하나를 서버와 가입 화면이 같이 쓴다. 로그인은 규칙 전에 만든 비밀번호도 받도록 8~128자 길이만 확인한다. 비밀번호는 계정별 난수 salt와 Node `scrypt`로 해시한다.
 - 세션은 32바이트 난수의 불투명 토큰이다. `gwamegi_session` 쿠키는 `HttpOnly; SameSite=Lax; Path=/`, 30일 만료이며 서버에도 만료 시각을 저장한다. 연결이 HTTPS이거나 `COOKIE_SECURE=1`이면 `Secure`를 붙인다. TLS 프록시(Caddy) 뒤의 서버는 평문 연결로 보이므로 VM은 `COOKIE_SECURE=1`을 쓴다. 저장소에는 토큰 원문 대신 SHA-256 해시만 저장한다.
 - 가입·로그인 시 현재 세션을 교체하고, 로그아웃 시 서버 세션과 쿠키를 폐기한다. 한 계정은 세션을 최근 10개만 둔다. 11번째를 만들면 가장 오래된 세션이 지워지고 그 기기는 로그아웃된 상태가 된다. `Account` 응답에는 `id`, `name`, `email`만 포함한다.
-- 초대는 32바이트 난수 링크이며 7일 후 만료한다. 초대 생성 응답에서만 토큰 원문을 제공하고 디스크에는 해시만 저장한다. 링크 전송은 운영자가 복사하여 수행하며 이메일을 발송하지 않는다.
+- 초대 토큰은 32바이트(base64url 43자)이며 7일 후 만료한다. 서버 비밀값 `INVITE_LINK_SECRET`이 없으면 난수로 만들고 초대 생성 응답에서만 원문을 준다. 있으면 `base64url(HMAC-SHA256(비밀값, "invite:" + 초대 ID))`로 만들어, 운영자가 `GET /sites/:id/invitations/:invitationId/link`로 대기 중인 초대의 링크를 다시 받는다. 서버는 다시 계산한 토큰의 해시가 저장된 해시와 같을 때만 돌려준다. 비밀값 없이 만든 초대와 비밀값을 바꾸기 전 초대는 HTTP 409 `INVITE_LINK_UNAVAILABLE`이고(링크 자체는 만료 전까지 유효), 사용·취소·만료된 초대는 HTTP 410 `INVITATION_UNAVAILABLE`이다. `Invitation.linkAvailable`은 다시 받을 수 있는 대기 중 초대에만 `true`다. 어느 경우든 디스크에는 토큰의 SHA-256 해시만 저장하며 저장 형식은 같다([0012](../decisions/0012-invite-link-rederive.md)). 링크 전송은 운영자가 복사하여 수행하며 이메일을 발송하지 않는다.
 - 초대 상태는 `pending`, `accepted`, `revoked`, `expired`다. 만료 여부는 서버 시각으로 계산한다. 동일 계정의 성공한 수락 재시도는 멤버십이 남아 있을 때만 동일 덕장을 반환한다. 다른 계정의 재사용과 제거된 팀원의 기존 초대 재사용은 거절한다.
 - 이미 수락한 초대는 취소할 수 없다. 접근을 회수하려면 팀원 제거를 사용한다. 초대를 만든 운영자의 자기 수락은 거절한다.
 
@@ -58,6 +59,7 @@
 | 403 | `SITE_ACCESS_DENIED`, `LOCAL_ORIGIN_REQUIRED` | 덕장 권한 또는 허용 출처 불일치 |
 | 404 | `INVITATION_NOT_FOUND`, `GUIDANCE_NOT_FOUND`, `REPLY_NOT_FOUND` | 대상 없음 |
 | 409 | `EMAIL_IN_USE`, `REVISION_CONFLICT`, `ANSWER_EXISTS`, `BATCH_CLOSED` | 중복·동시 수정·종료 상태 충돌 |
+| 409 | `INVITE_LINK_UNAVAILABLE` | 비밀값 없이 만든 초대라 링크를 다시 계산할 수 없음 |
 | 410 | `INVITATION_UNAVAILABLE` | 이미 사용·취소·만료된 초대 |
 | 413 / 415 | `BODY_TOO_LARGE` / `JSON_REQUIRED` | 1 MiB 초과 / JSON 형식 필요 |
 | 429 | `LOGIN_RATE_LIMITED` | `/auth/login` 실패가 같은 주소·이메일로 10분 안에 5번 쌓여 10분간 차단 |

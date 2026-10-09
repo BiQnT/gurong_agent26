@@ -21,6 +21,8 @@ export type Invitation = {
   status: 'pending' | 'accepted' | 'revoked' | 'expired';
   createdAt: string;
   expiresAt: string;
+  /** 운영자가 링크를 다시 복사할 수 있는가. 대기 중이고 서버 비밀값으로 만든 초대만 true (ADR 0012) */
+  linkAvailable: boolean;
 };
 export type Team = { members: TeamMember[]; invitations: Invitation[] };
 export type InvitePreview = {
@@ -138,6 +140,10 @@ export const workspaceApi = {
       method: 'POST',
       body: { language },
     }),
+  invitationLink: (id: string, invitationId: string) =>
+    request<{ token: string }>(
+      `${sitePath(id)}/invitations/${encodeURIComponent(invitationId)}/link`,
+    ),
   revokeInvite: (id: string, invitationId: string) =>
     request<{ ok: true }>(`${sitePath(id)}/invitations/${encodeURIComponent(invitationId)}`, {
       method: 'DELETE',

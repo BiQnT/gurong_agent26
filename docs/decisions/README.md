@@ -50,3 +50,4 @@ cp docs/decisions/_template.md docs/decisions/0002-<slug>.md
 | [0008](0008-open-dev-app-files-only.md) | dev 를 암호 없이 열고 화면에 필요한 파일만 준다 | 2026-10-06 | 확정 |
 | [0009](0009-kma-fallback-for-eum.md) | E-UM 을 정본으로 두고 기상청 AWS 816 을 대체·교차 확인에 쓴다 | 2026-10-06 | 일부 대체됨 (→ 0010) |
 | [0010](0010-drying-grade-rules.md) | 널기 등급을 규칙 함수로 산출한다 (가설 기준, 기준값과 함께 기록) | 2026-10-06 | 확정 |
+| [0012](0012-invite-link-rederive.md) | 초대 토큰을 서버 비밀값의 HMAC 으로 만들어 대기 중인 초대 링크를 다시 복사한다 | 2026-10-09 | 확정 |

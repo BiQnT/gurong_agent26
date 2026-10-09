@@ -70,6 +70,7 @@ sudo systemctl restart haepung-dev haepung-prod
 
 - 두 서비스(와 수집기)는 `haepung.env` → `backend.env` 순으로 읽고, 뒤가 앞을 이긴다. `PUBLIC_ORIGINS` 등 주소 설정은 `/etc/haepung/*.env` 가 마지막이다.
 - `DEV_BASIC_AUTH`: dev 접속 암호 `아이디:비밀번호`. 비어 있으면 bootstrap 이 만든다. 지금은 `/etc/haepung/dev.env` 의 `DEV_OPEN=1` 이 앞서서 쓰이지 않는다. 다시 잠그려면 bootstrap 에서 `DEV_OPEN=1` 을 빼고 머지·재실행한다. prod 유닛은 이 값을 지우고 띄운다([접근 제어](../../docs/design/backend.md#접근-제어)).
+- `INVITE_LINK_SECRET`: 운영자가 대기 중인 초대 링크를 다시 복사하게 하는 비밀값([0012](../../docs/decisions/0012-invite-link-rederive.md)). `openssl rand -base64 32` 로 만들어 `backend.env` 에 한 번 넣으면 dev·prod 가 같이 쓴다. 비우면 링크는 만들 때 한 번만 보인다. 새거나 의심되면 바꾼다. 바꾸기 전에 만든 초대는 다시 복사만 안 되고 링크는 그대로 쓸 수 있다.
 - `AGENT_AUTH_MODE=subscription`: 로컬에서 `claude setup-token` 으로 받은 토큰을 `CLAUDE_CODE_OAUTH_TOKEN` 에 넣는다.
   심사·시연처럼 팀 밖 사람이 쓰기 전에 `api_key` 와 `ANTHROPIC_API_KEY` 로 바꾼다 (개인 구독으로 남에게 서비스하는 것은 약관상 안 된다).
 - 키·토큰 값은 채팅·로그·커밋에 올리지 않는다.
