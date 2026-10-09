@@ -5,3 +5,6 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# scripts/make-audio.mjs 로 다시 만들 수 있는 합성 음원
+public/audio

@@ -1,66 +1,34 @@
-import { linearTiming, TransitionSeries } from "@remotion/transitions";
-import { fade } from "@remotion/transitions/fade";
-import { useVideoConfig } from "remotion";
-import { AskNow } from "./scenes/AskNow";
-import { Closing } from "./scenes/Closing";
-import { History } from "./scenes/History";
-import { Opening } from "./scenes/Opening";
-import { Problem } from "./scenes/Problem";
-import { Record } from "./scenes/Record";
-import { Team } from "./scenes/Team";
-import { Title } from "./scenes/Title";
-import { Tomorrow } from "./scenes/Tomorrow";
-import { Trust } from "./scenes/Trust";
+import { Audio } from "@remotion/media";
+import type React from "react";
+import { AbsoluteFill, Sequence, staticFile } from "remotion";
+import { ColdOpen, Problem, Statement } from "./scenes/Dark";
+import { Insight, Now, Record } from "./scenes/Desk";
+import { Exchange } from "./scenes/Exchange";
+import { End, Intro } from "./scenes/Light";
+import { from, length, SCENES } from "./timeline";
+import { COLOR } from "./theme";
 
-// 해풍 IR 소개 영상 (약 75초). 장면 사이는 0.5초 페이드라 전체 길이는 장면 합에서 9 × 15프레임을 뺀다.
-// 계획: .omc/plans/2026-10-09-ir-intro-video.md
+// 해풍 IR 소개 영상 2판 (78초). 장면 시각은 timeline.ts, 계획은 PLAN.md.
 
-export const INTRO_DURATION = 180 + 150 + 210 + 360 + 270 + 270 + 210 + 360 + 210 + 180 - 9 * 15;
+const PARTS: Array<[keyof typeof SCENES, string, React.FC]> = [
+  ["coldOpen", "1 여는 말", ColdOpen],
+  ["problem", "2 문제", Problem],
+  ["intro", "3 해풍과 앱 전체", Intro],
+  ["record", "4 말하면 기록", Record],
+  ["now", "5 지금 판단", Now],
+  ["exchange", "6 운영자와 근로자", Exchange],
+  ["insight", "7 예보와 과거 분석", Insight],
+  ["statement", "8 한 줄 정리", Statement],
+  ["end", "9 맺음", End],
+];
 
-export const HaepungIntro: React.FC = () => {
-  const { fps } = useVideoConfig();
-  const cut = <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: 15 })} />;
-  return (
-    <TransitionSeries>
-      <TransitionSeries.Sequence name="1 여는 말" durationInFrames={180} premountFor={fps}>
-        <Opening />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="2 제품 이름" durationInFrames={150} premountFor={fps}>
-        <Title />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="3 문제" durationInFrames={210} premountFor={fps}>
-        <Problem />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="4 지금" durationInFrames={360} premountFor={fps}>
-        <AskNow />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="5 예보" durationInFrames={270} premountFor={fps}>
-        <Tomorrow />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="6 과거 분석" durationInFrames={270} premountFor={fps}>
-        <History />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="7 건조 기록" durationInFrames={210} premountFor={fps}>
-        <Record />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="8 관리자와 근로자" durationInFrames={360} premountFor={fps}>
-        <Team />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="9 신뢰" durationInFrames={210} premountFor={fps}>
-        <Trust />
-      </TransitionSeries.Sequence>
-      {cut}
-      <TransitionSeries.Sequence name="10 맺음" durationInFrames={180} premountFor={fps}>
-        <Closing />
-      </TransitionSeries.Sequence>
-    </TransitionSeries>
-  );
-};
+export const HaepungIntro: React.FC = () => (
+  <AbsoluteFill style={{ background: COLOR.night }}>
+    {PARTS.map(([key, name, Scene]) => (
+      <Sequence key={key} name={name} from={from(key)} durationInFrames={length(key)} premountFor={30}>
+        <Scene />
+      </Sequence>
+    ))}
+    <Audio src={staticFile("audio/music.wav")} volume={0.8} />
+  </AbsoluteFill>
+);
