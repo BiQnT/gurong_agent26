@@ -78,6 +78,29 @@ const mean = (stat: Stat, unit: string) => value(stat.mean, unit);
 export function HistoryCard({ history }: { history: HistorySummary }) {
   const span = history.resolution === 'day' ? 24 : 24 * 7;
   const total = history.totals;
+  const source = (
+    <p className="analysis-note">
+      {history.station}
+      {history.distanceM === null
+        ? ''
+        : ` · 덕장에서 ${history.distanceM.toLocaleString()}m`} · {history.source} · 결측{' '}
+      {history.missingRate}%{history.rainKnown ? '' : ' · 강수 자료 없음(비·눈 제외)'}
+    </p>
+  );
+  // 판정할 표본이 하나도 없으면 빈 막대·표 대신 자료가 없다는 것만 보여 준다.
+  if (!total.gradeHours.적합 && !total.gradeHours.주의 && !total.gradeHours.부적합)
+    return (
+      <section className="assessment-card analysis-card" aria-label="기간 건조 조건 요약">
+        <div className="assessment-title">
+          <span className="eyebrow">기간 요약</span>
+          <span className="grade-pill muted">
+            {shortDate(history.from)}~{shortDate(history.to)}
+          </span>
+        </div>
+        <h3>이 기간에는 판정할 자료가 없어요.</h3>
+        {source}
+      </section>
+    );
   return (
     <section className="assessment-card analysis-card" aria-label="기간 건조 조건 요약">
       <div className="assessment-title">
@@ -123,13 +146,7 @@ export function HistoryCard({ history }: { history: HistorySummary }) {
           </div>
         ))}
       </div>
-      <p className="analysis-note">
-        {history.station}
-        {history.distanceM === null
-          ? ''
-          : ` · 덕장에서 ${history.distanceM.toLocaleString()}m`} · {history.source} · 결측{' '}
-        {history.missingRate}%{history.rainKnown ? '' : ' · 강수 자료 없음(비·눈 제외)'}
-      </p>
+      {source}
       <details className="evidence-details">
         <summary>
           <Table2 size={15} />
