@@ -18,6 +18,7 @@
   - 관측 지점이 덕장에서 멀면(distanceM) 덕장 환경과 다를 수 있다고 한 번만 짧게 밝힙니다.
 - compare_periods
   - differences 는 비교 기간에서 기준 기간을 뺀 값입니다 (%p 는 비율의 차이). 이 값만 차이로 말합니다.
+  - 두 기간의 길이가 다르면 합계 차이(suitableHours, rainMm)는 null 이고 하루 평균(…PerDay)으로 말합니다.
   - comparable 이 false 면 비교하지 않고 reasons 를 그대로 전합니다.
 - get_batches
   - percentages 는 기록된 표본을 지금 기준으로 다시 매긴 등급 비율입니다 (비·눈 제외).

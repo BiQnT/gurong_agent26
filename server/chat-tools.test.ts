@@ -420,7 +420,9 @@ test('two periods are compared item by item, and an unusable period is reported 
     humidityMean: -20,
     windSpeedMean: 0,
     rainMm: 0,
+    rainMmPerDay: 0,
     suitableHours: 24,
+    suitableHoursPerDay: 24,
     suitableShare: 100,
   });
   assert.match(String(compared.summary), /적합 비율 0% → 100% \(\+100%p\)/);
@@ -436,6 +438,11 @@ test('two periods are compared item by item, and an unusable period is reported 
 test('a start message pre-fills fish and count for the start dialog, read by a fixed rule', async () => {
   const { startPrefill } = await import('./chat.ts');
   assert.deepEqual(startPrefill('방금 꽁치 1,200마리 널었어'), { fish: '꽁치', quantity: 1200 });
+  assert.deepEqual(startPrefill('꽁치 말고 청어 200마리 널었어'), { quantity: 200 });
+  assert.deepEqual(startPrefill('어제 꽁치 300마리 걷고 오늘 500마리 널었어'), {
+    fish: '꽁치',
+    quantity: 500,
+  });
   assert.deepEqual(startPrefill('청어 널었어'), { fish: '청어' });
   assert.equal(startPrefill('널었어'), undefined);
   const reply = await chat(toolAsk([], '확인 버튼을 눌러 기록해 주세요.'))(
@@ -450,4 +457,69 @@ test('a start message pre-fills fish and count for the start dialog, read by a f
     fish: '꽁치',
     quantity: 300,
   });
+});
+
+test('periods of different length are compared per day, and input errors name the period', async () => {
+  const hours = (from: string, count: number) =>
+    Array.from({ length: count }, (_, h) => ({
+      at: new Date(Date.parse(`${from}T00:00:00+09:00`) + h * 3_600_000).toISOString(),
+      temperature: 6,
+      humidity: 50,
+      windSpeed: 3,
+      rainMm: 0,
+    }));
+  const history = async (range: { from: string; to: string }) => ({
+    samples:
+      range.from === '2026-09-28' ? hours('2026-09-28', 24 * 7) : hours('2026-10-05', 24 * 4 + 13),
+    source: '기상청 구룡포 AWS 시간자료',
+    station: '기상청 구룡포 AWS',
+    latitude: 35.9831,
+    longitude: 129.5475,
+    sampleMinutes: 60,
+  });
+  const seen: Parameters<typeof toolAsk>[2] = {};
+  await chat(
+    toolAsk(
+      [
+        [
+          'compare_periods',
+          {
+            base_from: '2026-09-28',
+            base_to: '2026-10-04',
+            target_from: '2026-10-05',
+            target_to: '2026-10-09',
+          },
+        ],
+        [
+          'compare_periods',
+          {
+            base_from: '2026-10-04',
+            base_to: '2026-09-28',
+            target_from: '2026-10-05',
+            target_to: '2026-10-09',
+          },
+        ],
+      ],
+      '하루 평균 적합 시간은 같아요.',
+      seen,
+    ),
+    { history },
+  )(request('이번 주랑 지난주 비교해줘'), graded, live(), undefined, data);
+  const [compared, wrong] = seen.results!;
+  const result = compared.result as {
+    differences: Record<string, number | null>;
+    notes: string[];
+    base: { days: number };
+    target: { days: number };
+  };
+  // 지난주 7일 · 이번 주는 오늘 13시까지 4.5일
+  assert.equal(result.base.days, 7);
+  assert.equal(result.target.days, 4.5);
+  assert.equal(result.differences.suitableHours, null);
+  assert.equal(result.differences.rainMm, null);
+  assert.equal(result.differences.suitableHoursPerDay, 0);
+  assert.equal(result.differences.suitableShare, 0);
+  assert.match(result.notes.at(-1)!, /길이가 달라요/);
+  assert.equal(wrong.isError, true);
+  assert.match(String(wrong.result), /^기준 기간: from 이 to 보다 늦어요/);
 });

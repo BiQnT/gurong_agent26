@@ -99,7 +99,7 @@ export function readChatRequest(value: unknown): LiveChatRequest {
 export function getAction(message: string): ChatReply['action'] {
   // "근로자 몇 명?"처럼 근로자를 묻기만 하는 말은 안내 작성이 아니다. 안내·전달·번역을 하려는 말만 고른다.
   if (
-    /작업\s*안내|번역|전달|(?:근로자|베트남)[^?？]*(?:안내|알려\s*(?:줘|주|달)|보내|말해\s*(?:줘|주))/.test(
+    /작업\s*안내|번역|전달(?!받)|(?:근로자|베트남)[^?？]*(?:안내|알려\s*(?:줘|주|달)|보내|말해\s*(?:줘|주))/.test(
       message,
     )
   )
@@ -118,8 +118,19 @@ export function getAction(message: string): ChatReply['action'] {
 
 /** "꽁치 300마리 널었어"에서 원물과 마리 수를 읽어 시작 창에 미리 채운다. AI 가 아니라 이 규칙만 쓴다. */
 export function startPrefill(message: string): ChatReply['prefill'] {
-  const fish = /꽁치/.test(message) ? '꽁치' : /청어/.test(message) ? '청어' : undefined;
-  const count = /(\d[\d,]*)\s*마리/.exec(message)?.[1].replaceAll(',', '');
+  // 두 원물이 다 나오면("꽁치 말고 청어") 고르지 않고 사람이 고르게 둔다.
+  const saury = /꽁치/.test(message);
+  const herring = /청어/.test(message);
+  const fish = saury && !herring ? '꽁치' : herring && !saury ? '청어' : undefined;
+  // 마리 수가 여럿이면("300마리 걷고 500마리 널었어") 널었다는 말에 가장 가까운 것을 쓴다.
+  const hung = message.search(/널었|널어|널기|널고|걸었/);
+  const counts = [...message.matchAll(/(\d[\d,]*)\s*마리/g)];
+  const nearest = counts.sort(
+    (a, b) =>
+      Math.abs((a.index ?? 0) - (hung < 0 ? 0 : hung)) -
+      Math.abs((b.index ?? 0) - (hung < 0 ? 0 : hung)),
+  )[0];
+  const count = nearest?.[1].replaceAll(',', '');
   const quantity =
     count && Number(count) > 0 && Number(count) <= 1_000_000 ? Number(count) : undefined;
   return fish || quantity

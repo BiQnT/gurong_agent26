@@ -286,7 +286,11 @@ export function summarizeHistory(
       부적합: percent(counts.부적합),
     },
   };
-  const period = `${shortDate(input.from)}~${shortDate(input.to)}`;
+  // 올해가 아니면 연도를 붙인다 ("작년 12월" 요약이 올해 12월로 읽히지 않게).
+  const thisYear = kstDate(input.now).slice(0, 4);
+  const withYear = (date: string) =>
+    date.slice(0, 4) === thisYear ? shortDate(date) : `${date.slice(0, 4)}.${shortDate(date)}`;
+  const period = `${withYear(input.from)}~${withYear(input.to)}`;
   const where = `${input.station}${input.distanceM === null ? '' : `(덕장에서 ${input.distanceM.toLocaleString()}m)`}`;
   const summary = !rated
     ? `${period} ${where}의 ${input.source}에서 판정할 수 있는 표본이 없어요 (기대 ${expectedSamples}개, 결측 ${missingRate}%).`

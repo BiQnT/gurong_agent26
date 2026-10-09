@@ -151,6 +151,8 @@ const batchForModel = (batch: BatchDigest) => ({
 
 /** 비교할 수 없는 조건 (신청서 US-4: 값을 추정하지 않고 비교 불가와 원인을 준다). */
 const MAX_COMPARE_MISSING = 50;
+/** 두 기간의 길이가 이보다 넘게 다르면 합계(적합 시간·강수)를 하루 평균으로 바꿔 비교한다. */
+const MAX_LENGTH_GAP = 0.1;
 const diff = (target: number | null, base: number | null) =>
   target === null || base === null ? null : Math.round((target - base) * 10) / 10;
 
@@ -174,8 +176,14 @@ export function compareHistory(
   }
   if (base.source !== target.source || base.station !== target.station)
     reasons.push(`두 기간의 자료 출처가 달라요 (${base.station} · ${target.station}).`);
+  // 자료가 있어야 하는 날 수 (오늘이 들어 있으면 지금까지). 하루 평균은 반올림 전 값으로 나눈다.
+  const exactDays = (item: HistorySummary) => (item.expectedSamples * item.sampleMinutes) / 1440;
+  const days = (item: HistorySummary) => Math.round(exactDays(item) * 10) / 10;
+  const perDay = (value: number | null, item: HistorySummary) =>
+    value === null || !exactDays(item) ? null : Math.round((value / exactDays(item)) * 10) / 10;
   const side = (item: HistorySummary) => ({
     period: period(item),
+    days: days(item),
     source: item.source,
     station: item.station,
     distanceM: item.distanceM,
@@ -185,6 +193,8 @@ export function compareHistory(
     windSpeedMean: item.totals.windSpeed.mean,
     rainMm: item.rainKnown ? (item.totals.rainMm ?? 0) : null,
     suitableHours: item.totals.gradeHours.적합,
+    suitableHoursPerDay: perDay(item.totals.gradeHours.적합, item),
+    rainMmPerDay: perDay(item.rainKnown ? (item.totals.rainMm ?? 0) : null, item),
     suitableShare: item.totals.percentages.적합,
   });
   const a = side(base);
@@ -199,21 +209,33 @@ export function compareHistory(
       differences: null,
       notes: notes.filter(Boolean),
     };
+  // "이번 주와 지난주"처럼 한쪽이 짧으면 합계 차이는 날씨가 아니라 길이 차이다. 하루 평균만 비교한다.
+  const sameLength =
+    Math.abs(exactDays(base) - exactDays(target)) <=
+    MAX_LENGTH_GAP * Math.max(exactDays(base), exactDays(target));
   const differences = {
     temperatureMean: diff(b.temperatureMean, a.temperatureMean),
     humidityMean: diff(b.humidityMean, a.humidityMean),
     windSpeedMean: diff(b.windSpeedMean, a.windSpeedMean),
-    rainMm: diff(b.rainMm, a.rainMm),
-    suitableHours: diff(b.suitableHours, a.suitableHours),
+    rainMm: sameLength ? diff(b.rainMm, a.rainMm) : null,
+    rainMmPerDay: diff(b.rainMmPerDay, a.rainMmPerDay),
+    suitableHours: sameLength ? diff(b.suitableHours, a.suitableHours) : null,
+    suitableHoursPerDay: diff(b.suitableHoursPerDay, a.suitableHoursPerDay),
     suitableShare: diff(b.suitableShare, a.suitableShare),
   };
+  if (!sameLength)
+    notes = [
+      ...notes,
+      `두 기간의 길이가 달라요 (${a.days}일 · ${b.days}일). 적합 시간과 강수는 합계 대신 하루 평균으로 비교해요.`,
+    ];
   const signed = (value: number | null, unit: string) =>
     value === null ? '알 수 없음' : `${value > 0 ? '+' : ''}${value}${unit}`;
   return {
     summary:
       `${a.period} 대비 ${b.period}: 평균 기온 ${signed(differences.temperatureMean, '°C')}, ` +
       `평균 습도 ${signed(differences.humidityMean, '%p')}, 평균 풍속 ${signed(differences.windSpeedMean, 'm/s')}, ` +
-      `적합 비율 ${a.suitableShare}% → ${b.suitableShare}% (${signed(differences.suitableShare, '%p')}).`,
+      `적합 비율 ${a.suitableShare}% → ${b.suitableShare}% (${signed(differences.suitableShare, '%p')}), ` +
+      `하루 평균 적합 ${a.suitableHoursPerDay ?? '알 수 없음'}시간 → ${b.suitableHoursPerDay ?? '알 수 없음'}시간.`,
     comparable: true,
     reasons,
     base: a,
@@ -410,8 +432,18 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
       },
       run: async (input, signal) => {
         const now = context.now();
-        const baseRange = readRange({ from: input.base_from, to: input.base_to }, now);
-        const targetRange = readRange({ from: input.target_from, to: input.target_to }, now);
+        const labeled = (label: string, from: unknown, to: unknown) => {
+          try {
+            return readRange({ from, to }, now);
+          } catch (error) {
+            // 어느 기간의 입력이 틀렸는지 알려 준다.
+            if (error instanceof ToolNotice)
+              throw new ToolNotice(`${label} 기간: ${error.message}`);
+            throw error;
+          }
+        };
+        const baseRange = labeled('기준', input.base_from, input.base_to);
+        const targetRange = labeled('비교', input.target_from, input.target_to);
         const [base, target] = await Promise.all([
           historyFor(baseRange, signal),
           historyFor(targetRange, signal),
