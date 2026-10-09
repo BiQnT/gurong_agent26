@@ -9,7 +9,6 @@ import {
   ClipboardList,
   Copy,
   Globe2,
-  MapPin,
   Plus,
   Menu,
   RotateCcw,
@@ -29,6 +28,7 @@ import { Welcome } from './components/chat/Welcome';
 import { Composer } from './components/chat/Composer';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileTabBar } from './components/layout/MobileTabBar';
+import { SiteSwitcher } from './components/layout/SiteSwitcher';
 import type { View } from './types/ui';
 import { WorkspaceGate, type WorkspaceContext } from './components/WorkspaceGate';
 import { OwnerHome } from './components/OwnerHome';
@@ -55,25 +55,17 @@ export default function App() {
 function WorkerWorkspace(context: WorkspaceContext) {
   const { user, site, sites, onSelectSite, onLogout, onSiteUpdated } = context;
   const operations = useOperations(null, { siteId: site.id, role: site.role, userId: user.id });
-  const vi = site.language === 'vi';
   return (
     <div className="worker-workspace">
       {sites.length > 1 && (
         <div className="worker-site-switch">
-          <label htmlFor="worker-site">{vi ? 'Nơi làm việc' : '작업할 덕장'}</label>
-          <select
-            id="worker-site"
-            value={site.id}
+          <SiteSwitcher
+            site={site}
+            sites={sites}
+            language={site.language}
             disabled={operations.saving}
-            onChange={(event) => onSelectSite(event.target.value)}
-          >
-            {sites.map((item) => (
-              <option value={item.id} key={item.id}>
-                {item.name}
-                {item.role === 'owner' ? (vi ? ' · Quản lý' : ' · 운영자') : ''}
-              </option>
-            ))}
-          </select>
+            onSelect={onSelectSite}
+          />
         </div>
       )}
       <WorkerHome
@@ -370,22 +362,12 @@ function OwnerWorkspace({
               <span />
               {sourceLabel}
             </span>
-            <div className="site-picker station-picker">
-              <MapPin size={15} />
-              <select
-                aria-label="덕장 선택"
-                value={site.id}
-                disabled={operations.saving}
-                onChange={(event) => onSelectSite(event.target.value)}
-              >
-                {sites.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                    {item.role === 'worker' ? ' · 근로자' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SiteSwitcher
+              site={site}
+              sites={sites}
+              disabled={operations.saving}
+              onSelect={onSelectSite}
+            />
             <button
               className="icon-button"
               disabled={operations.saving}

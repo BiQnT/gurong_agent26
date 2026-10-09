@@ -36,6 +36,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.worker-site-role {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eceef1;
+  color: #3d434b;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
+}
 .worker-main {
   max-width: 776px;
   padding: 30px 24px 90px;
