@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Check, ChevronDown, Crosshair, MapPin, Navigation } from 'lucide-react';
+import { Check, ChevronDown, Crosshair, MapPin, MousePointerClick, Navigation } from 'lucide-react';
 import { BusyIcon } from './shared';
 
 export type SiteLocation = { latitude: number; longitude: number };
@@ -32,10 +32,15 @@ export function LocationPicker({
   const [locationError, setLocationError] = useState<string | null>(null);
   const [tileError, setTileError] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [wheelZoom, setWheelZoom] = useState(false);
   const locatingRef = useRef(false);
+  const pinned = useRef(value !== null);
+  // 휠 확대를 켜려고 누른 것인지. 그 누름의 click 은 핀을 옮기지 않는다.
+  const activating = useRef(false);
   const id = useId();
   callback.current = onChange;
   locked.current = disabled;
+  pinned.current = value !== null;
 
   useEffect(() => {
     mounted.current = true;
@@ -67,6 +72,10 @@ export function LocationPicker({
     });
     instance.on('click', (event: L.LeafletMouseEvent) => {
       if (locked.current) return;
+      if (activating.current) {
+        activating.current = false;
+        return;
+      }
       const location = event.latlng.wrap();
       callback.current({
         latitude: Number(location.lat.toFixed(6)),
@@ -74,10 +83,39 @@ export function LocationPicker({
       });
       setLocationError(null);
     });
+    // 페이지를 스크롤하다 지도가 확대되지 않게, 지도를 누르거나 키보드로 들어온 뒤에만 휠로 확대한다.
+    // 포인터가 지도 밖으로 나가거나 포커스가 지도를 떠나면 다시 끈다.
+    const element = container.current;
+    const enableWheel = () => {
+      instance.scrollWheelZoom.enable();
+      if (mounted.current) setWheelZoom(true);
+    };
+    const disableWheel = () => {
+      instance.scrollWheelZoom.disable();
+      if (mounted.current) setWheelZoom(false);
+    };
+    // 핀이 이미 있으면 휠 확대를 켜는 첫 마우스 누름으로는 핀을 옮기지 않는다 (확인 표시와 주소가 그대로다).
+    // 새 덕장의 첫 핀은 한 번에 놓인다. 터치는 두 손가락으로 확대하므로 막지 않는다.
+    const press = (event: PointerEvent) => {
+      activating.current =
+        event.pointerType === 'mouse' && !instance.scrollWheelZoom.enabled() && pinned.current;
+      enableWheel();
+    };
+    const leaveFocus = (event: FocusEvent) => {
+      if (!element.contains(event.relatedTarget as Node | null)) disableWheel();
+    };
+    element.addEventListener('pointerdown', press);
+    element.addEventListener('focusin', enableWheel);
+    element.addEventListener('mouseleave', disableWheel);
+    element.addEventListener('focusout', leaveFocus);
     const observer = new ResizeObserver(() => instance.invalidateSize());
-    observer.observe(container.current);
+    observer.observe(element);
     return () => {
       mounted.current = false;
+      element.removeEventListener('pointerdown', press);
+      element.removeEventListener('focusin', enableWheel);
+      element.removeEventListener('mouseleave', disableWheel);
+      element.removeEventListener('focusout', leaveFocus);
       observer.disconnect();
       instance.remove();
       map.current = null;
@@ -206,6 +244,14 @@ export function LocationPicker({
           <div className="ws-map-hint">
             <MapPin size={15} />
             덕장 위치에 핀을 놓아 주세요
+          </div>
+        )}
+        {!wheelZoom && (
+          <div className="ws-map-wheel-hint" aria-hidden="true">
+            <MousePointerClick size={14} />
+            {value
+              ? '지도를 한 번 누르면 스크롤로 확대할 수 있어요. 핀은 그다음에 누른 곳으로 옮겨져요.'
+              : '지도를 누르면 핀이 놓이고 스크롤로 확대할 수 있어요.'}
           </div>
         )}
       </div>

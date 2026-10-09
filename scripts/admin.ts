@@ -7,6 +7,7 @@ import {
   passwordHash,
   validWorkspaceDocument,
 } from '../server/workspace.ts';
+import { isStrongPassword } from '../src/lib/workspace.ts';
 
 // 운영자용 관리 명령. 서버와 같은 저장소(잠금·schema 확인·저장 전 검증)를 거치므로
 // 서버가 켜져 있어도 된다.
@@ -42,7 +43,9 @@ async function main([command, ...args]: string[]): Promise<string> {
   }
   if (command === 'reset-password' && target) {
     const email = target.trim().toLowerCase();
-    const password = randomBytes(12).toString('base64url');
+    // 새 비밀번호 규칙(문자·숫자 포함)에 맞을 때까지 다시 뽑는다. 16자에 숫자가 없을 때가 약 7% 있다.
+    let password = '';
+    while (!isStrongPassword(password)) password = randomBytes(12).toString('base64url');
     const salt = randomBytes(16).toString('hex');
     const derived = await passwordHash(password, salt);
     await store.write((doc) => {

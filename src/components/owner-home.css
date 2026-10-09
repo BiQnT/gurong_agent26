@@ -17,7 +17,7 @@
   margin: 8px 0;
 }
 .owner-heading p {
-  font-size: 14px;
+  font-size: 16px;
   color: #71717a;
   line-height: 1.7;
   margin: 0;
@@ -31,7 +31,7 @@
   margin: 0;
 }
 .owner-distance {
-  font-size: 12px;
+  font-size: 14px;
   color: #777981;
   margin: 8px 0 24px;
 }
@@ -60,13 +60,13 @@
 .owner-invite strong,
 .owner-ask strong {
   display: block;
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 6px;
 }
 .owner-invite small,
 .owner-ask small {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   color: #6d6d76;
   line-height: 1.6;
 }
@@ -101,11 +101,11 @@
   padding: 22px 22px 8px;
 }
 .owner-section-title h2 {
-  font-size: 15px;
+  font-size: 17px;
   margin: 0;
 }
 .owner-section-title h2 > span {
-  font-size: 12px;
+  font-size: 14px;
   color: #767680;
   font-weight: 500;
   margin-left: 5px;
@@ -115,7 +115,7 @@
   gap: 5px;
   align-items: center;
   color: #71717a;
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
   padding: 8px 0;
 }
@@ -129,19 +129,19 @@
   stroke-width: 1.4;
 }
 .owner-empty h3 {
-  font-size: 14px;
+  font-size: 16px;
   color: #42424b;
   margin: 8px 0;
 }
 .owner-empty p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   margin: 0 0 19px;
 }
 .owner-empty .button-outline {
   display: inline-flex;
   margin: auto;
-  font-size: 12px;
+  font-size: 14px;
 }
 .owner-batches,
 .owner-replies {
@@ -166,14 +166,14 @@
 }
 .owner-batches strong {
   display: block;
-  font-size: 14px;
+  font-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .owner-batches small {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: #787881;
   line-height: 1.7;
   margin-top: 5px;
@@ -192,22 +192,22 @@
   gap: 8px;
 }
 .owner-replies strong {
-  font-size: 13px;
+  font-size: 15px;
 }
 .owner-replies span {
-  font-size: 11px;
+  font-size: 13px;
   padding: 3px 6px;
   background: #f1f1f3;
   border-radius: 4px;
   color: #61616b;
 }
 .owner-replies time {
-  font-size: 10px;
+  font-size: 12px;
   color: #82828b;
   margin-left: auto;
 }
 .owner-replies p {
-  font-size: 13px;
+  font-size: 15px;
   color: #62626c;
   margin: 9px 0 0;
   overflow-wrap: anywhere;
@@ -243,7 +243,7 @@
   background: #f7f4f3;
   border: 1px solid #e9e2df;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .owner-error button {
   text-decoration: underline;
@@ -252,7 +252,7 @@
 .owner-loading {
   padding: 25px 0;
   color: #75757e;
-  font-size: 13px;
+  font-size: 15px;
 }
 .owner-skeleton {
   display: block;

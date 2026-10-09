@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { workspaceApi, WorkspaceError } from './workspace.ts';
+import { isStrongPassword, workspaceApi, WorkspaceError } from './workspace.ts';
 
 test('workspace requests send cookie credentials and release the deadline after success', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -99,4 +99,27 @@ test('workspace server failures preserve error codes and safely handle malformed
     workspaceApi.session(),
     (error: unknown) => error instanceof WorkspaceError && error.status === 500,
   );
+});
+
+test('new passwords need 8 to 128 characters with at least one letter and one digit', () => {
+  for (const password of [
+    'gwamegi2026',
+    '덕장비밀번호2026',
+    `a1${'x'.repeat(126)}`,
+    // 전각 숫자도 숫자다.
+    'gwamegi１２',
+    // 자모로 나뉜(NFD) 입력도 NFC 로 맞춘 뒤 잰다.
+    '덕장비밀번호2026'.normalize('NFD'),
+  ])
+    assert.equal(isStrongPassword(password), true, password);
+  for (const password of [
+    'abc1234',
+    'onlyletters',
+    '12345678',
+    '!!!!1111',
+    `a1${'x'.repeat(127)}`,
+    // NFD 로는 10자지만 NFC 로는 6자다.
+    '비밀번호12'.normalize('NFD'),
+  ])
+    assert.equal(isStrongPassword(password), false, password);
 });

@@ -22,7 +22,7 @@
   min-width: 0;
 }
 .worker-brand strong {
-  font-size: 19px;
+  font-size: 20px;
   letter-spacing: -0.8px;
   white-space: nowrap;
 }
@@ -30,11 +30,22 @@
   margin-left: 7px;
   padding-left: 15px;
   border-left: 1px solid #dedfe2;
-  font-size: 13px;
+  font-size: 15px;
   color: #6b717a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.worker-site-role {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eceef1;
+  color: #3d434b;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
 }
 .worker-main {
   max-width: 776px;
@@ -48,7 +59,7 @@
   gap: 14px;
 }
 .worker-role-label {
-  font-size: 11px;
+  font-size: 13px;
   color: #676e78;
   padding: 5px 9px;
   border: 1px solid #dfe2e6;
@@ -60,7 +71,7 @@
   align-items: center;
   gap: 6px;
   color: #616975;
-  font-size: 12px;
+  font-size: 14px;
 }
 .worker-language-picker select {
   font: inherit;
@@ -76,7 +87,7 @@
 .worker-welcome > p {
   margin: 0 0 10px;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 16px;
 }
 .worker-welcome h1 {
   margin: 0 0 12px;
@@ -86,7 +97,7 @@
   font-weight: 650;
 }
 .worker-welcome > span {
-  font-size: 14px;
+  font-size: 16px;
   color: #717882;
   line-height: 1.7;
 }
@@ -98,7 +109,7 @@
 }
 .worker-section-heading h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 650;
   display: flex;
   align-items: center;
@@ -106,7 +117,7 @@
 }
 .worker-section-heading h2 > span {
   color: #8a919a;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 .worker-icon-button {
@@ -153,13 +164,13 @@
   flex-shrink: 0;
 }
 .worker-batch h3 {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   margin: 1px 0 5px;
   overflow-wrap: anywhere;
 }
 .worker-batch p {
-  font-size: 12px;
+  font-size: 14px;
   color: #747b86;
   margin: 0 0 9px;
 }
@@ -167,7 +178,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: 12px;
   color: #949aa3;
   line-height: 1.5;
 }
@@ -175,7 +186,7 @@
   margin: 0;
   padding: 20px;
   color: #868d97;
-  font-size: 13px;
+  font-size: 15px;
   border: 1px dashed #dfe3e8;
   border-radius: 10px;
 }
@@ -196,7 +207,7 @@
   background: transparent;
   color: #858c97;
   font: inherit;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   border: none;
   border-bottom: 2px solid transparent;
@@ -211,7 +222,7 @@
 .worker-tabs button span {
   padding: 1px 5px;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 12px;
   background: #eef0f3;
   color: #69717e;
 }
@@ -233,7 +244,7 @@
   align-items: center;
   gap: 12px;
   color: #979da6;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.6;
 }
 .worker-guidance-meta > span {
@@ -257,12 +268,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 14px;
   color: #666f7c;
   margin: 0 0 14px;
 }
 .worker-instruction {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.85;
   color: #454c57;
   margin: 0 0 13px;
@@ -281,7 +292,7 @@
   gap: 6px;
   cursor: pointer;
   color: #7a8391;
-  font-size: 11px;
+  font-size: 13px;
   min-height: 35px;
 }
 .worker-original summary::-webkit-details-marker,
@@ -296,7 +307,7 @@
 }
 .worker-original p {
   color: #6e7784;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.8;
   padding: 14px;
   margin: 0;
@@ -318,18 +329,18 @@
   gap: 10px;
 }
 .worker-facts dt {
-  font-size: 10px;
+  font-size: 12px;
   color: #8a919c;
   margin-bottom: 5px;
 }
 .worker-facts dd {
-  font-size: 13px;
+  font-size: 15px;
   color: #505968;
   margin: 0;
 }
 .worker-facts p {
   color: #969da7;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
   margin: 4px 0;
 }
@@ -347,7 +358,7 @@
   border-radius: 8px;
   min-height: 46px;
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   padding: 10px 14px;
   cursor: pointer;
@@ -368,7 +379,7 @@
   border: 0;
   min-height: 40px;
   padding: 8px 0 8px 12px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .worker-button:disabled,
 .worker-icon-button:disabled,
@@ -395,7 +406,7 @@
   align-items: center;
   gap: 7px;
   color: #667181;
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 .worker-question-form textarea {
@@ -406,7 +417,7 @@
   border: 1px solid #e1e5ea;
   border-radius: 8px;
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.7;
   padding: 11px 12px;
   color: #4f5b6b;
@@ -421,7 +432,7 @@
 }
 .worker-response-hint,
 .worker-readonly-note {
-  font-size: 11px;
+  font-size: 13px;
   color: #969da7;
   line-height: 1.8;
   margin: 14px 0 0;
@@ -432,7 +443,7 @@
   padding-top: 8px;
 }
 .worker-my-replies summary > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #929ba7;
 }
 .worker-my-replies summary > svg {
@@ -453,12 +464,12 @@
   padding-top: 2px;
 }
 .worker-my-replies li strong {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   color: #6d7889;
 }
 .worker-my-replies li p {
-  font-size: 13px;
+  font-size: 15px;
   margin: 4px 0;
   line-height: 1.7;
   color: #4d5a6b;
@@ -466,7 +477,7 @@
   overflow-wrap: anywhere;
 }
 .worker-my-replies li time {
-  font-size: 10px;
+  font-size: 12px;
   color: #a0a8b2;
   display: block;
   margin-top: 5px;
@@ -487,12 +498,12 @@
   border-radius: 16px;
 }
 .worker-empty h3 {
-  font-size: 15px;
+  font-size: 17px;
   color: #606d7e;
   margin: 20px 0 9px;
 }
 .worker-empty p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   color: #8c97a5;
   max-width: 360px;
@@ -505,7 +516,7 @@
   color: #86514b;
   padding: 15px 17px;
   margin-bottom: 22px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 .worker-error p {
@@ -531,7 +542,7 @@
 .worker-loading {
   padding: 50px 0;
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
   color: #8b97a6;
 }
 .worker-toast {
@@ -547,7 +558,7 @@
   border: 1px solid #444d59;
   border-radius: 10px;
   padding: 13px 19px;
-  font-size: 13px;
+  font-size: 15px;
   max-width: calc(100vw - 40px);
   width: max-content;
   box-shadow: 0 7px 24px #202a3930;
@@ -569,6 +580,12 @@
   outline: 2px solid #65768c;
   outline-offset: 3px;
 }
+/* 아주 좁은 폰에서는 덕장 이름과 역할이 보이도록 "해풍" 글자를 뺀다 (아이콘은 남는다). */
+@media (max-width: 359px) {
+  .worker-brand strong {
+    display: none;
+  }
+}
 @media (max-width: 540px) {
   .worker-topbar {
     height: 61px;
@@ -581,7 +598,7 @@
     padding: 19px 0 26px;
   }
   .worker-welcome > span {
-    font-size: 13px;
+    font-size: 15px;
   }
   .worker-batch-list {
     grid-template-columns: 1fr;
@@ -599,14 +616,14 @@
     padding: 20px 18px;
   }
   .worker-guidance h3 {
-    font-size: 18px;
+    font-size: 19px;
   }
   .worker-instruction {
-    font-size: 15px;
+    font-size: 17px;
   }
   .worker-button {
     padding: 10px 8px;
-    font-size: 12px;
+    font-size: 14px;
   }
   .worker-guidance-meta {
     gap: 8px;
@@ -636,17 +653,17 @@
 }
 .worker-my-replies .worker-owner-answer > strong {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #64748a;
 }
 .worker-owner-answer > span {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #8c97a7;
   margin: 5px 0 7px;
 }
 .worker-my-replies li .worker-answer-waiting {
-  font-size: 11px;
+  font-size: 13px;
   color: #929dad;
   margin-top: 10px;
 }
