@@ -11,7 +11,7 @@
 .ws-eyebrow {
   display: block;
   color: #737373;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   letter-spacing: 0.025em;
 }
@@ -41,7 +41,7 @@
   padding: 12px 19px;
   border: 1px solid transparent;
   border-radius: 11px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   line-height: 1.45;
   white-space: nowrap;
@@ -68,7 +68,7 @@
 .ws-button--small {
   min-height: 38px;
   padding: 9px 13px;
-  font-size: 12px;
+  font-size: 14px;
   border-radius: 9px;
 }
 .ws-button--full {
@@ -85,7 +85,7 @@
   gap: 7px;
   padding: 5px 0;
   color: #404040;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   border-radius: 4px;
 }
@@ -126,7 +126,7 @@
 }
 .ws-field > span,
 .ws-field-title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #404040;
 }
@@ -140,7 +140,7 @@
   background: #fff;
   border: 1px solid #e2e2e2;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   transition:
     border-color 0.18s,
@@ -153,7 +153,7 @@
 .ws-field input::placeholder,
 .ws-field textarea::placeholder {
   color: #a0a0a0;
-  font-size: 13px;
+  font-size: 15px;
 }
 .ws-field input:hover:not(:disabled),
 .ws-field textarea:hover:not(:disabled) {
@@ -174,7 +174,7 @@
 .ws-field-note {
   margin: 0;
   color: #737373;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.7;
 }
@@ -198,7 +198,7 @@
   border-radius: 9px;
   background: #faf7f6;
   color: #79544b;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.65;
 }
 .ws-error > svg {
@@ -207,7 +207,7 @@
 }
 .ws-field-error {
   color: #79544b;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 .ws-spinner {
@@ -259,7 +259,7 @@
 }
 .ws-auth-story-content > p {
   color: #737373;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.95;
   letter-spacing: -0.2px;
 }
@@ -318,7 +318,7 @@
   color: #525252;
   border-radius: 12px;
   padding: 13px 15px;
-  font-size: 11px;
+  font-size: 13px;
   box-shadow: 0 4px 16px #00000004;
   animation: ws-float 7s ease-in-out infinite;
 }
@@ -354,7 +354,7 @@
   z-index: 1;
   margin: 30px 0 0;
   color: #8a8a8a;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-auth-panel {
   min-width: 0;
@@ -371,7 +371,7 @@
 }
 .ws-auth-topline > span {
   color: #929292;
-  font-size: 11px;
+  font-size: 13px;
 }
 .ws-wordmark--mobile {
   display: none;
@@ -394,7 +394,7 @@
 }
 .ws-auth-heading p {
   color: #8a8a8a;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   margin: 0;
   word-break: keep-all;
@@ -407,7 +407,7 @@
   align-items: flex-start;
   gap: 7px;
   margin: 20px 0 0;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
   color: #929292;
 }
@@ -422,7 +422,7 @@
   gap: 7px;
   margin: 0;
   color: #a0a0a0;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
 }
 .ws-invite-banner {
@@ -435,7 +435,7 @@
   border: 1px solid #e8e8e8;
   border-radius: 10px;
   color: #737373;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
 }
 .ws-invite-banner svg {
@@ -470,7 +470,7 @@
   font-size: 21px;
 }
 .ws-setup-brand > span {
-  font-size: 11px;
+  font-size: 13px;
   color: #929292;
 }
 .ws-steps {
@@ -485,7 +485,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: #a3a3a3;
   white-space: nowrap;
 }
@@ -504,7 +504,7 @@
   height: 23px;
   border: 1px solid #e5e5e5;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-steps .is-current {
   color: #262626;
@@ -524,7 +524,7 @@
 }
 .ws-steps small {
   margin-left: 1px;
-  font-size: 9px;
+  font-size: 11px;
   color: #a3a3a3;
 }
 .ws-setup-heading {
@@ -542,7 +542,7 @@
 .ws-page-heading p {
   margin: 0;
   color: #858585;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.85;
 }
 .ws-setup-form {
@@ -566,12 +566,12 @@
   align-items: center;
   gap: 8px;
   color: #404040;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
 }
 .ws-section-label > span {
   color: #a3a3a3;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
 }
 .ws-setup-location {
@@ -595,12 +595,12 @@
   margin-top: 1px;
 }
 .ws-setup-note strong {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 550;
 }
 .ws-setup-note p {
   margin: 7px 0 0;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.85;
   color: #929292;
 }
@@ -614,12 +614,12 @@
 .ws-location-heading p {
   margin: 6px 0 0;
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
 }
 .ws-location-heading .ws-text-button {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 13px;
 }
 .ws-map-frame {
   position: relative;
@@ -645,7 +645,7 @@
   background: #f7f7f7;
   border: 1px solid #e8e8e8;
   border-radius: 11px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .ws-location-map .leaflet-tile-pane {
   filter: grayscale(1);
@@ -687,7 +687,7 @@
   border: 1px solid #e5e5e5;
   border-radius: 9px;
   box-shadow: 0 2px 8px #00000007;
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -719,14 +719,14 @@
   gap: 7px;
   min-height: 37px;
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-location-result.is-selected {
   color: #525252;
 }
 .ws-location-result small {
   margin-left: auto;
-  font-size: 9px;
+  font-size: 11px;
   color: #929292;
 }
 .ws-coordinates {
@@ -742,7 +742,7 @@
   cursor: pointer;
   padding: 4px 0;
   color: #737373;
-  font-size: 10px;
+  font-size: 12px;
   list-style: none;
 }
 .ws-coordinates > summary::-webkit-details-marker {
@@ -763,24 +763,24 @@
 .ws-coordinate-fields input {
   min-height: 38px;
   padding: 9px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .ws-coordinate-fields .ws-field > span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-coordinate-fields .ws-button {
   grid-column: 1 / -1;
   justify-self: end;
   min-height: 32px;
   padding: 7px 12px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-checkbox {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   color: #525252;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
   cursor: pointer;
 }
@@ -808,12 +808,12 @@
   align-items: center;
   gap: 10px;
   color: #737373;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
 }
 .ws-setup-footer-note small {
   color: #a3a3a3;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-actions {
   display: flex;
@@ -830,7 +830,7 @@
   justify-content: center;
   gap: 7px;
   color: #a3a3a3;
-  font-size: 10px;
+  font-size: 12px;
   margin: 19px 0 0;
 }
 .ws-team {
@@ -876,11 +876,11 @@
 }
 .ws-site-summary-main > span {
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-site-summary-main h2 {
   margin: 5px 0 7px;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
   font-weight: 600;
   overflow-wrap: anywhere;
@@ -888,7 +888,7 @@
 .ws-site-summary-main p {
   margin: 0;
   color: #737373;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
@@ -896,7 +896,7 @@
   display: block;
   margin-top: 3px;
   color: #a3a3a3;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.03em;
 }
 .ws-team-heading {
@@ -913,7 +913,7 @@
   gap: 8px;
   margin: 0;
   color: #404040;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 .ws-team-heading h2 > span {
@@ -926,13 +926,13 @@
   border-radius: 5px;
   background: #f0f0f0;
   color: #737373;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
 .ws-team-heading p {
   margin: 7px 0 0;
   color: #929292;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
 }
 .ws-member-list,
@@ -964,7 +964,7 @@
   border-radius: 50%;
   color: #737373;
   background: #f0f0f0;
-  font-size: 13px;
+  font-size: 15px;
 }
 .ws-avatar--owner {
   color: #fafafa;
@@ -979,7 +979,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   overflow-wrap: anywhere;
 }
@@ -988,7 +988,7 @@
   border: 1px solid #e5e5e5;
   border-radius: 4px;
   color: #858585;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 400;
 }
 .ws-member-name > span {
@@ -997,7 +997,7 @@
   gap: 5px;
   margin-top: 5px;
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 .ws-member-name > span svg {
@@ -1008,7 +1008,7 @@
   align-items: center;
   gap: 6px;
   margin-left: auto;
-  font-size: 10px;
+  font-size: 12px;
   color: #858585;
 }
 .ws-owner-mark {
@@ -1062,20 +1062,20 @@
 }
 .ws-team-empty h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 550;
   letter-spacing: -0.3px;
 }
 .ws-team-empty p {
   margin: 11px 0 20px;
-  font-size: 11px;
+  font-size: 13px;
   color: #929292;
   line-height: 1.9;
 }
 .ws-team-empty > small {
   margin-top: 15px;
   color: #a3a3a3;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-invitation {
   display: flex;
@@ -1100,13 +1100,13 @@
   flex: 1;
 }
 .ws-invitation strong {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 550;
 }
 .ws-invitation > div > span {
   display: block;
   margin-top: 6px;
-  font-size: 10px;
+  font-size: 12px;
   color: #a3a3a3;
   line-height: 1.6;
 }
@@ -1117,7 +1117,7 @@
   flex-shrink: 0;
   margin-left: auto;
   padding: 5px 7px;
-  font-size: 9px;
+  font-size: 11px;
   border: 1px solid #e8e8e8;
   border-radius: 6px;
   color: #a3a3a3;
@@ -1180,7 +1180,7 @@
   border: 1px solid #ededed;
   border-radius: 10px;
   color: #a3a3a3;
-  font-size: 11px;
+  font-size: 13px;
 }
 .ws-team-loading {
   display: flex;
@@ -1189,7 +1189,7 @@
   gap: 9px;
   padding: 40px;
   color: #929292;
-  font-size: 12px;
+  font-size: 14px;
 }
 .ws-load-error > .ws-text-button {
   margin: 12px 0;
@@ -1232,7 +1232,7 @@
 }
 .ws-dialog-heading h2 {
   margin: 4px 0 0;
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.5;
   letter-spacing: -0.5px;
@@ -1241,7 +1241,7 @@
 .ws-dialog-heading p {
   margin: 9px 0 0;
   color: #858585;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
 }
 .ws-dialog-heading > .ws-icon-button {
@@ -1267,7 +1267,7 @@
 }
 .ws-language-options > legend {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   color: #525252;
   font-weight: 550;
   margin-bottom: 12px;
@@ -1298,14 +1298,14 @@
   flex: 1;
 }
 .ws-language-options strong {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
 }
 .ws-language-options small {
   display: block;
   margin-top: 5px;
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-info-box {
   display: flex;
@@ -1322,7 +1322,7 @@
 }
 .ws-info-box p {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.8;
 }
 .ws-info-box strong {
@@ -1330,7 +1330,7 @@
   color: #525252;
 }
 .ws-info-box p > span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-invite-success {
   display: flex;
@@ -1350,14 +1350,14 @@
 }
 .ws-invite-created-meta strong {
   display: block;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 550;
   overflow-wrap: anywhere;
 }
 .ws-invite-created-meta span {
   display: block;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: #929292;
 }
 .ws-copy-field {
@@ -1371,7 +1371,7 @@
   padding: 10px 11px;
   background: #fafafa;
   color: #737373;
-  font-size: 11px;
+  font-size: 13px;
 }
 .ws-copy-field .ws-button {
   align-self: stretch;
@@ -1393,7 +1393,7 @@
 }
 .ws-invite-how p {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.9;
 }
 .ws-invite-how strong {
@@ -1403,7 +1403,7 @@
 .ws-caption {
   margin: 0;
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.85;
 }
 .ws-setup--editing {
@@ -1438,7 +1438,7 @@
   box-shadow: 0 8px 30px #0000000d;
   color: #525252;
   background: #fff;
-  font-size: 12px;
+  font-size: 14px;
 }
 .ws-toast > svg {
   flex-shrink: 0;
@@ -1486,7 +1486,7 @@
 }
 .ws-accept-description {
   color: #929292;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   margin: 0;
 }
@@ -1522,7 +1522,7 @@
   min-width: 0;
 }
 .ws-accept-site strong {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
   overflow-wrap: anywhere;
 }
@@ -1532,7 +1532,7 @@
   gap: 5px;
   margin-top: 7px;
   color: #929292;
-  font-size: 10px;
+  font-size: 12px;
 }
 .ws-accept-site > svg {
   color: #929292;
@@ -1544,7 +1544,7 @@
   gap: 8px;
   margin: 11px 0;
   text-align: left;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
   color: #929292;
 }
@@ -1565,12 +1565,12 @@
 }
 .ws-accept-actions > .ws-text-button {
   color: #929292;
-  font-size: 11px;
+  font-size: 13px;
 }
 .ws-accept-foot {
   color: #a3a3a3;
   margin: 24px 0 0;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
   text-align: center;
 }
@@ -1617,13 +1617,13 @@
     letter-spacing: -1.6px;
   }
   .ws-auth-story-content > p {
-    font-size: 12px;
+    font-size: 14px;
   }
   .ws-auth-art {
     height: 240px;
   }
   .ws-art-label {
-    font-size: 9px;
+    font-size: 11px;
     padding: 11px;
   }
   .ws-auth-panel {
@@ -1637,10 +1637,10 @@
     grid-template-columns: 1fr 1.18fr;
   }
   .ws-setup-footer-note {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-member-language {
-    font-size: 9px;
+    font-size: 11px;
   }
 }
 @media (max-width: 700px) {
@@ -1674,10 +1674,10 @@
     gap: 9px;
   }
   .ws-auth-topline > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-auth-topline > .ws-text-button {
-    font-size: 11px;
+    font-size: 13px;
   }
   .ws-auth-form-wrap {
     max-width: 420px;
@@ -1687,17 +1687,17 @@
     font-size: 29px;
   }
   .ws-auth-heading p {
-    font-size: 13px;
+    font-size: 15px;
   }
   .ws-field input,
   .ws-field textarea,
   .ws-coordinate-fields input,
   .ws-copy-field input {
-    font-size: 16px;
+    font-size: 17px;
   }
   .ws-field input::placeholder,
   .ws-field textarea::placeholder {
-    font-size: 13px;
+    font-size: 15px;
   }
   .ws-setup {
     padding: 23px 22px 27px;
@@ -1706,14 +1706,14 @@
     margin-bottom: 31px;
   }
   .ws-setup-brand > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-steps {
     margin-bottom: 33px;
   }
   .ws-steps li {
     gap: 6px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-steps li + li::before {
     width: 20px;
@@ -1726,7 +1726,7 @@
     font-size: 27px;
   }
   .ws-setup-heading p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .ws-setup-grid {
     grid-template-columns: 1fr;
@@ -1747,7 +1747,7 @@
     height: 300px;
   }
   .ws-location-result {
-    font-size: 11px;
+    font-size: 13px;
   }
   .ws-setup-footer {
     flex-direction: column;
@@ -1756,7 +1756,7 @@
     gap: 18px;
   }
   .ws-setup-footer-note {
-    font-size: 11px;
+    font-size: 13px;
   }
   .ws-setup-footer-note br {
     display: none;
@@ -1784,12 +1784,12 @@
     font-size: 23px;
   }
   .ws-page-heading p {
-    font-size: 11px;
+    font-size: 13px;
     max-width: 210px;
   }
   .ws-page-heading > .ws-button {
     padding: 10px 12px;
-    font-size: 11px;
+    font-size: 13px;
     min-height: 39px;
     margin-top: 28px;
   }
@@ -1810,7 +1810,7 @@
     margin-left: auto;
   }
   .ws-team-heading p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-member {
     padding: 15px 13px;
@@ -1826,7 +1826,7 @@
     margin-top: -2px;
   }
   .ws-member-name > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-member .ws-icon-button,
   .ws-owner-mark {
@@ -1840,7 +1840,7 @@
     padding: 28px 13px 25px;
   }
   .ws-team-empty p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-invitation {
     flex-wrap: wrap;
@@ -1857,16 +1857,16 @@
     height: 28px;
   }
   .ws-invitation > div > span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .ws-invitation .ws-icon-button {
     width: 25px;
   }
   .ws-invitation strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .ws-invite-status {
-    font-size: 8px;
+    font-size: 10px;
     padding: 5px;
   }
   .ws-dialog-backdrop {
@@ -1878,10 +1878,10 @@
     border-radius: 16px;
   }
   .ws-dialog-heading h2 {
-    font-size: 18px;
+    font-size: 19px;
   }
   .ws-dialog-heading p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .ws-dialog--wide {
     padding: 19px;
@@ -1901,7 +1901,7 @@
   }
   .ws-toast {
     bottom: 18px;
-    font-size: 11px;
+    font-size: 13px;
   }
   .ws-accept-page {
     padding: 24px 20px;
@@ -1991,7 +1991,7 @@
   border-radius: 10px;
   background: #fafafa;
   color: #525252;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 .ws-geo-suggestion strong {

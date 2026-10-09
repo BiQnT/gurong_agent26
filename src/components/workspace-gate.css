@@ -15,12 +15,12 @@
 }
 .gate-screen p {
   max-width: 420px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.8;
   color: #666;
 }
 .gate-screen .gate-vietnamese {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: -10px;
   color: #858585;
 }
@@ -39,7 +39,7 @@
   padding: 13px 28px;
   border-bottom: 1px solid #eee;
   background: #fff;
-  font-size: 12px;
+  font-size: 14px;
 }
 .gate-account-bar > span,
 .gate-account-bar button {
@@ -57,12 +57,12 @@
 }
 .gate-account-bar small {
   color: #a3a3a3;
-  font-size: 10px;
+  font-size: 12px;
 }
 .gate-account-bar button {
   color: #737373;
   padding: 7px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .gate-account-bar button:disabled {
   opacity: 0.5;
@@ -98,7 +98,7 @@
 }
 .gate-entry > p {
   color: #929292;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   margin: 0;
 }
@@ -141,14 +141,14 @@
 }
 .gate-role-card strong {
   display: block;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 550;
   letter-spacing: -0.2px;
 }
 .gate-role-card small {
   display: block;
   color: #929292;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
   margin-top: 6px;
 }
@@ -156,7 +156,7 @@
   display: block;
   margin-top: 4px;
   color: #a3a3a3;
-  font-size: 10px;
+  font-size: 12px;
 }
 .gate-role-card > svg {
   flex-shrink: 0;
@@ -167,7 +167,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: 12px;
   color: #a3a3a3;
   margin-top: 11px;
   line-height: 1.7;
@@ -178,7 +178,7 @@
 }
 .gate-worker-entry > .gate-vietnamese {
   color: #929292;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.8;
   margin: 9px 0 28px;
 }
@@ -190,15 +190,15 @@
 }
 .gate-entry-hint {
   margin: 22px 0;
-  font-size: 11px;
+  font-size: 13px;
   color: #929292;
   line-height: 1.9;
 }
 .gate-entry-hint > span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .gate-worker-entry > .ws-text-button {
-  font-size: 11px;
+  font-size: 13px;
   color: #737373;
 }
 .gate-toast {
@@ -215,7 +215,7 @@
   border-radius: 12px;
   padding: 14px 18px;
   z-index: 200;
-  font-size: 13px;
+  font-size: 15px;
   box-shadow: 0 8px 25px #0002;
 }
 .gate-toast > span {
@@ -234,7 +234,7 @@
     display: none;
   }
   .gate-account-bar button {
-    font-size: 10px;
+    font-size: 12px;
   }
   .gate-onboarding {
     padding: 42px 22px;
@@ -243,17 +243,17 @@
     font-size: 26px;
   }
   .gate-entry > p {
-    font-size: 11px;
+    font-size: 13px;
   }
   .gate-role-card {
     padding: 19px 17px;
     gap: 13px;
   }
   .gate-role-card strong {
-    font-size: 14px;
+    font-size: 16px;
   }
   .gate-role-card small {
-    font-size: 10px;
+    font-size: 12px;
   }
   .gate-role-icon {
     width: 41px;
@@ -264,10 +264,10 @@
     width: 15px;
   }
   .gate-entry-foot {
-    font-size: 9px;
+    font-size: 11px;
   }
   .gate-toast {
-    font-size: 11px;
+    font-size: 13px;
     padding: 12px 14px;
   }
 }
