@@ -45,7 +45,7 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 
 `GET /api/health` 응답은 `{ mode, eum: { configured }, llm: { provider, configured, model }, commit, schema }`이다. `mode`는 운영 서버(`main.ts`)에서 `server`, Vite 개발·미리보기에서 `local-bridge`다. `llm.provider`는 `openai` 또는 `claude`다. `commit`은 서버가 받은 `GIT_COMMIT`이며 없으면 `null`, `schema`는 저장 문서의 형식 번호다. 저장소를 읽지 못하면 `{ error, code }`와 HTTP 503을 돌려주며, 배포 스크립트가 이 응답으로 새 버전을 확인한다. `configured`는 키가 설정되었다는 뜻이며 실제 인증 성공을 검증하지 않는다. claude 제공자는 키 대신 서버의 로그인·토큰을 쓰므로 선택만으로 `true`다.
 
-`siteId`가 있으면 소속을 검사하고 실제 위치와의 거리를 계산한다. `deviceId`를 생략하면 1km 내 최근 관측소 중 가까운 관측소를 선택하고, 없으면 다른 자료와 거리·신선도 한계를 함께 제공한다. `siteId`가 없는 공개 관측 조회는 기존 최신 시각 선택을 유지한다. 알 수 없는 장비 ID는 거절한다.
+`siteId`가 있으면 소속을 검사하고 실제 위치와의 거리를 계산한다. `deviceId`를 생략하면 거리 순서로 고른다: 1km 안 최근 E-UM, 없으면 5km 안 기상청 AWS, 그다음 덕장이 속한 기상청 초단기실황 격자([0013](../decisions/0013-distance-tiered-observation.md)). 셋 다 없으면 다른 자료와 거리·신선도 한계를 함께 제공한다. `siteId`가 없는 공개 관측 조회는 기존 최신 시각 선택을 유지한다. 알 수 없는 장비 ID는 거절한다.
 
 ## 관측 응답
 
@@ -62,10 +62,10 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 | `warnings`                 | 조회 실패, 시간대 해석(`+09:00` 이 아닐 때), 거리·판정 기준 한계 |
 | `llm`                      | 모델 키 설정 여부와 모델 이름                                |
 | `weather`                  | `siteId` 가 있을 때만. 덕장 위치의 보조 자료 (아래 "기상청 보조"), 없으면 빠진다 |
-| `selectionReason`          | 고른 이유: `eum`, `kma-no-recent-eum`(최근 E-UM 없음), `kma-eum-anomaly`(E-UM 값 비정상·기상청과 크게 다름), `explicit`(사용자가 고름) |
+| `selectionReason`          | 고른 이유: `eum`, `kma-no-recent-eum`(1km 안 최근 E-UM 없음, 5km 안 AWS), `kma-eum-anomaly`(E-UM 값 비정상·기상청과 크게 다름), `kma-grid`(1km 안 E-UM·5km 안 AWS 없음, 덕장 격자 초단기실황), `explicit`(사용자가 고름) |
 | `assessment`               | `siteId` 가 있을 때만. 규칙 함수의 널기 판정 (아래 "널기 판정") |
 
-각 `LiveObservation`에는 `device`, `temperature`, `humidity`, `windSpeed`, `observedAt`, `observedAtRaw`, `ageMinutes`, `status`, `issues`, 선택적 `distanceM`이 있다. `siteId`가 있으면 스냅샷에 등록된 덕장의 `site: {id,name,latitude,longitude}`도 반환한다. 단위는 °C, %, m/s, 분이다. 없는 값은 `null`이다. 서버는 기온 −80~60°C, 습도 0~100%, 풍속 0~100m/s 밖의 값을 오류로 처리하고 원래 확인 가능한 다른 항목은 유지한다. 이 범위는 비정상 센서값을 거르는 데이터 검증 기준이며 건조 적합 기준이 아니다. 존재하지 않는 날짜와 시각의 자동 보정도 거부한다.
+각 `LiveObservation`에는 `device`, `temperature`, `humidity`, `windSpeed`, `observedAt`, `observedAtRaw`, `ageMinutes`, `status`, `issues`, 선택적 `distanceM`이 있다. `siteId`가 있으면 스냅샷에 등록된 덕장의 `site: {id,name,latitude,longitude}`도 반환한다. 단위는 °C, %, m/s, 분이다. 없는 값은 `null`이다. 서버는 기온 −80\~60°C, 습도 0\~100%, 풍속 0\~100m/s 밖의 값을 오류로 처리하고 원래 확인 가능한 다른 항목은 유지한다. 이 범위는 비정상 센서값을 거르는 데이터 검증 기준이며 건조 적합 기준이 아니다. 존재하지 않는 날짜와 시각의 자동 보정도 거부한다.
 
 - `current`: 필요한 값·시각이 있으며 화면의 신선도 기준 이내이다.
 - `stale`: 과거 관측이거나 명시된 보관 자료이다.
@@ -77,12 +77,13 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 
 ### 기상청 보조
 
-`KMA_AUTH_KEY` 가 있으면 E-UM 과 함께 기상청을 부른다 ([서버 코드](../../server/sources/kma.ts), [호출 기록](../../research/api-tests/2026-10-06-kma-apihub.md)). E-UM 이 정본이고 기상청은 보조다 ([0009](../decisions/0009-kma-fallback-for-eum.md)).
+`KMA_AUTH_KEY` 가 있으면 E-UM 과 함께 기상청을 부른다 ([서버 코드](../../server/sources/kma.ts), [호출 기록](../../research/api-tests/2026-10-06-kma-apihub.md), [격자 호출 기록](../../research/api-tests/2026-10-10-kma-grid-nowcast.md)). E-UM 이 정본이고 기상청은 보조다 ([0009](../decisions/0009-kma-fallback-for-eum.md), [0013](../decisions/0013-distance-tiered-observation.md)).
 
-- **AWS 816 구룡포 매분자료**: 관측 목록 끝에 `device.id = kma-aws-816`, `provider: kma` 로 붙는다 (경도 129.5475, 위도 35.9831). 덕장 1km 안에 최근(`current`) E-UM 값이 있으면 E-UM 을 고르고, 없을 때만 1km 안의 AWS 를 고르며 `warnings` 에 알린다. 둘 다 최근 값인데 기온 5°C·습도 25% 넘게 다르면 관측기 상태를 확인하라고 알린다. 덕장이 없는 공개 조회도 최근 E-UM 값이 하나도 없을 때만 AWS 를 고른다. 화면·AI·30분 수집기가 같은 선택을 쓴다.
+- **AWS 816 구룡포 매분자료**: 관측 목록 끝에 `device.id = kma-aws-816`, `provider: kma` 로 붙는다 (경도 129.5475, 위도 35.9831). 덕장 1km 안에 최근(`current`) E-UM 값이 있으면 E-UM 을 고르고, 없을 때만 5km 안의 AWS 를 고르며 `warnings` 에 거리(1km 넘으면 km)와 함께 알린다. 둘 다 최근 값인데 기온 5°C·습도 25% 넘게 다르면 관측기 상태를 확인하라고 알린다. 덕장이 없는 공개 조회도 최근 E-UM 값이 하나도 없을 때만 AWS 를 고른다. 화면·AI·30분 수집기가 같은 선택을 쓴다.
+- **초단기실황 격자 관측**: 1km 안 E-UM 과 5km 안 AWS 가 없으면 덕장이 속한 5km 격자의 기온(T1H)·습도(REH)·풍속(WSD)을 관측 하나로 붙여 고른다. `device.id = kma-grid-<nx>-<ny>`, `provider: kma-grid`, 좌표는 격자 중심(거리도 격자 중심까지). 매시 자료라 2시간까지 `current`(`GRID_STALE_MINUTES`). 아래 비·눈과 같은 호출을 나눠 쓴다. `selectionReason: kma-grid` 이고 `warnings` 에 "격자 값이라 덕장 현장과 다를 수 있어요"를 붙인다.
 - **`weather`** (`siteId` 가 있는 관측 조회와 채팅 근거): `precipitation` 기상청 초단기실황(덕장 좌표를 기상청 격자로 바꿔 조회, 지금 비·눈과 1시간 강수량), `rain` AWS 816 의 최근 60분·오늘 강수량, `sun` 한국천문연구원 일출·일몰(`DATA_GO_KR_KEY` 필요). 판정에는 쓰지 않는다.
 - 캐시: AWS 1분, 실황 10분, 일출·일몰 하루, 실패 30초~10분. 한 번 시도는 4초, 응답이 없으면 한 번 더 부른다. 관측 응답은 기상청을 최대 5초만 기다리고 늦은 결과는 다음 조회부터 쓴다.
-- AWS 는 최근 10분(1분 전까지)을 받아 기온·습도가 있는 마지막 줄을 쓴다. 화면이 `kma-aws-816` 을 고른 채 물었는데 이번에 기상청을 못 받았으면 오류 대신 기본 선택을 쓴다. E-UM 이 보관 자료뿐이어도 1km 안의 기상청 AWS 실시간 값이 골라지면 수집기가 기록한다.
+- AWS 는 최근 10분(1분 전까지)을 받아 기온·습도가 있는 마지막 줄을 쓴다. 화면이 `kma-aws-816` 을 고른 채 물었는데 이번에 기상청을 못 받았으면 오류 대신 기본 선택을 쓴다. E-UM 이 보관 자료뿐이어도 기상청 실시간 값(5km 안 AWS 또는 덕장 격자)이 골라지면 수집기가 기록한다.
 - 채팅은 경로 제한(90초)에서 관측을 기다린 시간을 뺀 만큼만 AI 를 기다리고, 넘으면 코드의 대체 답을 준다.
 - `weather.forecast`: 기상청 초단기예보 앞으로 6시간 (`at`, 기온·습도·풍속, `precipitation`, `rain` 글). 등급을 바꾸지 않고 조언으로만 쓴다 ([호출 기록](../../research/api-tests/2026-10-06-kma-ultra-forecast.md)).
 - E-UM 값이 비정상(습도 5% 미만)이거나 1km 안 기상청 AWS 와 기온 5°C·습도 25% 넘게 다르면 그 E-UM 장비를 건너뛰고, 다른 믿을 만한 E-UM 이 없으면 기상청 AWS 로 판정한다 (`selectionReason: kma-eum-anomaly`, [0010](../decisions/0010-drying-grade-rules.md)).
@@ -92,11 +93,11 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 
 `src/lib/drying.ts` 의 `assessDrying` 이 고른 관측과 `weather` 로 등급을 정한다. 같은 입력이면 AI 없이 같은 결과다. 결정과 기준: [0010](../decisions/0010-drying-grade-rules.md).
 
-| 등급 | 조건 (모두 가설값, `2026-10-06 가설값`) |
+| 등급 | 조건 (모두 가설값, `2026-10-10 가설값`) |
 | --- | --- |
-| 판정 불가 | 1km 안 최근 관측 없음, 오래됨, 값 누락, 습도 5% 미만 같은 비정상 값, 기온 -5°C 미만 |
+| 판정 불가 | 거리 한도(E-UM 1km, 기상청 AWS·격자 5km) 안 최근 관측 없음, 오래됨, 값 누락, 습도 5% 미만 같은 비정상 값, 기온 -5°C 미만 |
 | 부적합 | 비·눈(초단기실황), 풍속 14m/s 이상(강풍주의보 육상), 습도 85% 이상, 기온 15°C 초과 중 하나 |
-| 적합 | 습도 60% 미만, 풍속 2~14m/s, 기온 -5~10°C 모두 |
+| 적합 | 습도 60% 미만, 풍속 2m/s 이상 14m/s 미만, 기온 -5°C 이상 10°C 이하 모두 |
 | 주의 | 그 밖. 비·눈을 확인하지 못했으면(기상청 실황 없음) 적합 대신 주의 |
 
 필드: `grade`, `summary`, `temperature`·`humidity`·`windSpeed`, `observedAt`·`ageMinutes`·`distanceM`(판정 불가면 `null` 가능), `deviceName`, `source`, `reasons`(축별 이유·측정 시각 KST·장비·거리), `advice`(예보·강수 조언, 등급 불변), `thresholds`(적용 기준 전체). 화면 검증기 `readAssessment` 는 등급이 있는데 수치가 없거나 1km 를 넘으면 받지 않는다.

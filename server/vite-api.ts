@@ -165,6 +165,10 @@ export function createApiMiddleware(
   // 덕장 위치의 비·눈, 강수량, 일출·일몰. 키가 없거나 실패하면 붙이지 않는다.
   const siteWeather = async (site: { latitude: number; longitude: number }) =>
     kma ? await within(kma.weather(site), KMA_WAIT_MS) : null;
+  // 덕장 격자 초단기실황 관측. 1km 안 E-UM 과 5km 안 기상청 AWS 가 없을 때 판정에 쓴다 (ADR 0013).
+  // 비·눈(siteWeather)과 같은 기상청 호출을 나눠 쓴다.
+  const siteGrid = async (site: { latitude: number; longitude: number }) =>
+    kma?.grid ? await within(kma.grid(site), KMA_WAIT_MS) : null;
   // 과거 기간·3일 예보는 기상청 키가 있을 때만 붙는다 (없으면 배치 기록·초단기예보만).
   const chat = createLiveChat(config, fetch, undefined, createUvIndexSource(config), {
     history: createKmaHistory(config),
@@ -273,15 +277,16 @@ export function createApiMiddleware(
             throw new BridgeError(400, 'INVALID_DEVICE', '관측기 ID가 올바르지 않아요.');
           const siteId = url.searchParams.get('siteId');
           const access = siteId ? await workspace.requireMember(request, siteId) : null;
-          const [snapshot, weather] = await Promise.all([
+          const [snapshot, weather, grid] = await Promise.all([
             observations.snapshot(controller.signal, deviceId),
             access ? siteWeather(access.site) : null,
+            access ? siteGrid(access.site) : null,
           ]);
           send(
             200,
             access
               ? withAssessment({
-                  ...attachSiteContext(snapshot, access.site, deviceId),
+                  ...attachSiteContext(snapshot, access.site, deviceId, grid),
                   ...(weather ? { weather } : {}),
                 })
               : snapshot,
@@ -292,12 +297,13 @@ export function createApiMiddleware(
           throw new BridgeError(405, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청 방식이에요.');
         const input = readChatRequest(await readBody(request, controller.signal));
         const { site } = await workspace.requireMember(request, input.siteId, 'owner');
-        const [observed, weather] = await Promise.all([
+        const [observed, weather, grid] = await Promise.all([
           observations.snapshot(controller.signal, input.deviceId),
           siteWeather(site),
+          siteGrid(site),
         ]);
         const snapshot = withAssessment({
-          ...attachSiteContext(observed, site, input.deviceId),
+          ...attachSiteContext(observed, site, input.deviceId, grid),
           ...(weather ? { weather } : {}),
         });
         // 덕장·팀·배치는 AI 가 그 도구를 부를 때만 읽는다. 읽지 못해도 답변은 한다.

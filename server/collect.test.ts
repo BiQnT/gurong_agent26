@@ -292,7 +292,7 @@ test('stale, distant, failed or archived data become one missing sample per slot
   assert.equal(sample.sourceDeviceId, MISSING_DEVICE_ID);
   assert.deepEqual([sample.temperature, sample.humidity, sample.wind], [null, null, null]);
   assert.equal(sample.alert, false);
-  assert.match(afterStale.data.batches[0].logs.at(-1)!.detail, /1km 이내/);
+  assert.match(afterStale.data.batches[0].logs.at(-1)!.detail, /덕장 근처\(E-UM 1km, 기상청 5km\)/);
 
   // 같은 구간에 다시 돌아도 결측을 두 번 넣지 않는다.
   const again = await run('2026-10-04T09:50:00.000Z', () => {
@@ -589,8 +589,101 @@ test('each automatic sample keeps the grade it got, and 부적합 raises one ale
   const recorded = batch.logs.filter((log) => log.title.includes('30분 자동 수집으로'));
   assert.match(
     recorded[0].detail,
-    /등급 부적합 · 습도가 매우 높아요\(90%\).* · 기준 2026-10-06 가설값/,
+    /등급 부적합 · 습도가 매우 높아요\(90%\).* · 기준 2026-10-10 가설값/,
   );
   assert.match(recorded[3].detail, /등급 적합/);
   assert.match(recorded[0].detail, /실제 관측 10\.06 21:59 KST/);
+});
+
+test('with no E-UM in 1 km and no AWS in 5 km, the site grid nowcast is recorded once per hourly value', async (t) => {
+  const config: BridgeConfig = {
+    eumServiceKey: 'test-eum-secret',
+    openaiApiKey: '',
+    openaiModel: 'test',
+    llmBaseUrl: 'https://api.openai.com/v1',
+    timezoneOffset: '+09:00',
+    staleAfterMinutes: 30,
+    projectRoot: process.cwd(),
+  };
+  // E-UM 은 3시간 전 값만, 기상청 AWS 는 약 6.7km 밖이라 둘 다 못 쓴다.
+  const old = new Date(Date.now() - 3 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', ' ');
+  const aws: LiveObservation = {
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: '기상청 AWS 816',
+      latitude: SITE.latitude + 0.06,
+      longitude: SITE.longitude,
+      provider: 'kma',
+    },
+    temperature: 13.5,
+    humidity: 84.6,
+    windSpeed: 2.2,
+    observedAt: new Date(Date.now() - 60 * 1000).toISOString(),
+    observedAtRaw: '202610062215',
+    ageMinutes: 1,
+    status: 'current',
+    issues: [],
+  };
+  const grid: LiveObservation = {
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '덕장이 속한 기상청 5km 격자 (105, 94) 중심',
+      latitude: SITE.latitude + 0.01,
+      longitude: SITE.longitude,
+      provider: 'kma-grid',
+    },
+    temperature: 9.5,
+    humidity: 55,
+    windSpeed: 3.1,
+    observedAt: new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+    observedAtRaw: '202610100300',
+    ageMinutes: 50,
+    status: 'current',
+    issues: [],
+  };
+  const f = await fixture(t);
+  const { operations } = await siteWithBatch(f);
+  const service = createObservationService(
+    config,
+    async (input) => {
+      const url = new URL(String(input));
+      const data = url.pathname.endsWith('/realtime')
+        ? [{ devId: 1, logDateTime: old, temp: 22.7, humi: 57, winsp: 0.95 }]
+        : [
+            {
+              id: 1,
+              nickname: '구룡포 관측기',
+              address: '구룡포',
+              latitude: SITE.latitude,
+              longitude: SITE.longitude,
+            },
+          ];
+      return Response.json({ id: '1', status: 'success', data });
+    },
+    { aws: async () => aws, weather: async () => null },
+  );
+  const summary = await collectOnce({
+    workspace: f.workspace,
+    observations: service,
+    grid: async () => grid,
+  });
+  assert.deepEqual([summary.recorded, summary.missing], [1, 0]);
+  const recorded = (await operations()).data.batches[0].observations[0];
+  assert.equal(recorded.sourceDeviceId, 'kma-grid-105-94');
+  assert.equal(recorded.temperature, 9.5);
+  assert.equal(recorded.distanceM, 1112);
+  // 다음 30분 구간에도 같은 매시 값이면 다시 쌓지 않는다
+  const next = await collectOnce({
+    workspace: f.workspace,
+    observations: service,
+    grid: async () => grid,
+    now: () => Date.now() + 30 * 60 * 1000,
+  });
+  assert.deepEqual([next.recorded, next.missing, next.skipped], [0, 0, 1]);
+  assert.equal((await operations()).data.batches[0].observations.length, 1);
 });

@@ -636,3 +636,88 @@ equal(
 console.log(
   'Owner answers: real questions only, identified authors, ordered timestamps, length boundary, round-trip persistence, and worker/owner update preservation passed.',
 );
+
+// 기상청 대체 관측 (ADR 0013): 출처마다 거리·시각 한도가 다르다.
+const gridLive: LiveObservation = {
+  ...current,
+  device: {
+    ...current.device,
+    id: 'kma-grid-105-94',
+    name: '기상청 초단기실황 (격자 105,94)',
+    provider: 'kma-grid',
+  },
+  observedAt: '2026-10-03T00:00:00Z',
+  ageMinutes: 65,
+  distanceM: 2400,
+};
+assert(
+  observationRecordIssue(gridLive, recordingTime) === null,
+  'An hourly grid nowcast up to 120 minutes old can be recorded',
+);
+assert(
+  observationRecordIssue(
+    { ...gridLive, observedAt: '2026-10-02T22:50:00Z', ageMinutes: 135 },
+    recordingTime,
+  ) !== null,
+  'An older grid nowcast is not recorded',
+);
+assert(
+  observationRecordIssue(
+    {
+      ...current,
+      device: { ...current.device, id: 'kma-aws-816', provider: 'kma' },
+      observedAt: '2026-10-03T00:20:00Z',
+      ageMinutes: 45,
+    },
+    recordingTime,
+  ) !== null,
+  'A 1-minute station still needs a value within 30 minutes',
+);
+const kmaReport = getBatchReport({
+  ...emptyBatch(),
+  observations: [
+    {
+      at: recordingTime,
+      observedAt: '2026-10-03T01:00:00Z',
+      sourceDeviceId: 'kma-aws-816',
+      sourceDeviceName: '기상청 구룡포 AWS',
+      temperature: 5,
+      humidity: 50,
+      wind: 3,
+      distanceM: 2200,
+      alert: false,
+    },
+  ],
+});
+assert(
+  kmaReport.distanceValidated && kmaReport.temperature.mean === 5,
+  'A KMA sample within 5 km counts in the batch report',
+);
+const gradedFacts = {
+  grade: '주의',
+  temperature: 12.6,
+  humidity: 65,
+  wind: 2.4,
+  distanceM: 3200,
+  observedAt: '2026-10-03T01:00:00Z',
+  sourceDeviceName: '기상청 구룡포 AWS',
+  sourceStatus: 'current' as const,
+  sourceIssues: [],
+};
+assert(
+  validateOperationsData({
+    batches: [emptyBatch()],
+    guidance: [{ ...preparedGuidance(), facts: gradedFacts }],
+  }),
+  'Guidance facts graded from a KMA source within 5 km are stored (widened rule, ADR 0006 order)',
+);
+assert(
+  !validateOperationsData({
+    batches: [emptyBatch()],
+    guidance: [{ ...preparedGuidance(), facts: { ...gradedFacts, distanceM: 5200 } }],
+  }),
+  'Graded facts beyond the widest 5 km limit are rejected',
+);
+console.log(
+  'KMA fallback: per-source record age, 5 km report gate and widened facts limit passed.',
+);

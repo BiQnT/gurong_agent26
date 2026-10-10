@@ -1,7 +1,7 @@
-import { kst } from './drying.ts';
+import { DRYING_THRESHOLDS, distanceLimit, kst, sourceName } from './drying.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Assessment } from './chat.ts';
-import type { LiveObservation } from './live.ts';
+import { GRID_STALE_MINUTES, type LiveObservation } from './live.ts';
 import { createId as uid } from './id.ts';
 import { workspaceApi, WorkspaceError, type OperationsEnvelope } from './workspace.ts';
 
@@ -132,9 +132,12 @@ export const GUIDANCE_TEMPLATES = [
 const now = () => new Date().toISOString();
 const finite = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
+// 출처마다 거리 한도가 다르다: E-UM 1km, 기상청 AWS·초단기실황 격자 5km (ADR 0013).
 const inDistanceGate = (observation: Observation) =>
   observation.distanceM === null ||
-  (finite(observation.distanceM) && observation.distanceM >= 0 && observation.distanceM <= 1000);
+  (finite(observation.distanceM) &&
+    observation.distanceM >= 0 &&
+    observation.distanceM <= distanceLimit({ deviceId: observation.sourceDeviceId }));
 const summarize = (values: (number | null)[]): MetricSummary => {
   const valid = values.filter(finite);
   if (!valid.length) return { mean: null, min: null, max: null };
@@ -340,7 +343,8 @@ function validFacts(value: unknown): value is GuidanceFacts {
         value.humidity <= 100 &&
         nonnegative(value.wind) &&
         finite(value.distanceM) &&
-        value.distanceM <= 1000;
+        // 출처를 따로 남기지 않으므로 가장 넓은 한도(기상청 5km)로 본다 (ADR 0013, 저장 규칙을 넓힘).
+        value.distanceM <= DRYING_THRESHOLDS.maxFallbackDistanceM;
 }
 
 function validReply(value: unknown): value is GuidanceReply {
@@ -453,8 +457,15 @@ export function observationRecordIssue(
   )
     return '필수 관측값이 없거나 유효하지 않아 기록하지 않았어요.';
   const age = (Date.parse(recordedAt) - Date.parse(observation.observedAt)) / 60_000;
-  if (!nonnegative(observation.ageMinutes) || observation.ageMinutes > 30 || age < 0 || age > 30)
-    return '관측 후 30분 이내인 최신 값만 기록할 수 있어요.';
+  // 기상청 초단기실황 격자는 매시 자료라 더 오래 쓴다 (ADR 0013). 나머지는 1분 갱신 관측이다.
+  const maxAge = observation.device.provider === 'kma-grid' ? GRID_STALE_MINUTES : 30;
+  if (
+    !nonnegative(observation.ageMinutes) ||
+    observation.ageMinutes > maxAge ||
+    age < 0 ||
+    age > maxAge
+  )
+    return `관측 후 ${maxAge}분 이내인 최신 값만 기록할 수 있어요.`;
   if (!Array.isArray(observation.issues) || observation.issues.length)
     return '관측값의 시각 또는 품질에 확인할 사항이 있어 기록하지 않았어요.';
   return null;
@@ -526,10 +537,12 @@ export function factsFromAssessment(
   observation?: LiveObservation | null,
   recordedAt = now(),
 ): GuidanceFacts {
-  // 지난 대화의 판정 카드로 안내를 만들면 그때의 등급이 지금처럼 전달된다. 30분이 지났으면 판정 불가.
+  // 지난 대화의 판정 카드로 안내를 만들면 그때의 등급이 지금처럼 전달된다. 관측 후 30분(매시 자료인
+  // 기상청 초단기실황 격자는 GRID_STALE_MINUTES)이 지났으면 판정 불가.
+  const maxAge = assessment.source === sourceName('kma-grid') ? GRID_STALE_MINUTES : 30;
   const stale =
     !assessment.observedAt ||
-    Date.parse(recordedAt) - Date.parse(assessment.observedAt) > 30 * 60 * 1000;
+    Date.parse(recordedAt) - Date.parse(assessment.observedAt) > maxAge * 60 * 1000;
   if (
     stale ||
     assessment.grade === '판정 불가' ||

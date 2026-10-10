@@ -331,7 +331,7 @@ test('the KMA fallback reason is told only when the server chose KMA because E-U
       },
       undefined,
     ),
-    /E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS/,
+    /쓸 수 있는 E-UM 관측이 없어 기상청 구룡포 AWS/,
   );
   const picked = localExplanation(
     { ...chosen, selectionReason: 'explicit', warnings: [] },

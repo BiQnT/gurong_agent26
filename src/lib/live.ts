@@ -6,9 +6,18 @@ export type LiveDevice = {
   address: string;
   latitude: number;
   longitude: number;
-  /** 자료를 준 기관. 없으면 E-UM. 기상청 AWS 는 E-UM 관측기가 오래됐거나 이상할 때 대신 쓴다 */
-  provider?: 'eum' | 'kma';
+  /**
+   * 자료를 준 곳. 없으면 E-UM. 1km 안 E-UM 이 없거나 이상할 때 기상청 AWS(kma)를,
+   * 그것도 5km 안에 없으면 덕장이 속한 기상청 초단기실황 격자(kma-grid)를 대신 쓴다 (ADR 0013)
+   */
+  provider?: 'eum' | 'kma' | 'kma-grid';
 };
+
+/**
+ * 기상청 초단기실황 격자 값을 판정·기록에 쓰는 최대 경과 시간(분). 매시 자료가 약 40분 뒤 나오고 다음
+ * 자료가 나올 때까지 쓰므로 정시 기준으로 최대 약 105분 지난 값을 받는다. 1분 갱신 관측(30분)보다 길다.
+ */
+export const GRID_STALE_MINUTES = 120;
 
 export type LiveObservation = {
   device: LiveDevice;
@@ -45,8 +54,9 @@ export type SiteWeather = {
   } | null;
 };
 
-/** 왜 이 관측을 골랐는지. E-UM 이 정본이고 기상청은 보조다 (ADR 0009). */
-export type SelectionReason = 'eum' | 'kma-no-recent-eum' | 'kma-eum-anomaly' | 'explicit';
+/** 왜 이 관측을 골랐는지. E-UM 이 정본이고 기상청은 보조다 (ADR 0009, 0013). */
+export type SelectionReason =
+  'eum' | 'kma-no-recent-eum' | 'kma-eum-anomaly' | 'kma-grid' | 'explicit';
 
 export type LiveSnapshot = {
   fetchedAt: string;
@@ -91,6 +101,8 @@ function timestamp(value: unknown): value is string {
   );
 }
 
+const PROVIDERS: unknown[] = ['eum', 'kma', 'kma-grid'];
+
 function readDevice(value: unknown): LiveDevice {
   if (
     !record(value) ||
@@ -102,7 +114,7 @@ function readDevice(value: unknown): LiveDevice {
     !finite(value.longitude) ||
     Math.abs(value.longitude) > 180 ||
     // 모르는 기관을 E-UM 으로 보이게 하지 않는다.
-    (value.provider !== undefined && value.provider !== 'eum' && value.provider !== 'kma')
+    (value.provider !== undefined && !PROVIDERS.includes(value.provider as string))
   )
     throw new Error('관측기 정보를 확인할 수 없어요.');
   return {
@@ -111,7 +123,9 @@ function readDevice(value: unknown): LiveDevice {
     address: value.address,
     latitude: value.latitude,
     longitude: value.longitude,
-    ...(value.provider === 'kma' || value.provider === 'eum' ? { provider: value.provider } : {}),
+    ...(PROVIDERS.includes(value.provider as string)
+      ? { provider: value.provider as LiveDevice['provider'] }
+      : {}),
   };
 }
 
@@ -177,7 +191,7 @@ function readWeather(value: unknown): SiteWeather | undefined {
     : undefined;
 }
 
-const SELECTION_REASONS = ['eum', 'kma-no-recent-eum', 'kma-eum-anomaly', 'explicit'];
+const SELECTION_REASONS = ['eum', 'kma-no-recent-eum', 'kma-eum-anomaly', 'kma-grid', 'explicit'];
 
 export function readLiveObservation(value: unknown): LiveObservation {
   if (

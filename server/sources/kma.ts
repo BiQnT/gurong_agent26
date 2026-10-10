@@ -1,4 +1,4 @@
-import type { LiveObservation, SiteWeather } from '../../src/lib/live.ts';
+import { GRID_STALE_MINUTES, type LiveObservation, type SiteWeather } from '../../src/lib/live.ts';
 import type { BridgeConfig } from '../eum.ts';
 
 export type { SiteWeather };
@@ -7,7 +7,8 @@ export type { SiteWeather };
 // 호출 기록: research/api-tests/2026-10-06-kma-apihub.md
 //
 // - A2 AWS 816 구룡포 매분자료: E-UM 관측기가 오래됐거나 이상할 때 대신 쓰는 관측값 (1분 갱신)
-// - A3 초단기실황: 지금 비·눈이 오는지 (매시 자료, 약 40분 뒤 나온다)
+// - A3 초단기실황: 지금 비·눈이 오는지, 그리고 5km 안에 쓸 관측이 없을 때 대신 쓰는 덕장 격자의
+//   기온·습도·풍속 (매시 자료, 약 40분 뒤 나온다. 호출 기록 research/api-tests/2026-10-10-kma-grid-nowcast.md)
 // - B6 출몰시각: 일출·일몰 (하루 한 번)
 // 키는 URL 에만 들어가고 오류 글·로그에는 넣지 않는다. 실패하면 던지지 않고 null 이다.
 
@@ -61,21 +62,23 @@ export const PRECIPITATION: Record<string, string> = {
   '7': '눈날림',
 };
 
+type Site = { latitude: number; longitude: number };
+
 export type KmaSource = {
   aws: () => Promise<LiveObservation | null>;
-  weather: (site: { latitude: number; longitude: number }) => Promise<SiteWeather | null>;
+  weather: (site: Site) => Promise<SiteWeather | null>;
+  /** 덕장이 속한 초단기실황 격자의 기온·습도·풍속. weather 와 같은 호출을 나눠 쓴다 */
+  grid?: (site: Site) => Promise<LiveObservation | null>;
 };
 
-/** 기상청 격자 변환(A6, 람베르트 정각원추). 좌표 → 동네예보 격자. */
-export function toKmaGrid(latitude: number, longitude: number): { nx: number; ny: number } {
+// 기상청 격자 변환(A6, 람베르트 정각원추) 상수
+const LCC = (() => {
   const RE = 6371.00877;
   const GRID = 5.0;
   const SLAT1 = 30.0;
   const SLAT2 = 60.0;
   const OLON = 126.0;
   const OLAT = 38.0;
-  const XO = 43;
-  const YO = 136;
   const DEGRAD = Math.PI / 180;
   const re = RE / GRID;
   const slat1 = SLAT1 * DEGRAD;
@@ -88,6 +91,12 @@ export function toKmaGrid(latitude: number, longitude: number): { nx: number; ny
   sf = (Math.pow(sf, sn) * Math.cos(slat1)) / sn;
   let ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
   ro = (re * sf) / Math.pow(ro, sn);
+  return { re, sn, sf, ro, olon, DEGRAD, XO: 43, YO: 136 };
+})();
+
+/** 기상청 격자 변환(A6, 람베르트 정각원추). 좌표 → 동네예보 격자. */
+export function toKmaGrid(latitude: number, longitude: number): { nx: number; ny: number } {
+  const { re, sn, sf, ro, olon, DEGRAD, XO, YO } = LCC;
   let ra = Math.tan(Math.PI * 0.25 + latitude * DEGRAD * 0.5);
   ra = (re * sf) / Math.pow(ra, sn);
   let theta = longitude * DEGRAD - olon;
@@ -98,6 +107,23 @@ export function toKmaGrid(latitude: number, longitude: number): { nx: number; ny
     nx: Math.floor(ra * Math.sin(theta) + XO + 0.5),
     ny: Math.floor(ro - ra * Math.cos(theta) + YO + 0.5),
   };
+}
+
+/** 격자 → 그 격자 중심 좌표 (위 변환의 역). 덕장과 격자 중심의 거리를 재는 데 쓴다. */
+export function fromKmaGrid(nx: number, ny: number): { latitude: number; longitude: number } {
+  const { re, sn, sf, ro, olon, DEGRAD, XO, YO } = LCC;
+  const xn = nx - XO;
+  const yn = ro - ny + YO;
+  let ra = Math.sqrt(xn * xn + yn * yn);
+  if (sn < 0) ra = -ra;
+  const alat = 2 * Math.atan(Math.pow((re * sf) / ra, 1 / sn)) - Math.PI * 0.5;
+  const theta =
+    Math.abs(xn) <= 0
+      ? 0
+      : Math.abs(yn) <= 0
+        ? (xn < 0 ? -1 : 1) * Math.PI * 0.5
+        : Math.atan2(xn, yn);
+  return { latitude: alat / DEGRAD, longitude: (theta / sn + olon) / DEGRAD };
 }
 
 /** KST 시각 문자열 `YYYYMMDDHHMI` 를 ISO 로. */
@@ -128,6 +154,13 @@ function measured(value: string | undefined, min = -50, max = Infinity): number 
   return Number.isFinite(number) && number > min && number <= max ? number : null;
 }
 
+/**
+ * AWS 풍속: 10분 평균(WS10, 7번째 칸)을 쓰고, 그 칸이 비면 1분 평균(WS1, 3번째 칸)을 쓴다.
+ * 2026-10-10 에 816 의 WS10 이 모든 줄에서 -99.9 로 오고 WS1 은 정상이었다
+ * (research/api-tests/2026-10-10-kma-grid-nowcast.md).
+ */
+const awsWind = (column: string[]) => measured(column[7], -1, 100) ?? measured(column[3], -1, 100);
+
 /** AWS 매분자료(A2) 응답의 816 관측 줄을 모두 읽는다 (과거 기간 조회용). -50 이하는 없는 값이다. */
 export function readAwsRows(body: string): {
   at: string;
@@ -150,7 +183,7 @@ export function readAwsRows(body: string): {
               at,
               temperature: measured(column[8], -50, 60),
               humidity: measured(column[14], -1, 100),
-              windSpeed: measured(column[7], -1, 100),
+              windSpeed: awsWind(column),
               rain60mMm: measured(column[11]),
             },
           ]
@@ -172,15 +205,17 @@ export function readAwsMinute(
     .map((row) => row.split(/\s+/))
     .filter((column) => column.length >= 15 && column[1] === '816');
   // 최근 몇 분을 받아 기온·습도가 있는 마지막 줄을 쓴다 (마지막 분이 비어 있을 수 있다).
+  const complete = (row: string[]) =>
+    measured(row[8], -50, 60) !== null && measured(row[14], -1, 100) !== null;
   const column =
-    rows.findLast(
-      (row) => measured(row[8], -50, 60) !== null && measured(row[14], -1, 100) !== null,
-    ) ?? rows.at(-1);
+    rows.findLast((row) => complete(row) && awsWind(row) !== null) ??
+    rows.findLast(complete) ??
+    rows.at(-1);
   if (!column) return null;
   const observedAt = kstIso(column[0]);
   const temperature = measured(column[8], -50, 60);
   const humidity = measured(column[14], -1, 100);
-  const windSpeed = measured(column[7], -1, 100);
+  const windSpeed = awsWind(column);
   const parsed = observedAt ? Date.parse(observedAt) : NaN;
   const ageMinutes =
     Number.isFinite(parsed) && parsed <= now + 60_000
@@ -232,6 +267,86 @@ export function readNowcast(payload: unknown): SiteWeather['precipitation'] {
     type: PRECIPITATION[pty.obsrValue],
     rain1hMm: Number.isFinite(rain) && rain >= 0 ? rain : null,
     observedAt,
+  };
+}
+
+/** 초단기실황(A3) 격자 값 하나. 시각에 따른 신선도는 쓸 때 계산한다. */
+export type GridReading = {
+  nx: number;
+  ny: number;
+  temperature: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  observedAt: string;
+  observedAtRaw: string;
+};
+
+/** 초단기실황(A3) JSON 에서 격자의 기온(T1H)·습도(REH)·풍속(WSD)을 읽는다. */
+export function readNowcastGrid(payload: unknown): GridReading | null {
+  const items = (payload as { response?: { body?: { items?: { item?: unknown } } } })?.response
+    ?.body?.items?.item;
+  if (!Array.isArray(items) || !items.length) return null;
+  const rows = items as Record<string, unknown>[];
+  const first = rows[0];
+  const raw = `${String(first.baseDate)}${String(first.baseTime)}`;
+  const observedAt = kstIso(raw);
+  const nx = Number(first.nx);
+  const ny = Number(first.ny);
+  if (!observedAt || !Number.isInteger(nx) || !Number.isInteger(ny)) return null;
+  // 없는 항목이나 빈 값을 0 으로 읽지 않는다.
+  const value = (category: string, min: number, max: number) => {
+    const raw = rows.find((item) => item.category === category)?.obsrValue;
+    return (typeof raw === 'string' && raw.trim()) || typeof raw === 'number'
+      ? measured(String(raw), min, max)
+      : null;
+  };
+  return {
+    nx,
+    ny,
+    temperature: value('T1H', -50, 60),
+    humidity: value('REH', -1, 100),
+    windSpeed: value('WSD', -1, 100),
+    observedAt,
+    observedAtRaw: raw,
+  };
+}
+
+/** 격자 값을 덕장 판정에 쓸 수 있는 관측 하나로 만든다 (관측기 대신 격자 중심 좌표). */
+export function gridObservation(reading: GridReading, now: number): LiveObservation {
+  const center = fromKmaGrid(reading.nx, reading.ny);
+  const parsed = Date.parse(reading.observedAt);
+  const ageMinutes =
+    parsed <= now + 60_000 ? Math.max(0, Math.floor((now - parsed) / 60000)) : null;
+  const missing =
+    reading.temperature === null || reading.humidity === null || reading.windSpeed === null;
+  // 격자 값이라는 안내는 덕장 기준 선택(site-observations)이 경고로 붙인다. 여기는 품질 문제만 남긴다.
+  const issues: string[] = [];
+  if (missing) issues.push('초단기실황의 기온·습도·풍속 중 빠진 값이 있어요.');
+  if (ageMinutes === null) issues.push('초단기실황 시각이 조회 시각보다 미래예요.');
+  const status: LiveObservation['status'] =
+    ageMinutes === null || missing
+      ? 'invalid'
+      : ageMinutes > GRID_STALE_MINUTES
+        ? 'stale'
+        : 'current';
+  if (status === 'stale') issues.push(`초단기실황의 마지막 자료가 ${ageMinutes}분 전이에요.`);
+  return {
+    device: {
+      id: `kma-grid-${reading.nx}-${reading.ny}`,
+      name: `기상청 초단기실황 (격자 ${reading.nx},${reading.ny})`,
+      address: `덕장이 속한 기상청 5km 격자 (${reading.nx}, ${reading.ny}) 중심`,
+      latitude: Math.round(center.latitude * 1e5) / 1e5,
+      longitude: Math.round(center.longitude * 1e5) / 1e5,
+      provider: 'kma-grid',
+    },
+    temperature: reading.temperature,
+    humidity: reading.humidity,
+    windSpeed: reading.windSpeed,
+    observedAt: reading.observedAt,
+    observedAtRaw: reading.observedAtRaw,
+    ageMinutes,
+    status,
+    issues,
   };
 }
 
@@ -368,39 +483,52 @@ export function createKmaSource(
       return body ? readAwsMinute(body, now(), config.staleAfterMinutes) : null;
     });
 
+  /** 덕장 격자의 초단기실황. 비·눈(weather)과 격자 관측(grid)이 이 한 번의 호출을 나눠 쓴다. */
+  const nowcast = (site: Site) => {
+    const { nx, ny } = toKmaGrid(site.latitude, site.longitude);
+    // 매시 자료가 약 40분 뒤 나오므로 45분 전 시각의 정시를 묻는다.
+    const base = kstParts(now() - 45 * 60_000);
+    return cached(`ncst:${nx},${ny}:${base.date}${base.hour}`, 10 * 60_000, 60_000, async () => {
+      const url = new URL(NOWCAST_URL);
+      for (const [name, value] of Object.entries({
+        pageNo: '1',
+        numOfRows: '20',
+        dataType: 'JSON',
+        base_date: base.date,
+        base_time: `${base.hour}00`,
+        nx: String(nx),
+        ny: String(ny),
+        authKey: kmaKey,
+      }))
+        url.searchParams.set(name, value);
+      const body = await get(url);
+      if (!body) return null;
+      try {
+        const payload: unknown = JSON.parse(body);
+        const precipitation = readNowcast(payload);
+        const grid = readNowcastGrid(payload);
+        return precipitation || grid ? { precipitation, grid } : null;
+      } catch {
+        return null;
+      }
+    });
+  };
+
   return {
     async aws() {
       return (await awsMinute())?.observation ?? null;
     },
+    async grid(site) {
+      const reading = (await nowcast(site))?.grid;
+      return reading ? gridObservation(reading, now()) : null;
+    },
     async weather(site) {
       const { nx, ny } = toKmaGrid(site.latitude, site.longitude);
-      // 매시 자료가 약 40분 뒤 나오므로 45분 전 시각의 정시를 묻는다.
-      const base = kstParts(now() - 45 * 60_000);
       const today = kstParts(now()).date;
       // 초단기예보는 매시 30분 자료가 약 45분 뒤 나오므로 50분 전 시각의 30분을 묻는다.
       const issue = kstParts(now() - 50 * 60_000);
       const [precipitation, aws, sun, forecast] = await Promise.all([
-        cached(`ncst:${nx},${ny}:${base.date}${base.hour}`, 10 * 60_000, 60_000, async () => {
-          const url = new URL(NOWCAST_URL);
-          for (const [name, value] of Object.entries({
-            pageNo: '1',
-            numOfRows: '20',
-            dataType: 'JSON',
-            base_date: base.date,
-            base_time: `${base.hour}00`,
-            nx: String(nx),
-            ny: String(ny),
-            authKey: kmaKey,
-          }))
-            url.searchParams.set(name, value);
-          const body = await get(url);
-          if (!body) return null;
-          try {
-            return readNowcast(JSON.parse(body));
-          } catch {
-            return null;
-          }
-        }),
+        nowcast(site).then((value) => value?.precipitation ?? null),
         awsMinute(),
         dataKey
           ? cached(

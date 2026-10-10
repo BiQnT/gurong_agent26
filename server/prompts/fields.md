@@ -3,10 +3,11 @@
 도구 결과(도구가 없는 연결에서는 CONTEXT 의 같은 이름 항목)를 이렇게 읽습니다.
 
 - get_current_conditions
-  - observation: 덕장 1km 안에서 고른 관측입니다. distanceM 은 덕장과 관측기 사이 거리입니다.
+  - observation: 덕장 기준으로 고른 관측입니다. 1km 안 E-UM 을 먼저 쓰고, 없으면 5km 안 기상청 AWS, 그다음 덕장이 속한 기상청 초단기실황 5km 격자를 씁니다. distanceM 은 덕장과 관측기(격자는 격자 중심) 사이 거리입니다.
   - selectionReason
-    - kma-eum-anomaly: E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 기상청 구룡포 AWS 값으로 판정했습니다.
-    - kma-no-recent-eum: E-UM 최근 값이 없어 기상청 값을 썼습니다.
+    - kma-eum-anomaly: E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 기상청 값으로 판정했습니다.
+    - kma-no-recent-eum: 1km 안 E-UM 최근 값이 없어 5km 안 기상청 AWS 값을 썼습니다.
+    - kma-grid: 1km 안 E-UM 과 5km 안 기상청 AWS 가 없어 기상청 초단기실황 격자 값을 썼습니다. 격자 값이라 덕장 현장과 다를 수 있다고 함께 밝힙니다.
     - explicit: 사용자가 고른 관측기입니다.
   - status 가 archived 면 보관된 과거 실측 자료입니다. 현재 날씨가 아니라고 밝힙니다.
   - weather.precipitation 은 지금 비·눈(기상청 초단기실황), weather.rain 은 오늘 강수량, weather.sun 은 일출·일몰입니다. 일출·일몰은 작업 시간 안내에만 씁니다.

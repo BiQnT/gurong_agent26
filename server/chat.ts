@@ -3,6 +3,7 @@ import {
   describeThresholds,
   DRYING_THRESHOLDS,
   gradeIs,
+  isKmaSource,
   kst,
   type DryingGrade,
 } from '../src/lib/drying.ts';
@@ -138,18 +139,25 @@ export function startPrefill(message: string): ChatReply['prefill'] {
     : undefined;
 }
 
-/** 서버가 E-UM 대신 기상청 AWS 를 고른 경우 (사용자가 직접 고른 것과 구분한다). */
+/** 서버가 E-UM 대신 기상청 AWS·초단기실황 격자를 고른 경우 (사용자가 직접 고른 것과 구분한다). */
 const kmaFallback = (snapshot: LiveSnapshot) =>
-  snapshot.selected?.device.provider === 'kma' &&
+  isKmaSource(snapshot.selected?.device.provider) &&
   (snapshot.selectionReason === 'kma-no-recent-eum' ||
-    snapshot.selectionReason === 'kma-eum-anomaly');
+    snapshot.selectionReason === 'kma-eum-anomaly' ||
+    snapshot.selectionReason === 'kma-grid');
 
-/** 기상청 값을 쓴 이유 한 문장. */
+/** 기상청 값을 쓴 이유 한 문장 (ADR 0013: 1km 안 E-UM → 5km 안 기상청 AWS → 덕장 격자 초단기실황). */
 function selectionNote(snapshot: LiveSnapshot): string {
+  const name =
+    snapshot.selected?.device.provider === 'kma-grid'
+      ? '기상청 초단기실황(덕장이 속한 5km 격자)'
+      : (snapshot.selected?.device.name ?? '기상청');
   if (snapshot.selectionReason === 'kma-eum-anomaly')
-    return ' E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 기상청 구룡포 AWS 값을 기준으로 판단했어요.';
+    return ` E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 ${name} 값을 기준으로 판단했어요.`;
   if (snapshot.selectionReason === 'kma-no-recent-eum')
-    return ' E-UM 관측기의 최근 값이 없어 기상청 구룡포 AWS 값을 기준으로 판단했어요.';
+    return ` 덕장 1km 안 E-UM 관측기의 최근 값이 없어 ${name} 값을 기준으로 판단했어요.`;
+  if (snapshot.selectionReason === 'kma-grid')
+    return ` 덕장 1km 안 E-UM 과 5km 안 기상청 AWS 의 최근 값이 없어 ${name} 값을 기준으로 판단했어요. 격자 값이라 현장과 다를 수 있어요.`;
   return '';
 }
 
@@ -164,11 +172,11 @@ export function localExplanation(snapshot: LiveSnapshot, action: ChatReply['acti
         : action === 'guidance'
           ? '작업 안내에서 전달할 내용을 확인할 수 있어요. '
           : '';
-  const kma = observation?.device.provider === 'kma';
+  const kma = isKmaSource(observation?.device.provider);
   const source = kma
     ? kmaFallback(snapshot)
-      ? `E-UM 관측기의 최근 값이 없어 ${observation.device.name} 관측값을 확인했어요.`
-      : `${observation.device.name} 관측값을 확인했어요.`
+      ? `덕장 가까이에 쓸 수 있는 E-UM 관측이 없어 ${observation!.device.name} 관측값을 확인했어요.`
+      : `${observation!.device.name} 관측값을 확인했어요.`
     : snapshot.status === 'archived'
       ? `${snapshot.archiveSourceDate ?? '이전'}에 관측된 E-UM 보관 실측 자료를 보여드려요. 현재 날씨가 아니에요.`
       : observation

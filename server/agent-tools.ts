@@ -9,7 +9,7 @@ import {
   type HistorySummary,
   type ShortForecast,
 } from '../src/lib/analysis.ts';
-import { describeThresholds, gradeIs, kst } from '../src/lib/drying.ts';
+import { describeThresholds, gradeIs, isKmaSource, kst, sourceName } from '../src/lib/drying.ts';
 import { distanceMeters } from '../src/lib/geo.ts';
 import type { LiveSnapshot } from '../src/lib/live.ts';
 import type { OperationsData } from '../src/lib/operations.ts';
@@ -109,7 +109,7 @@ function currentConditions(snapshot: LiveSnapshot, uv: UvReading | null) {
     summary: a
       ? `현재 규칙 판정은 ${gradeIs(a.grade)}. ${a.summary}`
       : '덕장 기준 판정을 만들 수 없어요.',
-    source: o?.device.provider === 'kma' ? '기상청 API허브 AWS 매분자료' : snapshot.source,
+    source: isKmaSource(o?.device.provider) ? sourceName(o?.device.provider) : snapshot.source,
     status: snapshot.status,
     archiveSourceDate: snapshot.archiveSourceDate ?? null,
     fetchedAt: kst(snapshot.fetchedAt),
@@ -307,7 +307,7 @@ export function createAgentTools(context: ToolContext): ToolDefinition[] {
         samples: operations ? batchHistorySamples(operations) : [],
         ...range,
         source: '해풍 배치 기록(30분 수집)',
-        station: '덕장 1km 안 관측기',
+        station: '덕장 기준으로 고른 관측 (E-UM 1km, 기상청 5km)',
         distanceM: null,
         sampleMinutes: 30,
         now,

@@ -12,7 +12,7 @@ import {
   Wind,
 } from 'lucide-react';
 import type { Assessment } from '../../lib/chat';
-import { describeThresholds } from '../../lib/drying';
+import { describeThresholds, isKmaSource, sourceName } from '../../lib/drying';
 import { formatDistance } from '../../lib/geo';
 import type { LiveObservation } from '../../lib/live';
 
@@ -65,7 +65,8 @@ export function ConditionsCard({
         humidity: observation?.humidity ?? null,
         windSpeed: observation?.windSpeed ?? null,
       };
-  const kma = observation?.device.provider === 'kma';
+  const provider = observation?.device.provider;
+  const kma = isKmaSource(provider);
   const deviceName = observation?.device.name ?? assessment?.deviceName ?? '관측기 없음';
   const distance = observation?.distanceM ?? assessment?.distanceM ?? null;
   const observedAt = observation?.observedAt ?? assessment?.observedAt ?? null;
@@ -121,8 +122,10 @@ export function ConditionsCard({
       <p className="conditions-where">
         <MapPin size={14} />
         <span>
-          {deviceName} · 덕장에서 {formatDistance(distance)} · {observationTime(observedAt)} 측정
-          {ageMinutes === null ? '' : ` (${ageMinutes}분 전)`} · {kma ? '기상청 AWS' : 'E-UM'}
+          {deviceName} · {provider === 'kma-grid' ? '격자 중심까지' : '덕장에서'}{' '}
+          {formatDistance(distance)} · {observationTime(observedAt)} 측정
+          {ageMinutes === null ? '' : ` (${ageMinutes}분 전)`} ·{' '}
+          {provider === 'kma-grid' ? '기상청 격자' : kma ? '기상청 AWS' : 'E-UM'}
         </span>
       </p>
       {assessment && (
@@ -196,7 +199,7 @@ export function ConditionsCard({
           target="_blank"
           rel="noreferrer"
         >
-          {kma ? '기상청 API허브 AWS 매분자료' : 'E-UM 대기환경 데이터'}
+          {kma ? sourceName(provider) : 'E-UM 대기환경 데이터'}
           <ExternalLink size={12} />
         </a>
       </details>
