@@ -2,11 +2,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { readLiveSnapshot } from '../src/lib/live.ts';
+import { distanceMeters } from '../src/lib/geo.ts';
 import {
   AWS_816,
   createKmaSource,
+  fromKmaGrid,
+  gridObservation,
   readAwsMinute,
   readNowcast,
+  readNowcastGrid,
   readRiseSet,
   toKmaGrid,
 } from './sources/kma.ts';
@@ -232,4 +236,175 @@ test('the last row with values is used, impossible dates are rejected, and a sel
   );
   const result = await service.snapshot(new AbortController().signal, 'kma-aws-816');
   assert.equal(result.selected?.device.id, '1');
+});
+
+test('the grid centre converts back to the same grid and lies within a few km of the site', () => {
+  for (const [latitude, longitude] of [
+    [35.9812, 129.5402],
+    [35.9035, 129.5145],
+    [37.5665, 126.978],
+  ]) {
+    const { nx, ny } = toKmaGrid(latitude, longitude);
+    const centre = fromKmaGrid(nx, ny);
+    assert.deepEqual(toKmaGrid(centre.latitude, centre.longitude), { nx, ny });
+    // 5km 격자라 격자 안의 어느 점도 중심에서 대각선 반(약 3.6km)보다 가깝다
+    assert.ok(distanceMeters({ latitude, longitude }, centre) < 3600);
+  }
+});
+
+test('the real nowcast gives the grid temperature, humidity and wind; a missing value stays null', () => {
+  // 2026-10-10 12:00 KST 발표, 예시 덕장 격자 105,94 (research/api-tests/2026-10-10-kma-grid-nowcast.md)
+  const today = JSON.parse(raw('kma-ultra-srt-ncst-2026-10-10.json'));
+  const reading = readNowcastGrid(today);
+  assert.deepEqual(reading, {
+    nx: 105,
+    ny: 94,
+    temperature: 24.3,
+    humidity: 68,
+    windSpeed: 3,
+    observedAt: '2026-10-10T03:00:00.000Z',
+    observedAtRaw: '202610101200',
+  });
+  // 2026-10-06 기록도 같은 모양이다
+  assert.deepEqual(
+    (({ temperature, humidity, windSpeed }) => ({ temperature, humidity, windSpeed }))(
+      readNowcastGrid(JSON.parse(raw('kma-ultra-srt-ncst.json')))!,
+    ),
+    { temperature: 13.1, humidity: 82, windSpeed: 2.6 },
+  );
+  // 항목이 빠지면 0 이 아니라 없음이다
+  const items = today.response.body.items.item.filter(
+    (item: { category: string }) => item.category !== 'REH',
+  );
+  const partial = { response: { body: { items: { item: items } } } };
+  assert.equal(readNowcastGrid(partial)?.humidity, null);
+  assert.equal(readNowcastGrid({ response: { body: { items: { item: [] } } } }), null);
+
+  // 관측 하나로: 매시 자료라 2시간까지 최신으로 본다
+  const observedAt = Date.parse('2026-10-10T03:00:00Z');
+  const fresh = gridObservation(reading!, observedAt + 50 * 60_000);
+  assert.equal(fresh.status, 'current');
+  assert.equal(fresh.ageMinutes, 50);
+  assert.deepEqual(fresh.issues, []);
+  assert.equal(fresh.device.id, 'kma-grid-105-94');
+  assert.equal(fresh.device.provider, 'kma-grid');
+  assert.deepEqual(toKmaGrid(fresh.device.latitude, fresh.device.longitude), { nx: 105, ny: 94 });
+  assert.equal(gridObservation(reading!, observedAt + 130 * 60_000).status, 'stale');
+  assert.equal(gridObservation(readNowcastGrid(partial)!, observedAt).status, 'invalid');
+  // 화면 검증을 통과한다
+  assert.equal(
+    readLiveSnapshot({
+      fetchedAt: '2026-10-10T03:50:00Z',
+      source: '테스트',
+      sourceUrl: 'https://apihub.kma.go.kr/',
+      devices: [fresh.device],
+      observations: [fresh],
+      selected: fresh,
+      warnings: [],
+      status: 'ok',
+      llm: { configured: false, model: 'test' },
+      selectionReason: 'kma-grid',
+    }).selected?.device.provider,
+    'kma-grid',
+  );
+});
+
+test('the grid observation and the rain check share one nowcast call', async () => {
+  const urls: URL[] = [];
+  const source = createKmaSource(
+    { kmaAuthKey: 'kma-secret', staleAfterMinutes: 30 },
+    async (input) => {
+      const url = new URL(String(input));
+      urls.push(url);
+      if (url.pathname.endsWith('getUltraSrtNcst'))
+        return new Response(raw('kma-ultra-srt-ncst-2026-10-10.json'));
+      if (url.pathname.endsWith('nph-aws2_min')) return new Response(raw('kma-aws816-minute.txt'));
+      return new Response('{}');
+    },
+    () => Date.parse('2026-10-10T03:50:00Z'),
+  )!;
+  const site = { latitude: 35.9812, longitude: 129.5402 };
+  const [weather, grid] = await Promise.all([source.weather(site), source.grid!(site)]);
+  assert.equal(weather?.precipitation?.type, '없음');
+  assert.equal(grid?.temperature, 24.3);
+  assert.equal(grid?.status, 'current');
+  assert.equal(urls.filter((url) => url.pathname.endsWith('getUltraSrtNcst')).length, 1);
+  // 키는 URL 에만 있고 관측 결과에는 없다
+  assert.ok(!JSON.stringify(grid).includes('kma-secret'));
+});
+
+test('when the 10-minute wind (WS10) is missing, the 1-minute wind (WS1) is used', () => {
+  // 2026-10-10 에 816 의 WS10 이 모든 줄에서 -99.9 로 왔다 (WS1 은 정상)
+  const body = raw('kma-aws816-minute.txt')
+    .split('\n')
+    .map((row) => {
+      if (row.startsWith('#') || !row.trim()) return row;
+      const column = row.trim().split(/\s+/);
+      column[7] = '-99.9';
+      return column.join(' ');
+    })
+    .join('\n');
+  const read = readAwsMinute(body, OBSERVED + 2 * 60_000, 30);
+  const ws1 = Number(
+    raw('kma-aws816-minute.txt')
+      .split('\n')
+      .filter((row) => row.trim() && !row.startsWith('#'))
+      .at(-1)!
+      .trim()
+      .split(/\s+/)[3],
+  );
+  assert.equal(read?.observation.windSpeed, ws1);
+  assert.equal(read?.observation.status, 'current');
+});
+
+test('AWS 816 rain is told only to sites within 5 km, and a late nowcast falls back one hour', async () => {
+  const asked: string[] = [];
+  const source = createKmaSource(
+    { kmaAuthKey: 'kma-secret', staleAfterMinutes: 30 },
+    async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith('getUltraSrtNcst')) {
+        asked.push(url.searchParams.get('base_time')!);
+        // 13:00 자료가 아직 없다 (발표 지연) → 빈 목록
+        if (url.searchParams.get('base_time') === '1300')
+          return Response.json({ response: { header: { resultCode: '03' }, body: { items: '' } } });
+        return new Response(raw('kma-ultra-srt-ncst-2026-10-10.json'));
+      }
+      if (url.pathname.endsWith('nph-aws2_min')) return new Response(raw('kma-aws816-minute.txt'));
+      return new Response('{}');
+    },
+    // 13:46 KST: 45분 전은 13:01 → 13:00 자료를 묻는다
+    () => Date.parse('2026-10-10T04:46:00Z'),
+  )!;
+  const near = await source.weather({ latitude: 35.9812, longitude: 129.5402 });
+  assert.equal(near?.rain?.todayMm, 0);
+  assert.deepEqual(asked, ['1300', '1200']);
+  // 한 시간 전 자료의 비·눈은 오래됐을 수 있어 쓰지 않는다 (판정은 적합 대신 주의가 된다)
+  assert.equal(near?.precipitation, null);
+  // 약 9km 남쪽 덕장에는 구룡포 AWS 강수량을 붙이지 않는다
+  const far = await source.weather({ latitude: 35.9035, longitude: 129.5145 });
+  // (다른 자료도 없으면 weather 자체가 없다)
+  assert.equal(far?.rain ?? null, null);
+  // 한 시간 전 격자 값도 2시간 안이라 최신이다
+  const grid = await source.grid!({ latitude: 35.9812, longitude: 129.5402 });
+  assert.equal(grid?.status, 'current');
+  assert.equal(grid?.ageMinutes, 106);
+});
+
+test('a KMA outage does not trigger a second nowcast request for the previous hour', async () => {
+  const asked: string[] = [];
+  const source = createKmaSource(
+    { kmaAuthKey: 'kma-secret', staleAfterMinutes: 30 },
+    async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith('getUltraSrtNcst')) {
+        asked.push(url.searchParams.get('base_time')!);
+        return new Response('', { status: 503 });
+      }
+      return new Response('', { status: 503 });
+    },
+    () => Date.parse('2026-10-10T04:46:00Z'),
+  )!;
+  assert.equal(await source.grid!({ latitude: 35.9812, longitude: 129.5402 }), null);
+  assert.deepEqual(asked, ['1300']);
 });

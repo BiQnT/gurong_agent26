@@ -24,7 +24,7 @@ import {
   type Batch,
   type StartPrefill,
 } from '../../lib/operations';
-import { evaluateBatch, kst } from '../../lib/drying';
+import { distanceLimit, evaluateBatch, kst } from '../../lib/drying';
 import {
   BatchBadge,
   Facts,
@@ -474,7 +474,7 @@ function ReportDialog({ operations, batch }: ViewProps & { batch: Batch }) {
                 <small>
                   {summary.distanceValidated
                     ? '덕장 기준 최대 거리'
-                    : '일부 거리 미확인 또는 1km 초과'}
+                    : '일부 거리 미확인 또는 거리 한도 초과 (E-UM 1km, 기상청 5km)'}
                 </small>
               </div>
               <div>
@@ -555,7 +555,8 @@ function ReportDialog({ operations, batch }: ViewProps & { batch: Batch }) {
                     <td>{value(item.humidity, '%')}</td>
                     <td>{value(item.wind, 'm/s')}</td>
                     <td>
-                      {item.distanceM !== null && item.distanceM > 1000 ? (
+                      {item.distanceM !== null &&
+                      item.distanceM > distanceLimit({ deviceId: item.sourceDeviceId }) ? (
                         <span className="op-missing-tag">거리 초과</span>
                       ) : item.temperature === null ||
                         item.humidity === null ||

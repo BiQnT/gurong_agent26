@@ -126,8 +126,8 @@ VM 에 넣는 값은 [infra/gcp/backend.env.example](../../infra/gcp/backend.env
 
 - **대상:** 진행 중인 배치가 있는 덕장만. 하나도 없으면 E-UM 을 부르지 않고 끝난다.
 - **조회:** `createObservationService` 로 한 번만 조회하고(장비 목록 `INT_S01_001`, 일괄 관측 `INT_S01_003`, 빠진 장비는 단건 `INT_S01_004`. [chat-api.md](chat-api.md)) 모든 덕장이 그 결과를 같이 쓴다.
-- **기록:** 덕장마다 화면과 같은 기준(1km 안의 최근 관측 중 가장 가까운 장비)으로 관측을 고른다. 진행 중인 배치마다 `appendLiveObservation`([src/lib/operations.ts](../../src/lib/operations.ts))이 받아 주면 실제 관측으로 기록한다. 수동 기록의 기준(`observationRecordIssue`: 현재 상태, 관측 후 30분 이내, 값·시각 유효, 확인 사항 없음)을 그대로 쓴다.
-- **결측:** 고르지 못했거나 기준에 못 미치면(E-UM 조회 실패, 보관 자료만 있음, 1km 안에 최근 관측 없음, 기록 기준 미달) 결측 샘플을 남긴다. 장비 ID 는 `collector-missing`, 값과 `distanceM` 은 `null`, `alert` 는 `false` 이고 이유는 배치 로그의 `detail` 에 적는다. 보고서에서 결측 샘플은 결측률에만 잡히고 유효 표본·거리 검증에서는 빠진다(`getBatchReport`).
+- **기록:** 덕장마다 화면과 같은 기준(1km 안 최근 E-UM, 없으면 5km 안 기상청 AWS, 그다음 덕장 격자 초단기실황. [0013](../decisions/0013-distance-tiered-observation.md))으로 관측을 고른다. 진행 중인 배치마다 `appendLiveObservation`([src/lib/operations.ts](../../src/lib/operations.ts))이 받아 주면 실제 관측으로 기록한다. 수동 기록의 기준(`observationRecordIssue`: 현재 상태, 관측 후 30분 이내(매시 자료인 격자는 2시간), 값·시각 유효, 확인 사항 없음)을 그대로 쓴다. 격자 값은 매시 하나라 같은 값이 다음 구간에 다시 오면 쌓지 않는다.
+- **결측:** 고르지 못했거나 기준에 못 미치면(E-UM 조회 실패, 보관 자료만 있음, 거리 한도 안에 최근 관측 없음, 기록 기준 미달) 결측 샘플을 남긴다. 장비 ID 는 `collector-missing`, 값과 `distanceM` 은 `null`, `alert` 는 `false` 이고 이유는 배치 로그의 `detail` 에 적는다. 보고서에서 결측 샘플은 결측률에만 잡히고 유효 표본·거리 검증에서는 빠진다(`getBatchReport`).
 - **한 구간에 한 번:** 로그 id 를 `collect-<30분 구간 시작 시각(ISO)>` 로 정한다. 같은 id 가 이미 있으면(타이머가 두 번 돌아도) 아무것도 더하지 않는다. 운영자가 같은 장비·같은 관측 시각을 이미 손으로 기록했다면 그 표본이 대신한다.
 - **저장:** `workspace.appendCollected(siteId, update)` 가 잠금 안에서 최신 기록에 적용한다. 운영자 저장처럼 `revision` 을 올리므로 화면의 충돌 재시도가 그대로 동작하고, 저장 전 검증과 근로자 이력 보호도 같다. 사람의 요청이 아니라 쿠키·소속 검사는 없다.
 - **등급과 경보:** 기록한 관측마다 규칙 함수(`assessDrying`, [0010](../decisions/0010-drying-grade-rules.md))로 등급을 매겨 로그 `detail` 에 등급·이유·기준 이름을 남긴다. 강수는 기상청 초단기실황을 쓴다. 부적합이면 직전 경보로부터 1시간이 지났을 때만 `kind: alert` 로그(`alert-<구간>`)를 더하고 그 샘플의 `alert` 를 `true` 로 한다. 근로자·휴대폰 알림 발신과 기본 조언 3시간 쿨다운은 아직 없다.

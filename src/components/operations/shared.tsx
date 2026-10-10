@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Droplets, LockKeyhole, Radio, Thermometer, Wind } from 'lucide-react';
+import { distanceLimit } from '../../lib/drying';
 import {
   getBatchReport,
   GUIDANCE_FACTS,
@@ -90,7 +91,9 @@ export function MiniChart({ batch }: { batch: Batch }) {
     (item) =>
       item.temperature !== null &&
       Number.isFinite(item.temperature) &&
-      (item.distanceM === null || (item.distanceM >= 0 && item.distanceM <= 1000)),
+      (item.distanceM === null ||
+        (item.distanceM >= 0 &&
+          item.distanceM <= distanceLimit({ deviceId: item.sourceDeviceId }))),
   );
   if (!observed.length)
     return (

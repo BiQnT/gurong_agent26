@@ -131,7 +131,7 @@ const DEMO_ASSESSMENTS: Record<Scenario, Assessment> = {
   unavailable: {
     ...SHARED_DEMO,
     grade: '판정 불가',
-    summary: '1km 이내에서 사용할 수 있는 관측 데이터를 찾지 못했어요.',
+    summary: '덕장 근처(E-UM 1km, 기상청 5km)에서 사용할 수 있는 관측 데이터를 찾지 못했어요.',
     temperature: null,
     humidity: null,
     windSpeed: null,
@@ -139,7 +139,7 @@ const DEMO_ASSESSMENTS: Record<Scenario, Assessment> = {
     distanceM: 1470,
     deviceName: '인근 관측기 없음 · 시연',
     reasons: [
-      '가장 가까운 관측기가 1,470m 떨어져 있어 1km 거리 기준을 충족하지 못해요.',
+      '가장 가까운 E-UM 관측기가 1,470m 떨어져 있고 기상청 자료도 받지 못해 거리 기준을 충족하지 못해요.',
       '온도·습도·풍속 값이 없어 건조 환경 등급을 추정하지 않았어요.',
       '덕장 위치와 관측기 연결을 확인한 뒤 다시 요청해 주세요.',
     ],
@@ -206,7 +206,7 @@ function demoReply(request: ChatRequest): ChatReply {
   if (/기준|방법|어떻게|설명|신뢰|관측기|데이터|거리|사용법|이유/.test(message)) {
     return {
       content:
-        '온도·습도·풍속과 관측 시각, 관측기 거리를 함께 확인해요. 1km 이내 관측값이 없거나 데이터가 부족하면 “판정 불가”로 안내해요. 지금 등급은 샘플 관측 기준이며, 실제 연동에서는 검증된 규칙의 판정 근거를 AI가 설명해요.',
+        '온도·습도·풍속과 관측 시각, 관측기 거리를 함께 확인해요. 덕장 1km 안 E-UM 관측을 먼저 쓰고, 없으면 5km 안 기상청 AWS, 그다음 덕장이 속한 기상청 격자 실황을 써요. 셋 다 없거나 데이터가 부족하면 “판정 불가”로 안내해요. 지금 등급은 샘플 관측 기준이며, 실제 연동에서는 검증된 규칙의 판정 근거를 AI가 설명해요.',
       suggestions: ['지금 건조해도 괜찮을까요?', '새 건조 작업 시작하기', '작업 종료 기록하기'],
     };
   }
@@ -250,7 +250,7 @@ function demoReply(request: ChatRequest): ChatReply {
       주의: '습도가 높고 바람이 약해요. 작업 전 덕장 내부의 습기와 통풍 상태를 확인해 주세요.',
       부적합: '습도가 높고 바람이 거의 없어요. 작업 여부는 현장 상태를 확인한 뒤 결정해 주세요.',
       '판정 불가':
-        '1km 이내 관측값이 없어 환경을 추정하지 않았어요. 덕장 위치와 현장 상태를 확인해 주세요.',
+        '덕장 근처에서 쓸 수 있는 관측값이 없어 환경을 추정하지 않았어요. 덕장 위치와 현장 상태를 확인해 주세요.',
     };
     const content = `샘플 관측 기준, 건조 환경은 “${assessment.grade}”이에요. ${explanation[assessment.grade]}`;
     return { content, assessment, suggestions };

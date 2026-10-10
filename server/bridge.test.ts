@@ -517,3 +517,22 @@ test('public settings expose defaults without accepting an invalid timezone or f
   assert.equal(defaults.staleAfterMinutes, 30);
   assert.equal(defaults.openaiModel, 'gpt-4.1-mini');
 });
+
+test('a grid id picked on screen is left to the site selection instead of failing as an unknown device', async () => {
+  const service = createObservationService(config, async (input) => {
+    const url = new URL(String(input));
+    if (url.pathname.endsWith('/devices'))
+      return Response.json({
+        status: 'success',
+        data: [{ id: 1, latitude: 35.98, longitude: 129.55, nickname: '실측 관측기' }],
+      });
+    return Response.json({
+      status: 'success',
+      data: [{ devId: 1, temp: 12, humi: 56, winsp: 1.2, logDateTime: '2026-08-06 03:00:31' }],
+    });
+  });
+  // 덕장 격자(kma-grid-…)는 E-UM 목록에 없지만 오류(UNKNOWN_DEVICE) 대신 기본 선택으로 답한다
+  const snapshot = await service.snapshot(signal(), 'kma-grid-105-94');
+  assert.equal(snapshot.selectionReason, 'eum');
+  await assert.rejects(service.snapshot(signal(), 'no-such-device'), { code: 'UNKNOWN_DEVICE' });
+});

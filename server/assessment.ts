@@ -1,5 +1,5 @@
 import type { BatchDigest, HistorySample } from '../src/lib/analysis.ts';
-import { assessDrying, evaluateBatch, kst } from '../src/lib/drying.ts';
+import { assessDrying, distanceLimit, evaluateBatch, kst } from '../src/lib/drying.ts';
 import type { LiveSnapshot } from '../src/lib/live.ts';
 import {
   getBatchReport,
@@ -86,14 +86,16 @@ export function digestBatches(
 
 /**
  * 이 덕장 배치에 기록된 관측 표본 (우리 DB 의 과거 자료). 진행 중인 배치가 있을 때만 30분마다 쌓인다.
- * 거리를 모르거나 1km 밖인 표본, 결측 표본은 뺀다.
+ * 거리를 모르거나 출처의 거리 한도(E-UM 1km, 기상청 5km) 밖인 표본, 결측 표본은 뺀다.
  */
 export function batchHistorySamples(data: OperationsData): HistorySample[] {
   return data.batches.flatMap((batch) =>
     batch.observations
       .filter(
         (item) =>
-          typeof item.distanceM === 'number' && item.distanceM >= 0 && item.distanceM <= 1000,
+          typeof item.distanceM === 'number' &&
+          item.distanceM >= 0 &&
+          item.distanceM <= distanceLimit({ deviceId: item.sourceDeviceId }),
       )
       .filter((item) =>
         [item.temperature, item.humidity, item.wind].some((value) => value !== null),

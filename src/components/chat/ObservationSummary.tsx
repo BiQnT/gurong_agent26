@@ -1,6 +1,6 @@
 import { ChevronRight, Droplets, MapPin, RefreshCw, Thermometer, Wind } from 'lucide-react';
 import type { LiveObservation, LiveSnapshot, SiteWeather } from '../../lib/live';
-import { assessDrying } from '../../lib/drying';
+import { assessDrying, isKmaSource } from '../../lib/drying';
 import { observationTime } from './ConditionsCard';
 
 type Props = {
@@ -21,10 +21,13 @@ export function ObservationSummary({
   onAsk,
 }: Props) {
   // 기상청 AWS 는 E-UM 관측기의 최근 값이 없을 때 대신 쓴 실시간 값이다 (E-UM 이 보관 자료여도).
-  const kma = observation?.device.provider === 'kma';
+  const kma = isKmaSource(observation?.device.provider);
   const archived = snapshot?.status === 'archived' && !kma;
+  // 서버가 기상청 값을 고른 이유 (site-observations 의 경고 문장, "… 판단해요.")
   const kmaNote = kma
-    ? snapshot?.warnings.find((warning) => warning.includes('기상청 구룡포 AWS'))
+    ? snapshot?.warnings.find(
+        (warning) => warning.includes('기상청') && warning.includes('판단해요'),
+      )
     : undefined;
   const extra = weatherLine(snapshot?.weather);
   // 덕장이 등록돼 있으면 규칙 함수의 널기 판정을 카드에 보여 준다.

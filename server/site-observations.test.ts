@@ -49,7 +49,7 @@ test('registered site chooses nearby current evidence over stale/invalid closer 
   assert.equal(result.selected?.device.id, 'near');
   assert.equal(result.selected?.distanceM, 111);
   assert.equal(source.selected?.distanceM, undefined);
-  assert.ok(!result.warnings.some((warning) => warning.includes('1km 이내')));
+  assert.ok(!result.warnings.some((warning) => warning.includes('덕장 근처')));
   assert.deepEqual(readLiveSnapshot(result).site, site);
   assert.equal(readLiveSnapshot(result).selected?.distanceM, 111);
   assert.equal(attachSiteContext(source, site, 'far').selected?.device.id, 'far');
@@ -62,7 +62,9 @@ test('no valid nearby observation is clearly flagged, including empty and stale-
     [observation('stale', 36, 'stale')],
   ]) {
     const result = attachSiteContext(snapshot(observations), site);
-    assert.ok(result.warnings.some((warning) => warning.includes('1km 이내')));
+    assert.ok(
+      result.warnings.some((warning) => warning.includes('덕장 근처(E-UM 1km, 기상청 5km)')),
+    );
     assert.ok(result.warnings.some((warning) => warning.includes('가설 기준으로 규칙 함수')));
     if (!observations.length) assert.equal(result.selected, null);
   }
@@ -119,7 +121,7 @@ test('model receives computed distance and registration status without private s
   assert.equal(current.assessment, null);
 });
 
-test('E-UM comes first within 1 km; the KMA AWS fills in only when no recent E-UM value is near', () => {
+test('E-UM comes first within 1 km; the KMA AWS within 5 km fills in only when no recent E-UM value is near', () => {
   const kma = (latitude: number, temperature = 12): LiveObservation => ({
     ...observation('kma-aws-816', latitude, 'current'),
     device: {
@@ -148,14 +150,22 @@ test('E-UM comes first within 1 km; the KMA AWS fills in only when no recent E-U
   assert.ok(fallback.warnings.some((warning) => /기상청 구룡포 AWS\(약 667m\)/.test(warning)));
   // 화면 검증을 통과하고 기관 표시가 남는다
   assert.equal(readLiveSnapshot(fallback).selected?.device.provider, 'kma');
-  // 3) 기상청도 1km 밖이면 대신 쓰지 않는다
-  const tooFar = attachSiteContext(
+  // 3) 1km 밖이어도 5km 안의 기상청 AWS 는 쓴다 (ADR 0013), km 로 알린다
+  const within5 = attachSiteContext(
     snapshot([observation('eum', 36.001, 'stale'), kma(36.02)]),
     site,
   );
+  assert.equal(within5.selected?.device.id, 'kma-aws-816');
+  assert.equal(within5.selectionReason, 'kma-no-recent-eum');
+  assert.ok(within5.warnings.some((warning) => /기상청 구룡포 AWS\(약 2\.2km\)/.test(warning)));
+  // 4) 기상청 AWS 도 5km 밖이면 대신 쓰지 않는다
+  const tooFar = attachSiteContext(
+    snapshot([observation('eum', 36.001, 'stale'), kma(36.05)]),
+    site,
+  );
   assert.equal(tooFar.selected?.device.id, 'eum');
-  assert.ok(tooFar.warnings.some((warning) => warning.includes('1km 이내')));
-  // 4) 둘 다 최신인데 크게 다르면 E-UM 장비 이상으로 보고 기상청 값으로 판단한다
+  assert.ok(tooFar.warnings.some((warning) => warning.includes('덕장 근처')));
+  // 5) 둘 다 최신인데 크게 다르면 E-UM 장비 이상으로 보고 기상청 값으로 판단한다
   const differ = attachSiteContext(
     snapshot([observation('eum', 36.001, 'current'), kma(36.002, 19)]),
     site,
@@ -289,4 +299,134 @@ test('a device id the screen picked automatically is not an explicit pick, and a
   );
   assert.equal(fine.selected?.device.id, 'near');
   assert.ok(!fine.warnings.some((warning) => warning.includes('가까운 E-UM')));
+});
+
+test('with no E-UM in 1 km and no KMA AWS in 5 km, the site grid nowcast is used and labelled', () => {
+  const grid: LiveObservation = {
+    ...observation('kma-grid-105-94', 36.012, 'current'),
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '덕장이 속한 기상청 5km 격자 (105, 94) 중심',
+      latitude: 36.012,
+      longitude: 129.5,
+      provider: 'kma-grid',
+    },
+    observedAt: '2026-10-04T04:00:00Z',
+    ageMinutes: 65,
+  };
+  const aws = (latitude: number): LiveObservation => ({
+    ...observation('kma-aws-816', latitude, 'current'),
+    device: {
+      id: 'kma-aws-816',
+      name: '기상청 구룡포 AWS',
+      address: 'AWS 816',
+      latitude,
+      longitude: 129.5,
+      provider: 'kma',
+    },
+  });
+  // E-UM 은 2.2km(1km 밖), AWS 는 5.6km(5km 밖) → 격자
+  const used = attachSiteContext(
+    snapshot([observation('eum', 36.02, 'current'), aws(36.05)]),
+    site,
+    undefined,
+    grid,
+  );
+  assert.equal(used.selected?.device.id, 'kma-grid-105-94');
+  assert.equal(used.selectionReason, 'kma-grid');
+  assert.equal(used.selected?.distanceM, 1334);
+  assert.ok(used.devices.some((device) => device.id === 'kma-grid-105-94'));
+  assert.ok(
+    used.warnings.some((warning) =>
+      warning.includes('기상청 초단기실황(덕장이 속한 5km 격자, 13:00 자료) 값으로 판단해요'),
+    ),
+  );
+  // 화면 검증을 통과하고 격자 출처가 남는다
+  assert.equal(readLiveSnapshot(used).selected?.device.provider, 'kma-grid');
+  assert.equal(readLiveSnapshot(used).selectionReason, 'kma-grid');
+  // 5km 안 AWS 가 있으면 격자보다 AWS (실제 관측이 먼저)
+  const awsFirst = attachSiteContext(snapshot([aws(36.03)]), site, undefined, grid);
+  assert.equal(awsFirst.selected?.device.id, 'kma-aws-816');
+  // 1km 안 E-UM 이 있으면 격자를 쓰지 않는다
+  const eumFirst = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    undefined,
+    grid,
+  );
+  assert.equal(eumFirst.selected?.device.id, 'eum');
+  // 격자 값도 오래됐으면 쓰지 않는다
+  const staleGrid = attachSiteContext(snapshot([]), site, undefined, {
+    ...grid,
+    status: 'stale',
+  });
+  assert.equal(staleGrid.selectionReason, 'eum');
+  assert.ok(staleGrid.warnings.some((warning) => warning.includes('덕장 근처')));
+});
+
+test('the grid stays off the station list unless it is used, and a picked grid is honoured', () => {
+  const grid: LiveObservation = {
+    ...observation('kma-grid-105-94', 36.012, 'current'),
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '덕장이 속한 기상청 5km 격자 (105, 94) 중심',
+      latitude: 36.012,
+      longitude: 129.5,
+      provider: 'kma-grid',
+    },
+  };
+  // 1km 안 E-UM 으로 판정하는 덕장에는 격자가 목록에 없다
+  const eum = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    undefined,
+    grid,
+  );
+  assert.equal(eum.selected?.device.id, 'eum');
+  assert.ok(!eum.devices.some((device) => device.provider === 'kma-grid'));
+  assert.ok(!eum.observations.some((item) => item.device.provider === 'kma-grid'));
+  // 사용자가 격자를 고르면 그대로 쓴다 (목록과 화면 검증도 통과)
+  const picked = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    'kma-grid-105-94',
+    grid,
+  );
+  assert.equal(picked.selected?.device.id, 'kma-grid-105-94');
+  assert.equal(picked.selectionReason, 'explicit');
+  assert.equal(readLiveSnapshot(picked).selected?.device.provider, 'kma-grid');
+  // 이번에 격자를 못 받았으면 고른 격자 대신 기본 선택
+  const missing = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    'kma-grid-105-94',
+  );
+  assert.equal(missing.selected?.device.id, 'eum');
+});
+
+test('an anomalous E-UM replaced by the grid still carries the grid caveat', () => {
+  const grid: LiveObservation = {
+    ...observation('kma-grid-105-94', 36.012, 'current'),
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '격자',
+      latitude: 36.012,
+      longitude: 129.5,
+      provider: 'kma-grid',
+    },
+  };
+  const broken = { ...observation('eum', 36.003, 'current'), humidity: 2 };
+  const result = attachSiteContext(snapshot([broken]), site, undefined, grid);
+  assert.equal(result.selected?.device.id, 'kma-grid-105-94');
+  assert.equal(result.selectionReason, 'kma-eum-anomaly');
+  assert.ok(
+    result.warnings.some(
+      (warning) =>
+        warning.includes('비정상이라') &&
+        warning.includes('격자 값이라 덕장 현장과 다를 수 있어요'),
+    ),
+  );
 });

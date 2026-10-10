@@ -111,8 +111,10 @@ export function OwnerHome({
       />
       {live.selected && (
         <p className="owner-distance">
-          등록한 덕장에서 {formatDistance(live.selected.distanceM)} ·{' '}
-          {live.preferredDeviceId ? '직접 선택한 관측소' : '가까운 관측소 자동 선택'}
+          {live.selected.device.provider === 'kma-grid'
+            ? `덕장이 속한 기상청 5km 격자 (중심까지 ${formatDistance(live.selected.distanceM)})`
+            : `등록한 덕장에서 ${formatDistance(live.selected.distanceM)}`}{' '}
+          · {live.preferredDeviceId ? '직접 선택한 관측소' : '가까운 관측소 자동 선택'}
         </p>
       )}
       {operations.loading ? (

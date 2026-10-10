@@ -25,12 +25,14 @@ export type DryingThresholds = {
   hotTemperatureAbove: number;
   /** 이 값 미만의 저온은 판정 대상에서 뺀다 (기획서: 저온 조건 판정 제외) */
   minTemperature: number;
-  /** 거리 게이트 */
+  /** 거리 게이트: E-UM 관측기는 덕장에서 이 거리 안이어야 판정에 쓴다 */
   maxDistanceM: number;
+  /** 거리 게이트: 기상청 AWS·초단기실황 격자는 이 거리 안이어야 판정에 쓴다 (1km 안 E-UM 이 없을 때) */
+  maxFallbackDistanceM: number;
 };
 
 export const DRYING_THRESHOLDS: DryingThresholds = {
-  version: '2026-10-06 가설값',
+  version: '2026-10-10 가설값',
   dryHumidityBelow: 60,
   minWind: 2,
   galeWind: 14,
@@ -39,14 +41,41 @@ export const DRYING_THRESHOLDS: DryingThresholds = {
   hotTemperatureAbove: 15,
   minTemperature: -5,
   maxDistanceM: 1000,
+  maxFallbackDistanceM: 5000,
 };
+
+/**
+ * 저장·화면 검증에서 등급이 있는 판정의 거리 상한. 판정 기준(`maxFallbackDistanceM`)을 줄여도
+ * 이 값은 줄이지 않는다. 이미 저장된 판정을 거부하면 dev·prod 가 같이 쓰는 DB 를 못 읽는다 (ADR 0006, 0013).
+ */
+export const STORED_GRADED_MAX_DISTANCE_M = 5000;
+
+/** 기상청 자료(AWS 매분자료, 초단기실황 격자)인지. 기록된 표본은 관측기 ID 로 가린다 (`kma-` 로 시작). */
+export const isKmaSource = (provider: string | undefined) =>
+  provider === 'kma' || provider === 'kma-grid';
+export const isKmaDeviceId = (deviceId: string | undefined) =>
+  Boolean(deviceId?.startsWith('kma-'));
+
+/** 이 관측으로 판정해도 되는 최대 거리. E-UM 1km, 기상청 5km (ADR 0013). */
+export function distanceLimit(
+  source: { provider?: string; deviceId?: string },
+  t: DryingThresholds = DRYING_THRESHOLDS,
+): number {
+  return isKmaSource(source.provider) || isKmaDeviceId(source.deviceId)
+    ? t.maxFallbackDistanceM
+    : t.maxDistanceM;
+}
+
+/** 거리 한도를 사람이 읽는 말로 */
+export const distanceRule = (t: DryingThresholds = DRYING_THRESHOLDS) =>
+  `E-UM ${t.maxDistanceM / 1000}km, 기상청 ${t.maxFallbackDistanceM / 1000}km`;
 
 /** 사람이 읽는 적용 기준 한 줄. */
 export function describeThresholds(t: DryingThresholds = DRYING_THRESHOLDS): string {
   return (
     `적합: 습도 ${t.dryHumidityBelow}% 미만 · 풍속 ${t.minWind}~${t.galeWind}m/s · 기온 ${t.minTemperature}~${t.maxTemperature}°C / ` +
-    `부적합: 비·눈, 풍속 ${t.galeWind}m/s 이상, 습도 ${t.wetHumidityAtLeast}% 이상, 기온 ${t.hotTemperatureAbove}°C 초과 ` +
-    `(${t.version})`
+    `부적합: 비·눈, 풍속 ${t.galeWind}m/s 이상, 습도 ${t.wetHumidityAtLeast}% 이상, 기온 ${t.hotTemperatureAbove}°C 초과 / ` +
+    `관측 거리: ${distanceRule(t)} 안 (${t.version})`
   );
 }
 
@@ -141,8 +170,12 @@ export function gradeConditions(
   return { grade, reasons, problems: unsuitable.length ? unsuitable : problems };
 }
 
+/** 관측 출처의 이름 (판정 카드·AI 도구 결과의 source). */
+export const sourceName = (provider: string | undefined) => PROVIDER_SOURCE[provider ?? 'eum'];
+
 const PROVIDER_SOURCE: Record<string, string> = {
   kma: '기상청 API허브 AWS 매분자료',
+  'kma-grid': '기상청 API허브 초단기실황 (5km 격자)',
   eum: '포항 E-UM 대기환경 관측 API',
 };
 
@@ -197,27 +230,30 @@ export function assessDrying(
   if (!observation)
     return withAdvice(
       unavailable(
-        '덕장 1km 안에서 쓸 수 있는 관측값이 없어 판정할 수 없어요.',
+        `덕장 근처(${distanceRule(t)})에서 쓸 수 있는 관측값이 없어 판정할 수 없어요.`,
         null,
         ['검사를 통과한 관측기가 없어요. 덕장 위치와 관측기 연결을 확인해 주세요.'],
         t,
       ),
     );
-  const where = `${observation.device.name} · 덕장에서 ${
+  const where = `${observation.device.name} · ${
+    observation.device.provider === 'kma-grid' ? '격자 중심까지' : '덕장에서'
+  } ${
     observation.distanceM === null || observation.distanceM === undefined
       ? '거리 미확인'
       : `${observation.distanceM}m`
   }`;
+  const limit = distanceLimit({ provider: observation.device.provider }, t);
   if (
     observation.distanceM === null ||
     observation.distanceM === undefined ||
-    observation.distanceM > t.maxDistanceM
+    observation.distanceM > limit
   )
     return withAdvice(
       unavailable(
-        '가까운 관측기가 1km 밖에 있어 판정할 수 없어요.',
+        `관측 위치가 덕장에서 너무 멀어 판정할 수 없어요 (${distanceRule(t)} 안이어야 해요).`,
         observation,
-        [`${where} · 거리 기준 ${t.maxDistanceM}m를 넘어요.`],
+        [`${where} · 거리 기준 ${limit}m를 넘어요.`],
         t,
       ),
     );
@@ -316,6 +352,8 @@ export function evaluateBatch(
     humidity: number | null;
     wind: number | null;
     distanceM?: number | null;
+    /** 기록된 관측기 ID. 거리 한도를 출처(E-UM·기상청)에 맞춰 고른다 */
+    sourceDeviceId?: string;
   }[],
   t: DryingThresholds = DRYING_THRESHOLDS,
 ): BatchEvaluation {
@@ -329,8 +367,10 @@ export function evaluateBatch(
       item.wind === null ||
       implausibleReading(item.humidity) ||
       item.temperature < t.minTemperature ||
-      // 거리를 모르거나 1km 밖의 표본은 판정 게이트를 통과하지 못한다.
-      (item.distanceM !== undefined && (item.distanceM === null || item.distanceM > t.maxDistanceM))
+      // 거리를 모르거나 출처의 거리 한도(E-UM 1km, 기상청 5km) 밖인 표본은 판정 게이트를 통과하지 못한다.
+      (item.distanceM !== undefined &&
+        (item.distanceM === null ||
+          item.distanceM > distanceLimit({ deviceId: item.sourceDeviceId }, t)))
     ) {
       unrated += 1;
       continue;
@@ -367,14 +407,25 @@ const timestamp = (value: unknown): value is string =>
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
   Number.isFinite(Date.parse(value));
 
-function validThresholds(value: unknown): value is DryingThresholds {
-  return (
-    record(value) &&
-    text(value.version) &&
-    (Object.keys(DRYING_THRESHOLDS) as (keyof DryingThresholds)[])
-      .filter((key) => key !== 'version')
+/**
+ * 저장된 판정의 적용 기준을 읽는다. 2026-10-10 전 기준에는 기상청 거리 한도가 없었고 모든 출처가
+ * 1km(`maxDistanceM`)였으므로 그 값으로 채운다. 맞지 않으면 null.
+ */
+function readThresholds(value: unknown): DryingThresholds | null {
+  if (
+    !record(value) ||
+    !text(value.version) ||
+    !(Object.keys(DRYING_THRESHOLDS) as (keyof DryingThresholds)[])
+      .filter((key) => key !== 'version' && key !== 'maxFallbackDistanceM')
       .every((key) => finite(value[key]))
-  );
+  )
+    return null;
+  if (value.maxFallbackDistanceM !== undefined && !finite(value.maxFallbackDistanceM)) return null;
+  const thresholds = value as DryingThresholds;
+  return {
+    ...thresholds,
+    maxFallbackDistanceM: thresholds.maxFallbackDistanceM ?? thresholds.maxDistanceM,
+  };
 }
 
 /** 서버·저장된 응답의 판정을 화면에 쓰기 전에 확인한다. 맞지 않으면 null. */
@@ -394,8 +445,8 @@ export function readAssessment(value: unknown): Assessment | null {
   if (!nullable(value.temperature, finite)) return null;
   if (!nullable(value.humidity, (x) => finite(x) && x >= 0 && x <= 100)) return null;
   if (!nullable(value.windSpeed, (x) => finite(x) && x >= 0)) return null;
-  // 거리 게이트를 넘는 판정은 판정 불가여야 한다.
-  if (graded && (value.distanceM as number) > 1000) return null;
+  // 거리 게이트를 넘는 판정은 판정 불가여야 한다. 출처를 모르므로 저장 검증 상한으로 본다.
+  if (graded && (value.distanceM as number) > STORED_GRADED_MAX_DISTANCE_M) return null;
   if (value.advice !== undefined && (!Array.isArray(value.advice) || !value.advice.every(text)))
     return null;
   return {
@@ -411,6 +462,6 @@ export function readAssessment(value: unknown): Assessment | null {
     source: value.source,
     reasons: [...(value.reasons as string[])],
     ...(value.advice ? { advice: [...(value.advice as string[])] } : {}),
-    ...(validThresholds(value.thresholds) ? { thresholds: value.thresholds } : {}),
+    ...(readThresholds(value.thresholds) ? { thresholds: readThresholds(value.thresholds)! } : {}),
   };
 }

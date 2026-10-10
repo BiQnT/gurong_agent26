@@ -146,11 +146,13 @@ function OwnerWorkspace({
     ? '관측 정보 확인 중'
     : live.selected?.device.provider === 'kma'
       ? '기상청 · AWS 실시간'
-      : live.snapshot?.status === 'archived'
-        ? 'E-UM · 보관된 실측'
-        : live.snapshot?.status === 'ok'
-          ? 'E-UM · API 응답'
-          : '관측 연결 확인 필요';
+      : live.selected?.device.provider === 'kma-grid'
+        ? '기상청 · 초단기실황 격자'
+        : live.snapshot?.status === 'archived'
+          ? 'E-UM · 보관된 실측'
+          : live.snapshot?.status === 'ok'
+            ? 'E-UM · API 응답'
+            : '관측 연결 확인 필요';
 
   useEffect(() => {
     if (!toast) return;
@@ -704,7 +706,9 @@ function OwnerWorkspace({
                 <div>
                   <dt>덕장 위치</dt>
                   <dd>
-                    {site.address} · 관측소까지 {formatDistance(live.selected?.distanceM)}
+                    {site.address} ·{' '}
+                    {live.selected?.device.provider === 'kma-grid' ? '격자 중심까지' : '관측소까지'}{' '}
+                    {formatDistance(live.selected?.distanceM)}
                   </dd>
                 </div>
               </dl>

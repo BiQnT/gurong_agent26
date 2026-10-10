@@ -1,0 +1,82 @@
+{
+ "response": {
+  "header": {
+   "resultCode": "00",
+   "resultMsg": "NORMAL_SERVICE"
+  },
+  "body": {
+   "dataType": "JSON",
+   "items": {
+    "item": [
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "PTY",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "0"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "REH",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "68"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "RN1",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "0"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "T1H",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "24.3"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "UUU",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "-2.9"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "VEC",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "103"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "VVV",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "0.7"
+     },
+     {
+      "baseDate": "20261010",
+      "baseTime": "1200",
+      "category": "WSD",
+      "nx": 105,
+      "ny": 94,
+      "obsrValue": "3"
+     }
+    ]
+   },
+   "pageNo": 1,
+   "numOfRows": 20,
+   "totalCount": 8
+  }
+ }
+}

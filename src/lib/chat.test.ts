@@ -314,7 +314,7 @@ async function runTests() {
       Response.json({
         content: '판정',
         suggestions: [],
-        assessment: { ...getDemoAssessment(), distanceM: 1400 },
+        assessment: { ...getDemoAssessment(), distanceM: 6000 },
       });
     await expectReject(http.send(request, options()), /환경 판정/);
     globalThis.fetch = async () =>

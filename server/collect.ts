@@ -3,10 +3,17 @@
 //
 //   DATABASE_PATH=/srv/haepung/db/haepung.db EUM_SERVICE_KEY=... node server/collect.ts
 //
-// 진행 중인 배치가 있는 덕장마다 1km 기준 관측을 배치 기록에 붙이고, 못 붙이면 결측 표본을 남겨
-// 보고서의 결측률에 반영한다. 검증된 건조 기준이 없으므로 등급·경보는 만들지 않는다.
+// 진행 중인 배치가 있는 덕장마다 화면과 같은 기준으로 고른 관측(1km 안 E-UM, 없으면 5km 안 기상청 AWS,
+// 그다음 덕장 격자 초단기실황. ADR 0013)을 배치 기록에 붙이고, 못 붙이면 결측 표본을 남겨 보고서의
+// 결측률에 반영한다. 표본마다 규칙 등급을 남기고 부적합이면 경보를 남긴다.
 import { resolve } from 'node:path';
-import { assessDrying, type Assessment } from '../src/lib/drying.ts';
+import {
+  assessDrying,
+  distanceLimit,
+  distanceRule,
+  isKmaSource,
+  type Assessment,
+} from '../src/lib/drying.ts';
 import type { LiveObservation, LiveSnapshot, SiteWeather } from '../src/lib/live.ts';
 import {
   appendLiveObservation,
@@ -46,12 +53,30 @@ export type CollectSummary = {
   failedSites: number;
 };
 
-function choose(snapshot: LiveSnapshot | null, site: SiteLocation, recordedAt: string): Choice {
-  if (!snapshot) return { reason: 'E-UM 관측 조회에 실패했어요.', label: 'E-UM 조회 실패' };
-  // 화면과 같은 기준: 1km 안의 최근 E-UM 관측 중 가장 가까운 장비, 없으면 1km 안의 기상청 AWS (ADR 0009).
-  const selected = attachSiteContext(snapshot, site).selected;
-  // E-UM 이 보관 자료뿐이어도 기상청 AWS 실시간 값이 골라졌으면 기록한다.
-  if (snapshot.status !== 'ok' && selected?.device.provider !== 'kma')
+function choose(
+  snapshot: LiveSnapshot | null,
+  site: SiteLocation,
+  recordedAt: string,
+  grid?: LiveObservation | null,
+): Choice {
+  // E-UM 조회가 통째로 실패해도 덕장 격자 초단기실황이 있으면 그 값으로 기록한다 (ADR 0013).
+  if (!snapshot && grid?.status !== 'current')
+    return { reason: 'E-UM 관측 조회에 실패했어요.', label: 'E-UM 조회 실패' };
+  const source: LiveSnapshot = snapshot ?? {
+    fetchedAt: recordedAt,
+    source: '기상청 초단기실황',
+    sourceUrl: 'https://apihub.kma.go.kr/',
+    devices: [],
+    observations: [],
+    selected: null,
+    warnings: [],
+    status: 'ok',
+    llm: { configured: false, model: '' },
+  };
+  // 화면과 같은 기준: 1km 안 E-UM, 없으면 5km 안 기상청 AWS, 그다음 덕장 격자 초단기실황 (ADR 0009, 0013).
+  const selected = attachSiteContext(source, site, undefined, grid).selected;
+  // E-UM 이 보관 자료뿐이어도 기상청 실시간 값이 골라졌으면 기록한다.
+  if (source.status !== 'ok' && !isKmaSource(selected?.device.provider))
     return {
       reason: '실시간 조회에 실패해 보관된 과거 자료만 있어 기록하지 않았어요.',
       label: '실시간 자료 없음',
@@ -60,11 +85,11 @@ function choose(snapshot: LiveSnapshot | null, site: SiteLocation, recordedAt: s
     !selected ||
     selected.status !== 'current' ||
     typeof selected.distanceM !== 'number' ||
-    selected.distanceM > 1000
+    selected.distanceM > distanceLimit({ provider: selected.device.provider })
   )
     return {
-      reason: '덕장 1km 이내에서 사용할 수 있는 최근 관측값을 찾지 못했어요.',
-      label: '1km 이내 최근 관측 없음',
+      reason: `덕장 근처(${distanceRule()})에서 사용할 수 있는 최근 관측값을 찾지 못했어요.`,
+      label: '근처 최근 관측 없음',
     };
   const issue = observationRecordIssue(selected, recordedAt);
   // 원천 관측의 첫 확인 사항(예: 시간대 없음)을 같이 남겨 운영자가 결측 이유를 알 수 있게 한다.
@@ -172,6 +197,8 @@ export async function collectOnce(options: {
   observations: ObservationSource;
   /** 덕장 위치의 비·눈 (기상청). 판정의 강수 조건에 쓴다. 없으면 강수는 모르는 채로 판정한다 */
   weather?: (site: { latitude: number; longitude: number }) => Promise<SiteWeather | null>;
+  /** 덕장 격자 초단기실황 관측 (ADR 0013). 없으면 E-UM·AWS 만으로 고른다 */
+  grid?: (site: { latitude: number; longitude: number }) => Promise<LiveObservation | null>;
   now?: () => number;
 }): Promise<CollectSummary> {
   const now = options.now ?? Date.now;
@@ -217,7 +244,12 @@ export async function collectOnce(options: {
   const recordedAt = new Date(now()).toISOString();
 
   for (const site of sites) {
-    const choice = choose(snapshot, site, recordedAt);
+    // E-UM·AWS 로 고르지 못했을 때만 덕장 격자 초단기실황을 부른다 (덕장마다 최대 5초라 아낀다).
+    let choice = choose(snapshot, site, recordedAt);
+    if (!('observation' in choice) && options.grid) {
+      const grid = await within(options.grid(site), KMA_WAIT_MS);
+      if (grid) choice = choose(snapshot, site, recordedAt, grid);
+    }
     const weather =
       'observation' in choice && options.weather
         ? await within(options.weather(site), KMA_WAIT_MS)
@@ -270,6 +302,7 @@ if (import.meta.main) {
       workspace: config,
       observations: createObservationService(config, fetch, kma),
       ...(kma ? { weather: (site) => kma.weather(site) } : {}),
+      ...(kma?.grid ? { grid: kma.grid } : {}),
     });
     console.log(formatSummary(summary));
     if (summary.failedSites) process.exitCode = 1;

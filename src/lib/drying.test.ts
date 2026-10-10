@@ -106,7 +106,15 @@ test('without a rain check the grade is never 적합', () => {
 test('every gate that cannot be trusted ends in 판정 불가 with its reason', () => {
   const cases: [LiveObservation | null, RegExp][] = [
     [null, /쓸 수 있는 관측값이 없어/],
-    [observed({ distanceM: 1001 }), /1km 밖/],
+    // 기상청 자료는 5km, E-UM 관측기는 1km 까지 쓴다 (ADR 0013)
+    [observed({ distanceM: 5001 }), /너무 멀어/],
+    [
+      observed({
+        distanceM: 1001,
+        device: { id: '1', name: 'E-UM 관측기', address: '', latitude: 36, longitude: 129.5 },
+      }),
+      /너무 멀어/,
+    ],
     [observed({ status: 'stale', ageMinutes: 45 }), /최근 관측값이 아니어서/],
     [observed({ humidity: null, status: 'invalid' }), /최근 관측값이 아니어서/],
     [observed({ humidity: 0, temperature: 0 }), /비정상으로 보여/],
@@ -162,9 +170,20 @@ test('KST formatting, threshold text and the screen validator', () => {
   const valid = assessDrying(observed());
   assert.deepEqual(readAssessment(JSON.parse(JSON.stringify(valid))), valid);
   assert.equal(readAssessment({ ...valid, grade: '최고' }), null);
-  // 등급이 있는데 근거 수치가 없거나 1km 를 넘으면 받지 않는다
+  assert.match(describeThresholds(), /관측 거리: E-UM 1km, 기상청 5km 안/);
+  // 등급이 있는데 근거 수치가 없거나 가장 넓은 거리 한도(기상청 5km)를 넘으면 받지 않는다
   assert.equal(readAssessment({ ...valid, humidity: null }), null);
-  assert.equal(readAssessment({ ...valid, distanceM: 1200 }), null);
+  assert.ok(readAssessment({ ...valid, distanceM: 1200 }), '5km 안 기상청 판정은 받는다');
+  assert.equal(readAssessment({ ...valid, distanceM: 5200 }), null);
+  // 2026-10-10 전 판정의 적용 기준(기상청 거리 한도 없음)도 읽고, 그때의 1km 로 채운다
+  const { maxFallbackDistanceM: _dropped, ...legacy } = {
+    ...DRYING_THRESHOLDS,
+    version: '2026-10-06 가설값',
+  };
+  const old = readAssessment({ ...valid, thresholds: legacy });
+  assert.equal(old?.thresholds?.version, '2026-10-06 가설값');
+  assert.equal(old?.thresholds?.maxFallbackDistanceM, 1000);
+  assert.match(describeThresholds(old!.thresholds), /관측 거리: E-UM 1km, 기상청 1km 안/);
 });
 
 test('a batch is evaluated from its recorded samples with the current rules', () => {
@@ -193,13 +212,16 @@ test('a batch is evaluated from its recorded samples with the current rules', ()
     evaluation.summary,
     '적합 33% · 주의 33% · 부적합 33% (표본 3개, 결측·판정 제외 2개, 비·눈 제외)',
   );
-  // 거리를 모르거나 1km 밖인 표본(수동 기록 등)은 판정하지 않는다
+  // 거리를 모르거나 출처의 거리 한도(E-UM 1km, 기상청 5km) 밖인 표본은 판정하지 않는다
   const gated = evaluateBatch([
     { ...sample(3, 50, 3, 0), distanceM: 300 },
     { ...sample(3, 50, 3, 30), distanceM: null },
     { ...sample(3, 50, 3, 60), distanceM: 1500 },
+    { ...sample(3, 50, 3, 90), distanceM: 1500, sourceDeviceId: 'kma-aws-816' },
+    { ...sample(3, 50, 3, 120), distanceM: 2400, sourceDeviceId: 'kma-grid-105-94' },
+    { ...sample(3, 50, 3, 150), distanceM: 5200, sourceDeviceId: 'kma-aws-816' },
   ]);
-  assert.deepEqual([gated.counts.적합, gated.unrated], [1, 2]);
+  assert.deepEqual([gated.counts.적합, gated.unrated], [3, 3]);
   assert.equal(evaluateBatch([]).summary, '판정할 수 있는 관측 표본이 아직 없어요.');
 });
 
@@ -208,4 +230,23 @@ test('a judgment older than 30 minutes is not passed on to workers as a grade', 
   const fresh = assessDrying(observed(), dry);
   assert.equal(factsFromAssessment(fresh, null, '2026-10-06T13:40:00.000Z').grade, '적합');
   assert.equal(factsFromAssessment(fresh, null, '2026-10-06T14:05:00.000Z').grade, '판정 불가');
+  // 매시 자료인 기상청 초단기실황 격자 판정은 2시간까지 넘긴다 (ADR 0013)
+  const grid = assessDrying(
+    observed({
+      device: {
+        id: 'kma-grid-105-94',
+        name: '기상청 초단기실황 (격자 105,94)',
+        address: '덕장이 속한 기상청 5km 격자 (105, 94) 중심',
+        latitude: 35.98,
+        longitude: 129.54,
+        provider: 'kma-grid',
+      },
+      distanceM: 2400,
+    }),
+    dry,
+  );
+  assert.equal(grid.grade, '적합');
+  assert.match(grid.source, /초단기실황/);
+  assert.equal(factsFromAssessment(grid, null, '2026-10-06T15:00:00.000Z').grade, '적합');
+  assert.equal(factsFromAssessment(grid, null, '2026-10-06T15:35:00.000Z').grade, '판정 불가');
 });

@@ -1,7 +1,7 @@
 # 0010. 널기 등급을 규칙 함수로 산출한다 (가설 기준, 기준값과 함께 기록)
 
 - **날짜**: 2026-10-06
-- **상태**: 일부 대체됨 (→ [0011](0011-assistant-reads-with-tools.md)) · 바뀐 것: 예보 시간별 예상 등급을 따로 보여 줌, AI 답의 등급 대조는 현재 시점 문장에만. 유지: 등급 규칙과 기준값
+- **상태**: 일부 대체됨 (→ [0011](0011-assistant-reads-with-tools.md), [0013](0013-distance-tiered-observation.md)) · 바뀐 것: 예보 시간별 예상 등급을 따로 보여 줌, AI 답의 등급 대조는 현재 시점 문장에만(0011), 1km 거리 게이트를 출처별(E-UM 1km, 기상청 AWS·격자 5km)로(0013). 유지: 등급 규칙과 기준값
 - **정한 사람**: 안동현
 - **관련**: [0009](0009-kma-fallback-for-eum.md)의 교차 확인을 바꾼다, [PROJECT_SPEC US-1](../../PROJECT_SPEC.md), [src/lib/drying.ts](../../src/lib/drying.ts), [chat-api.md](../design/chat-api.md)
 
