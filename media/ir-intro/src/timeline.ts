@@ -2,7 +2,7 @@ import { useCurrentFrame } from "remotion";
 
 // 장면 안의 시각은 모두 "설계 프레임"(30fps 기준, 1초 = 30)으로 적었다.
 // 2판 평가에서 조금 늦춰 달라고 해서(0.8배는 너무 느려 0.9배), 실제 영상은 설계 프레임을 SPEED 로 나눈 만큼 길다
-// (78초 → 약 86.7초). 음악(scripts/make-audio.mjs)도 같은 SPEED 로 100BPM → 90BPM 이라 박자가 맞는다.
+// (78초 → 약 86.7초). 음악(scripts/make-audio.mjs, 3판)은 135BPM 이라 화음 하나(실제 약 5.3초)가 3마디로 떨어져 박자가 맞는다.
 
 export const FPS = 30;
 export const SPEED = 0.9;

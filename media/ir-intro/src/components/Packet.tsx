@@ -93,7 +93,7 @@ export const Packet: React.FC<{
           borderRadius: 999,
           background: "#fff",
           boxShadow: "0 18px 50px rgba(27,27,25,0.22), 0 0 0 1px rgba(27,27,25,0.08)",
-          fontFamily: FONT.sans,
+          fontFamily: FONT,
           fontSize: 28,
           fontWeight: 500,
           color: COLOR.ink,

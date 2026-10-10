@@ -64,7 +64,7 @@ export const Lockup: React.FC<{ start: number; tagline?: string; taglineStart?: 
       <BrandMark size={150} start={start} />
       <div
         style={{
-          fontFamily: FONT.serif,
+          fontFamily: FONT,
           fontWeight: 700,
           fontSize: 132,
           letterSpacing: "0.02em",
@@ -80,7 +80,7 @@ export const Lockup: React.FC<{ start: number; tagline?: string; taglineStart?: 
       {tagline && (
         <div
           style={{
-            fontFamily: FONT.sans,
+            fontFamily: FONT,
             fontWeight: 500,
             fontSize: 40,
             color: COLOR.muted,
