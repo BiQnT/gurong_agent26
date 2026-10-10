@@ -53,7 +53,7 @@ const Label: React.FC<{ x: number; y: number; role: string; language: string }> 
       display: "flex",
       alignItems: "baseline",
       gap: 12,
-      fontFamily: FONT.sans,
+      fontFamily: FONT,
       whiteSpace: "nowrap",
     }}
   >

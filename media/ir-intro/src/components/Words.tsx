@@ -17,7 +17,7 @@ export const Words: React.FC<{
   font?: string;
   stagger?: number;
   style?: React.CSSProperties;
-}> = ({ text, start, exit, size = 92, color = COLOR.ink, weight = 700, font = FONT.serif, stagger = 4, style }) => {
+}> = ({ text, start, exit, size = 92, color = COLOR.ink, weight = 700, font = FONT, stagger = 4, style }) => {
   const frame = useFrame();
   const words = text.split(" ");
   return (

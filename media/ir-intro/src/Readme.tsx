@@ -64,9 +64,9 @@ export const ReadmeHero: React.FC = () => (
   <AbsoluteFill style={{ background: COLOR.paper, overflow: "hidden" }}>
     <div style={{ position: "absolute", left: 110, top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 26 }}>
       <BrandMark size={112} start={-100} />
-      <div style={{ fontFamily: FONT.serif, fontWeight: 700, fontSize: 112, color: COLOR.ink, lineHeight: 1 }}>해풍</div>
-      <div style={{ fontFamily: FONT.sans, fontWeight: 500, fontSize: 36, color: COLOR.ink }}>덕장을 위한 AI 파트너</div>
-      <div style={{ fontFamily: FONT.sans, fontSize: 26, color: COLOR.muted, lineHeight: 1.6 }}>
+      <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: 112, color: COLOR.ink, lineHeight: 1 }}>해풍</div>
+      <div style={{ fontFamily: FONT, fontWeight: 500, fontSize: 36, color: COLOR.ink }}>덕장을 위한 AI 파트너</div>
+      <div style={{ fontFamily: FONT, fontSize: 26, color: COLOR.muted, lineHeight: 1.6 }}>
         구룡포 디지털 트윈 관측으로
         <br />
         오늘 널어도 되는지 판단합니다.
