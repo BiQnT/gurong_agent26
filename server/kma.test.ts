@@ -379,12 +379,32 @@ test('AWS 816 rain is told only to sites within 5 km, and a late nowcast falls b
   const near = await source.weather({ latitude: 35.9812, longitude: 129.5402 });
   assert.equal(near?.rain?.todayMm, 0);
   assert.deepEqual(asked, ['1300', '1200']);
-  assert.equal(near?.precipitation?.type, '없음');
+  // 한 시간 전 자료의 비·눈은 오래됐을 수 있어 쓰지 않는다 (판정은 적합 대신 주의가 된다)
+  assert.equal(near?.precipitation, null);
   // 약 9km 남쪽 덕장에는 구룡포 AWS 강수량을 붙이지 않는다
   const far = await source.weather({ latitude: 35.9035, longitude: 129.5145 });
-  assert.equal(far?.rain, null);
+  // (다른 자료도 없으면 weather 자체가 없다)
+  assert.equal(far?.rain ?? null, null);
   // 한 시간 전 격자 값도 2시간 안이라 최신이다
   const grid = await source.grid!({ latitude: 35.9812, longitude: 129.5402 });
   assert.equal(grid?.status, 'current');
   assert.equal(grid?.ageMinutes, 106);
+});
+
+test('a KMA outage does not trigger a second nowcast request for the previous hour', async () => {
+  const asked: string[] = [];
+  const source = createKmaSource(
+    { kmaAuthKey: 'kma-secret', staleAfterMinutes: 30 },
+    async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith('getUltraSrtNcst')) {
+        asked.push(url.searchParams.get('base_time')!);
+        return new Response('', { status: 503 });
+      }
+      return new Response('', { status: 503 });
+    },
+    () => Date.parse('2026-10-10T04:46:00Z'),
+  )!;
+  assert.equal(await source.grid!({ latitude: 35.9812, longitude: 129.5402 }), null);
+  assert.deepEqual(asked, ['1300']);
 });

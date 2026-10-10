@@ -490,6 +490,7 @@ export function createKmaSource(
     const { nx, ny } = toKmaGrid(site.latitude, site.longitude);
     // 매시 자료가 약 40분 뒤 나오므로 45분 전 시각의 정시를 묻는다.
     const base = kstParts(now() - 45 * 60_000);
+    // empty: 응답은 정상인데 그 정시 자료가 아직 없음 (발표 지연). 연결 실패와 구분한다.
     const load = async (at: { date: string; hour: string }) => {
       const url = new URL(NOWCAST_URL);
       for (const [name, value] of Object.entries({
@@ -504,23 +505,26 @@ export function createKmaSource(
       }))
         url.searchParams.set(name, value);
       const body = await get(url);
-      if (!body) return null;
+      if (!body) return { result: null, empty: false };
       try {
         const payload: unknown = JSON.parse(body);
         const precipitation = readNowcast(payload);
         const grid = readNowcastGrid(payload);
-        return precipitation || grid ? { precipitation, grid } : null;
+        return precipitation || grid
+          ? { result: { precipitation, grid }, empty: false }
+          : { result: null, empty: true };
       } catch {
-        return null;
+        return { result: null, empty: false };
       }
     };
-    // 이번 정시 자료가 아직 안 나왔으면(발표가 늦은 때) 한 시간 전 자료를 쓴다. 격자는 2시간까지 최신이다.
-    return cached(
-      `ncst:${nx},${ny}:${base.date}${base.hour}`,
-      10 * 60_000,
-      60_000,
-      async () => (await load(base)) ?? (await load(kstParts(now() - 105 * 60_000))),
-    );
+    return cached(`ncst:${nx},${ny}:${base.date}${base.hour}`, 10 * 60_000, 60_000, async () => {
+      const current = await load(base);
+      if (current.result || !current.empty) return current.result;
+      // 이번 정시 자료가 아직 안 나왔으면 한 시간 전 격자 값만 쓴다 (격자는 2시간까지 최신).
+      // 그 비·눈은 너무 오래됐을 수 있어 모르는 것으로 둔다 (적합 대신 주의).
+      const previous = await load(kstParts(now() - 105 * 60_000));
+      return previous.result?.grid ? { precipitation: null, grid: previous.result.grid } : null;
+    });
   };
 
   return {
