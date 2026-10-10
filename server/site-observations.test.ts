@@ -364,3 +364,69 @@ test('with no E-UM in 1 km and no KMA AWS in 5 km, the site grid nowcast is used
   assert.equal(staleGrid.selectionReason, 'eum');
   assert.ok(staleGrid.warnings.some((warning) => warning.includes('덕장 근처')));
 });
+
+test('the grid stays off the station list unless it is used, and a picked grid is honoured', () => {
+  const grid: LiveObservation = {
+    ...observation('kma-grid-105-94', 36.012, 'current'),
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '덕장이 속한 기상청 5km 격자 (105, 94) 중심',
+      latitude: 36.012,
+      longitude: 129.5,
+      provider: 'kma-grid',
+    },
+  };
+  // 1km 안 E-UM 으로 판정하는 덕장에는 격자가 목록에 없다
+  const eum = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    undefined,
+    grid,
+  );
+  assert.equal(eum.selected?.device.id, 'eum');
+  assert.ok(!eum.devices.some((device) => device.provider === 'kma-grid'));
+  assert.ok(!eum.observations.some((item) => item.device.provider === 'kma-grid'));
+  // 사용자가 격자를 고르면 그대로 쓴다 (목록과 화면 검증도 통과)
+  const picked = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    'kma-grid-105-94',
+    grid,
+  );
+  assert.equal(picked.selected?.device.id, 'kma-grid-105-94');
+  assert.equal(picked.selectionReason, 'explicit');
+  assert.equal(readLiveSnapshot(picked).selected?.device.provider, 'kma-grid');
+  // 이번에 격자를 못 받았으면 고른 격자 대신 기본 선택
+  const missing = attachSiteContext(
+    snapshot([observation('eum', 36.005, 'current')]),
+    site,
+    'kma-grid-105-94',
+  );
+  assert.equal(missing.selected?.device.id, 'eum');
+});
+
+test('an anomalous E-UM replaced by the grid still carries the grid caveat', () => {
+  const grid: LiveObservation = {
+    ...observation('kma-grid-105-94', 36.012, 'current'),
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '격자',
+      latitude: 36.012,
+      longitude: 129.5,
+      provider: 'kma-grid',
+    },
+  };
+  const broken = { ...observation('eum', 36.003, 'current'), humidity: 2 };
+  const result = attachSiteContext(snapshot([broken]), site, undefined, grid);
+  assert.equal(result.selected?.device.id, 'kma-grid-105-94');
+  assert.equal(result.selectionReason, 'kma-eum-anomaly');
+  assert.ok(
+    result.warnings.some(
+      (warning) =>
+        warning.includes('비정상이라') &&
+        warning.includes('격자 값이라 덕장 현장과 다를 수 있어요'),
+    ),
+  );
+});

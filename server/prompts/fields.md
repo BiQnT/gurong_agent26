@@ -5,7 +5,7 @@
 - get_current_conditions
   - observation: 덕장 기준으로 고른 관측입니다. 1km 안 E-UM 을 먼저 쓰고, 없으면 5km 안 기상청 AWS, 그다음 덕장이 속한 기상청 초단기실황 5km 격자를 씁니다. distanceM 은 덕장과 관측기(격자는 격자 중심) 사이 거리입니다.
   - selectionReason
-    - kma-eum-anomaly: E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 기상청 값으로 판정했습니다.
+    - kma-eum-anomaly: E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 기상청 값으로 판정했습니다. observation.provider 가 kma-grid 면 격자 값이라 현장과 다를 수 있다고 함께 밝힙니다.
     - kma-no-recent-eum: 1km 안 E-UM 최근 값이 없어 5km 안 기상청 AWS 값을 썼습니다.
     - kma-grid: 1km 안 E-UM 과 5km 안 기상청 AWS 가 없어 기상청 초단기실황 격자 값을 썼습니다. 격자 값이라 덕장 현장과 다를 수 있다고 함께 밝힙니다.
     - explicit: 사용자가 고른 관측기입니다.

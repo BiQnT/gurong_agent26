@@ -706,7 +706,9 @@ function OwnerWorkspace({
                 <div>
                   <dt>덕장 위치</dt>
                   <dd>
-                    {site.address} · 관측소까지 {formatDistance(live.selected?.distanceM)}
+                    {site.address} ·{' '}
+                    {live.selected?.device.provider === 'kma-grid' ? '격자 중심까지' : '관측소까지'}{' '}
+                    {formatDistance(live.selected?.distanceM)}
                   </dd>
                 </div>
               </dl>

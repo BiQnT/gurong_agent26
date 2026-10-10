@@ -1,4 +1,4 @@
-import { DRYING_THRESHOLDS, distanceLimit, kst, sourceName } from './drying.ts';
+import { distanceLimit, kst, sourceName, STORED_GRADED_MAX_DISTANCE_M } from './drying.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Assessment } from './chat.ts';
 import { GRID_STALE_MINUTES, type LiveObservation } from './live.ts';
@@ -343,8 +343,8 @@ function validFacts(value: unknown): value is GuidanceFacts {
         value.humidity <= 100 &&
         nonnegative(value.wind) &&
         finite(value.distanceM) &&
-        // 출처를 따로 남기지 않으므로 가장 넓은 한도(기상청 5km)로 본다 (ADR 0013, 저장 규칙을 넓힘).
-        value.distanceM <= DRYING_THRESHOLDS.maxFallbackDistanceM;
+        // 출처를 따로 남기지 않으므로 저장 검증 상한(5km)으로 본다. 좁히지 않는다 (ADR 0006, 0013).
+        value.distanceM <= STORED_GRADED_MAX_DISTANCE_M;
 }
 
 function validReply(value: unknown): value is GuidanceReply {

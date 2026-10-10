@@ -121,6 +121,13 @@ export function attachSiteContext(
       byDistance[0] ??
       null;
   }
+  // 격자는 실제로 고른 때(대체 판정·사용자가 고름)만 목록에 남긴다. 늘 붙이면 E-UM 으로 판정하는
+  // 덕장에도 관측소 목록에 격자가 보인다.
+  const keepGrid = Boolean(grid && selected?.device.id === grid.device.id);
+  const shownObservations = keepGrid ? observations : observations.filter((item) => !isGrid(item));
+  const shownDevices = keepGrid
+    ? devices
+    : devices.filter((device) => device.provider !== 'kma-grid');
   const warnings = snapshot.warnings.filter(
     (warning) => !warning.includes('실제 덕장 좌표와 검증된') && warning !== KMA_FALLBACK_WARNING,
   );
@@ -147,7 +154,9 @@ export function attachSiteContext(
         reference
           ? `비정상이거나 ${reference.device.name}(${values(reference)})와 크게 달라`
           : '비정상이라'
-      } ${where(selected)} 값을 기준으로 판단해요. 관측기 상태를 확인해 주세요.`,
+      } ${where(selected)} 값을 기준으로 판단해요. 관측기 상태를 확인해 주세요.${
+        isGrid(selected) ? ' 격자 값이라 덕장 현장과 다를 수 있어요.' : ''
+      }`,
     );
   else if (
     selectionReason === 'eum' &&
@@ -173,8 +182,8 @@ export function attachSiteContext(
   );
   return {
     ...snapshot,
-    devices,
-    observations,
+    devices: shownDevices,
+    observations: shownObservations,
     selected,
     warnings,
     selectionReason,

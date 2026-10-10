@@ -59,11 +59,24 @@ function choose(
   recordedAt: string,
   grid?: LiveObservation | null,
 ): Choice {
-  if (!snapshot) return { reason: 'E-UM 관측 조회에 실패했어요.', label: 'E-UM 조회 실패' };
+  // E-UM 조회가 통째로 실패해도 덕장 격자 초단기실황이 있으면 그 값으로 기록한다 (ADR 0013).
+  if (!snapshot && grid?.status !== 'current')
+    return { reason: 'E-UM 관측 조회에 실패했어요.', label: 'E-UM 조회 실패' };
+  const source: LiveSnapshot = snapshot ?? {
+    fetchedAt: recordedAt,
+    source: '기상청 초단기실황',
+    sourceUrl: 'https://apihub.kma.go.kr/',
+    devices: [],
+    observations: [],
+    selected: null,
+    warnings: [],
+    status: 'ok',
+    llm: { configured: false, model: '' },
+  };
   // 화면과 같은 기준: 1km 안 E-UM, 없으면 5km 안 기상청 AWS, 그다음 덕장 격자 초단기실황 (ADR 0009, 0013).
-  const selected = attachSiteContext(snapshot, site, undefined, grid).selected;
+  const selected = attachSiteContext(source, site, undefined, grid).selected;
   // E-UM 이 보관 자료뿐이어도 기상청 실시간 값이 골라졌으면 기록한다.
-  if (snapshot.status !== 'ok' && !isKmaSource(selected?.device.provider))
+  if (source.status !== 'ok' && !isKmaSource(selected?.device.provider))
     return {
       reason: '실시간 조회에 실패해 보관된 과거 자료만 있어 기록하지 않았어요.',
       label: '실시간 자료 없음',
@@ -231,9 +244,12 @@ export async function collectOnce(options: {
   const recordedAt = new Date(now()).toISOString();
 
   for (const site of sites) {
-    // 5km 안에 쓸 관측이 없을 때 대신 쓰는 덕장 격자 초단기실황. 기상청 키가 없으면 없다.
-    const grid = options.grid ? await within(options.grid(site), KMA_WAIT_MS) : null;
-    const choice = choose(snapshot, site, recordedAt, grid);
+    // E-UM·AWS 로 고르지 못했을 때만 덕장 격자 초단기실황을 부른다 (덕장마다 최대 5초라 아낀다).
+    let choice = choose(snapshot, site, recordedAt);
+    if (!('observation' in choice) && options.grid) {
+      const grid = await within(options.grid(site), KMA_WAIT_MS);
+      if (grid) choice = choose(snapshot, site, recordedAt, grid);
+    }
     const weather =
       'observation' in choice && options.weather
         ? await within(options.weather(site), KMA_WAIT_MS)

@@ -44,6 +44,12 @@ export const DRYING_THRESHOLDS: DryingThresholds = {
   maxFallbackDistanceM: 5000,
 };
 
+/**
+ * 저장·화면 검증에서 등급이 있는 판정의 거리 상한. 판정 기준(`maxFallbackDistanceM`)을 줄여도
+ * 이 값은 줄이지 않는다. 이미 저장된 판정을 거부하면 dev·prod 가 같이 쓰는 DB 를 못 읽는다 (ADR 0006, 0013).
+ */
+export const STORED_GRADED_MAX_DISTANCE_M = 5000;
+
 /** 기상청 자료(AWS 매분자료, 초단기실황 격자)인지. 기록된 표본은 관측기 ID 로 가린다 (`kma-` 로 시작). */
 export const isKmaSource = (provider: string | undefined) =>
   provider === 'kma' || provider === 'kma-grid';
@@ -230,7 +236,9 @@ export function assessDrying(
         t,
       ),
     );
-  const where = `${observation.device.name} · 덕장에서 ${
+  const where = `${observation.device.name} · ${
+    observation.device.provider === 'kma-grid' ? '격자 중심까지' : '덕장에서'
+  } ${
     observation.distanceM === null || observation.distanceM === undefined
       ? '거리 미확인'
       : `${observation.distanceM}m`
@@ -399,14 +407,25 @@ const timestamp = (value: unknown): value is string =>
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
   Number.isFinite(Date.parse(value));
 
-function validThresholds(value: unknown): value is DryingThresholds {
-  return (
-    record(value) &&
-    text(value.version) &&
-    (Object.keys(DRYING_THRESHOLDS) as (keyof DryingThresholds)[])
-      .filter((key) => key !== 'version')
+/**
+ * 저장된 판정의 적용 기준을 읽는다. 2026-10-10 전 기준에는 기상청 거리 한도가 없었고 모든 출처가
+ * 1km(`maxDistanceM`)였으므로 그 값으로 채운다. 맞지 않으면 null.
+ */
+function readThresholds(value: unknown): DryingThresholds | null {
+  if (
+    !record(value) ||
+    !text(value.version) ||
+    !(Object.keys(DRYING_THRESHOLDS) as (keyof DryingThresholds)[])
+      .filter((key) => key !== 'version' && key !== 'maxFallbackDistanceM')
       .every((key) => finite(value[key]))
-  );
+  )
+    return null;
+  if (value.maxFallbackDistanceM !== undefined && !finite(value.maxFallbackDistanceM)) return null;
+  const thresholds = value as DryingThresholds;
+  return {
+    ...thresholds,
+    maxFallbackDistanceM: thresholds.maxFallbackDistanceM ?? thresholds.maxDistanceM,
+  };
 }
 
 /** 서버·저장된 응답의 판정을 화면에 쓰기 전에 확인한다. 맞지 않으면 null. */
@@ -426,8 +445,8 @@ export function readAssessment(value: unknown): Assessment | null {
   if (!nullable(value.temperature, finite)) return null;
   if (!nullable(value.humidity, (x) => finite(x) && x >= 0 && x <= 100)) return null;
   if (!nullable(value.windSpeed, (x) => finite(x) && x >= 0)) return null;
-  // 거리 게이트를 넘는 판정은 판정 불가여야 한다. 출처를 모르므로 가장 넓은 한도(기상청 5km)로 본다.
-  if (graded && (value.distanceM as number) > DRYING_THRESHOLDS.maxFallbackDistanceM) return null;
+  // 거리 게이트를 넘는 판정은 판정 불가여야 한다. 출처를 모르므로 저장 검증 상한으로 본다.
+  if (graded && (value.distanceM as number) > STORED_GRADED_MAX_DISTANCE_M) return null;
   if (value.advice !== undefined && (!Array.isArray(value.advice) || !value.advice.every(text)))
     return null;
   return {
@@ -443,6 +462,6 @@ export function readAssessment(value: unknown): Assessment | null {
     source: value.source,
     reasons: [...(value.reasons as string[])],
     ...(value.advice ? { advice: [...(value.advice as string[])] } : {}),
-    ...(validThresholds(value.thresholds) ? { thresholds: value.thresholds } : {}),
+    ...(readThresholds(value.thresholds) ? { thresholds: readThresholds(value.thresholds)! } : {}),
   };
 }

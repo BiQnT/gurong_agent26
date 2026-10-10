@@ -100,7 +100,7 @@ Vite의 개발·미리보기 서버와 운영 서버(`node server/main.ts`)에 E
 | 적합 | 습도 60% 미만, 풍속 2m/s 이상 14m/s 미만, 기온 -5°C 이상 10°C 이하 모두 |
 | 주의 | 그 밖. 비·눈을 확인하지 못했으면(기상청 실황 없음) 적합 대신 주의 |
 
-필드: `grade`, `summary`, `temperature`·`humidity`·`windSpeed`, `observedAt`·`ageMinutes`·`distanceM`(판정 불가면 `null` 가능), `deviceName`, `source`, `reasons`(축별 이유·측정 시각 KST·장비·거리), `advice`(예보·강수 조언, 등급 불변), `thresholds`(적용 기준 전체). 화면 검증기 `readAssessment` 는 등급이 있는데 수치가 없거나 1km 를 넘으면 받지 않는다.
+필드: `grade`, `summary`, `temperature`·`humidity`·`windSpeed`, `observedAt`·`ageMinutes`·`distanceM`(판정 불가면 `null` 가능), `deviceName`, `source`, `reasons`(축별 이유·측정 시각 KST·장비·거리), `advice`(예보·강수 조언, 등급 불변), `thresholds`(적용 기준 전체). 화면 검증기 `readAssessment` 는 등급이 있는데 수치가 없거나 저장 검증 상한(`STORED_GRADED_MAX_DISTANCE_M`, 5km)을 넘으면 받지 않는다. 2026-10-10 전 판정의 `thresholds` 에는 기상청 거리 한도가 없어 그때의 1km 로 채워 읽는다.
 
 실시간 조회를 확보하지 못하면 `research/api-tests/raw/INT_S01_001.json`, `INT_S01_003.json`의 **`response.data`만** 읽는다. 요청 URL·파라미터는 반환하지 않는다. 보관 자료는 `archived`로 표시하고 유효한 값도 `current`로 바꾸지 않는다. 보관 자료마저 없거나 손상됐다면 오류로 종료하며 값을 생성하지 않는다.
 

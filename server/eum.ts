@@ -413,6 +413,8 @@ export function createObservationService(
       const devices = aws ? [...data.devices, aws.device] : data.devices;
       // 화면이 기상청 AWS 를 고른 채 묻는데 이번에 기상청을 못 받았으면 오류 대신 기본 선택을 쓴다.
       if (deviceId === AWS_816.id && !aws) deviceId = undefined;
+      // 덕장 격자 초단기실황은 덕장 기준 선택(site-observations)이 붙이므로 여기서는 기본 선택을 쓴다.
+      if (deviceId?.startsWith('kma-grid-')) deviceId = undefined;
       if (deviceId && !devices.some((device) => device.id === deviceId)) {
         throw new BridgeError(
           400,

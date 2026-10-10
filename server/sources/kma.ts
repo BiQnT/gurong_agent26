@@ -1,3 +1,5 @@
+import { DRYING_THRESHOLDS } from '../../src/lib/drying.ts';
+import { distanceMeters } from '../../src/lib/geo.ts';
 import { GRID_STALE_MINUTES, type LiveObservation, type SiteWeather } from '../../src/lib/live.ts';
 import type { BridgeConfig } from '../eum.ts';
 
@@ -488,14 +490,14 @@ export function createKmaSource(
     const { nx, ny } = toKmaGrid(site.latitude, site.longitude);
     // 매시 자료가 약 40분 뒤 나오므로 45분 전 시각의 정시를 묻는다.
     const base = kstParts(now() - 45 * 60_000);
-    return cached(`ncst:${nx},${ny}:${base.date}${base.hour}`, 10 * 60_000, 60_000, async () => {
+    const load = async (at: { date: string; hour: string }) => {
       const url = new URL(NOWCAST_URL);
       for (const [name, value] of Object.entries({
         pageNo: '1',
         numOfRows: '20',
         dataType: 'JSON',
-        base_date: base.date,
-        base_time: `${base.hour}00`,
+        base_date: at.date,
+        base_time: `${at.hour}00`,
         nx: String(nx),
         ny: String(ny),
         authKey: kmaKey,
@@ -511,7 +513,14 @@ export function createKmaSource(
       } catch {
         return null;
       }
-    });
+    };
+    // 이번 정시 자료가 아직 안 나왔으면(발표가 늦은 때) 한 시간 전 자료를 쓴다. 격자는 2시간까지 최신이다.
+    return cached(
+      `ncst:${nx},${ny}:${base.date}${base.hour}`,
+      10 * 60_000,
+      60_000,
+      async () => (await load(base)) ?? (await load(kstParts(now() - 105 * 60_000))),
+    );
   };
 
   return {
@@ -569,8 +578,13 @@ export function createKmaSource(
           }
         }),
       ]);
-      if (!precipitation && !aws?.rain && !sun && !forecast) return null;
-      return { precipitation, rain: aws?.rain ?? null, sun, forecast };
+      // 구룡포 AWS 강수량은 그 AWS 가 판정 거리(5km) 안인 덕장에만 붙인다. 먼 덕장에는 맞지 않는다.
+      const rain =
+        distanceMeters(site, AWS_816) <= DRYING_THRESHOLDS.maxFallbackDistanceM
+          ? (aws?.rain ?? null)
+          : null;
+      if (!precipitation && !rain && !sun && !forecast) return null;
+      return { precipitation, rain, sun, forecast };
     },
   };
 }

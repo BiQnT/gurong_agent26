@@ -687,3 +687,46 @@ test('with no E-UM in 1 km and no AWS in 5 km, the site grid nowcast is recorded
   assert.deepEqual([next.recorded, next.missing, next.skipped], [0, 0, 1]);
   assert.equal((await operations()).data.batches[0].observations.length, 1);
 });
+
+test('when E-UM fails entirely, a current grid nowcast is still recorded', async (t) => {
+  const f = await fixture(t);
+  const { operations } = await siteWithBatch(f);
+  const grid: LiveObservation = {
+    device: {
+      id: 'kma-grid-105-94',
+      name: '기상청 초단기실황 (격자 105,94)',
+      address: '덕장이 속한 기상청 5km 격자 (105, 94) 중심',
+      latitude: SITE.latitude + 0.01,
+      longitude: SITE.longitude,
+      provider: 'kma-grid',
+    },
+    temperature: 8.5,
+    humidity: 50,
+    windSpeed: 3,
+    observedAt: new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+    observedAtRaw: '202610100300',
+    ageMinutes: 50,
+    status: 'current',
+    issues: [],
+  };
+  let gridCalls = 0;
+  const summary = await collectOnce({
+    workspace: f.workspace,
+    observations: {
+      snapshot: async () => {
+        throw Object.assign(new Error('upstream'), { code: 'UPSTREAM_ERROR' });
+      },
+    },
+    grid: async () => {
+      gridCalls += 1;
+      return grid;
+    },
+  });
+  assert.equal(summary.source, 'error');
+  assert.deepEqual([summary.recorded, summary.missing], [1, 0]);
+  assert.equal(gridCalls, 1);
+  assert.equal(
+    (await operations()).data.batches[0].observations[0].sourceDeviceId,
+    'kma-grid-105-94',
+  );
+});

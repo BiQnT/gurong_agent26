@@ -5,6 +5,7 @@ import {
   gradeIs,
   isKmaSource,
   kst,
+  sourceName,
   type DryingGrade,
 } from '../src/lib/drying.ts';
 import type { HistorySummary, ShortForecast } from '../src/lib/analysis.ts';
@@ -152,8 +153,10 @@ function selectionNote(snapshot: LiveSnapshot): string {
     snapshot.selected?.device.provider === 'kma-grid'
       ? '기상청 초단기실황(덕장이 속한 5km 격자)'
       : (snapshot.selected?.device.name ?? '기상청');
+  const gridNote =
+    snapshot.selected?.device.provider === 'kma-grid' ? ' 격자 값이라 현장과 다를 수 있어요.' : '';
   if (snapshot.selectionReason === 'kma-eum-anomaly')
-    return ` E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 ${name} 값을 기준으로 판단했어요.`;
+    return ` E-UM 관측기 값이 비정상이거나 기상청과 크게 달라 ${name} 값을 기준으로 판단했어요.${gridNote}`;
   if (snapshot.selectionReason === 'kma-no-recent-eum')
     return ` 덕장 1km 안 E-UM 관측기의 최근 값이 없어 ${name} 값을 기준으로 판단했어요.`;
   if (snapshot.selectionReason === 'kma-grid')
@@ -193,7 +196,7 @@ export function localExplanation(snapshot: LiveSnapshot, action: ChatReply['acti
     const basis =
       assessment.grade === '판정 불가'
         ? assessment.reasons.join(' ')
-        : `근거: 기온 ${assessment.temperature}°C · 습도 ${assessment.humidity}% · 풍속 ${assessment.windSpeed}m/s, ${kst(assessment.observedAt)} 측정(${assessment.ageMinutes}분 전), ${assessment.deviceName} · 덕장에서 ${assessment.distanceM}m.`;
+        : `근거: 기온 ${assessment.temperature}°C · 습도 ${assessment.humidity}% · 풍속 ${assessment.windSpeed}m/s, ${kst(assessment.observedAt)} 측정(${assessment.ageMinutes}분 전), ${assessment.deviceName} · ${assessment.source === sourceName('kma-grid') ? '격자 중심까지' : '덕장에서'} ${assessment.distanceM}m.`;
     const advice = assessment.advice?.length ? `\n${assessment.advice.join(' ')}` : '';
     const rules = assessment.thresholds
       ? `\n\n적용 기준은 현장 검증 전 가설값이에요. ${describeThresholds(assessment.thresholds)}`

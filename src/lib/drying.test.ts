@@ -175,6 +175,15 @@ test('KST formatting, threshold text and the screen validator', () => {
   assert.equal(readAssessment({ ...valid, humidity: null }), null);
   assert.ok(readAssessment({ ...valid, distanceM: 1200 }), '5km 안 기상청 판정은 받는다');
   assert.equal(readAssessment({ ...valid, distanceM: 5200 }), null);
+  // 2026-10-10 전 판정의 적용 기준(기상청 거리 한도 없음)도 읽고, 그때의 1km 로 채운다
+  const { maxFallbackDistanceM: _dropped, ...legacy } = {
+    ...DRYING_THRESHOLDS,
+    version: '2026-10-06 가설값',
+  };
+  const old = readAssessment({ ...valid, thresholds: legacy });
+  assert.equal(old?.thresholds?.version, '2026-10-06 가설값');
+  assert.equal(old?.thresholds?.maxFallbackDistanceM, 1000);
+  assert.match(describeThresholds(old!.thresholds), /관측 거리: E-UM 1km, 기상청 1km 안/);
 });
 
 test('a batch is evaluated from its recorded samples with the current rules', () => {
